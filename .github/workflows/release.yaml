@@ -18,16 +18,16 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            artifact_name: scarf-linux-amd64
+            artifact_name: forj-linux-amd64
           - os: macos-26
             target: x86_64-apple-darwin
-            artifact_name: scarf-macos-intel
+            artifact_name: forj-macos-intel
           - os: macos-26
             target: aarch64-apple-darwin
-            artifact_name: scarf-macos-arm64
+            artifact_name: forj-macos-arm64
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            artifact_name: scarf-windows-amd64
+            artifact_name: forj-windows-amd64
 
     steps:
       - name: Checkout Source Code
@@ -39,27 +39,27 @@ jobs:
           target: ${{ matrix.target }}
 
       - name: Build Release Binary
-        run: cargo build -p scarf --release --target ${{ matrix.target }}
+        run: cargo build -p forj --release --target ${{ matrix.target }}
 
       - name: Package Binary (Linux/macOS)
         if: matrix.os != 'windows-latest'
         run: |
           cd target/${{ matrix.target }}/release
-          tar -czf ../../../${{ matrix.artifact_name }}.tar.gz scarf
+          tar -czf ../../../${{ matrix.artifact_name }}.tar.gz forj
           cd ../../..
 
       - name: Package Binary (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          powershell Compress-Archive -Path target/${{ matrix.target }}/release/scarf.exe -DestinationPath ${{ matrix.artifact_name }}.zip
+          powershell Compress-Archive -Path target/${{ matrix.target }}/release/forj.exe -DestinationPath ${{ matrix.artifact_name }}.zip
 
       - name: Upload Binaries to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            scarf-linux-amd64.tar.gz
-            scarf-macos-intel.tar.gz
-            scarf-macos-arm64.tar.gz
-            scarf-windows-amd64.zip
+            forj-linux-amd64.tar.gz
+            forj-macos-intel.tar.gz
+            forj-macos-arm64.tar.gz
+            forj-windows-amd64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

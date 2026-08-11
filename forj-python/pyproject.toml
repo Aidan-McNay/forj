@@ -1,0 +1,26 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "forj_python"
+version = "0.1.0"
+authors = [
+  { name="Aidan McNay", email="aidanmcnay@gmail.com" },
+]
+description = "Python bindings for the Forj SystemVerilog tools"
+readme = "../README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+
+[project.urls]
+Homepage = "https://github.com/Aidan-McNay/forj"
+Issues = "https://github.com/Aidan-McNay/forj/issues"
+
+[tool.maturin.generate-ci.github]
+trusted-publishing = true
+publishing-environment = "release"

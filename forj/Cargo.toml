@@ -1,0 +1,16 @@
+[package]
+name = "forj"
+description = "A suite of tools for interacting with (System)Verilog hardware designs"
+version = "0.1.0"
+authors = ["Aidan McNay <aidanmcnay@gmail.com>"]
+edition = "2024"
+license = "Apache-2.0"
+repository = "https://github.com/Aidan-McNay/forj"
+readme = "../README.md"
+keywords = ["systemverilog"]
+categories = ["command-line-utilities", "development-tools"]
+
+[dependencies]
+forj-parser = { version = "0.1.0", path = "../forj-parser" }
+forj-syntax = { version = "0.1.0", path = "../forj-syntax" }
+clap = { version = "4.5.39", features = ["derive"] }

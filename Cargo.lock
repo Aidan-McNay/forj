@@ -166,6 +166,47 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
+name = "forj"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "forj-parser",
+ "forj-syntax",
+]
+
+[[package]]
+name = "forj-parser"
+version = "0.1.0"
+dependencies = [
+ "ariadne",
+ "clap",
+ "elsa",
+ "forj-syntax",
+ "logos",
+ "winnow",
+]
+
+[[package]]
+name = "forj-python"
+version = "0.1.0"
+dependencies = [
+ "forj-parser",
+ "forj-syntax",
+ "pyo3",
+ "yansi",
+]
+
+[[package]]
+name = "forj-syntax"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+ "walkdir",
+]
+
+[[package]]
 name = "heck"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -366,47 +407,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "93fc1dc3aaa9bfed95e02e6eadabb4baf7e3078b0bd1b4d7b6b0b68378900502"
 dependencies = [
  "winapi-util",
-]
-
-[[package]]
-name = "scarf"
-version = "0.2.3"
-dependencies = [
- "clap",
- "scarf-parser",
- "scarf-syntax",
-]
-
-[[package]]
-name = "scarf-parser"
-version = "0.2.3"
-dependencies = [
- "ariadne",
- "clap",
- "elsa",
- "logos",
- "scarf-syntax",
- "winnow",
-]
-
-[[package]]
-name = "scarf-python"
-version = "0.2.3"
-dependencies = [
- "pyo3",
- "scarf-parser",
- "scarf-syntax",
- "yansi",
-]
-
-[[package]]
-name = "scarf-syntax"
-version = "0.2.3"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
- "walkdir",
 ]
 
 [[package]]

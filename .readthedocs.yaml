@@ -11,9 +11,9 @@ build:
     python: "3.14"
 
 sphinx:
-  configuration: scarf-python/docs/conf.py
+  configuration: forj-python/docs/conf.py
   builder: "dirhtml"
 
 python:
   install:
-    - requirements: scarf-python/docs/requirements.txt
+    - requirements: forj-python/docs/requirements.txt

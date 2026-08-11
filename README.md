@@ -1,7 +1,7 @@
-# scarf
+# forj
 
-[![Crates.io Version](https://img.shields.io/crates/v/scarf)](https://crates.io/crates/scarf)
-[![Crates.io License](https://img.shields.io/crates/l/scarf)](https://crates.io/crates/scarf)
+[![Crates.io Version](https://img.shields.io/crates/v/forj)](https://crates.io/crates/forj)
+[![Crates.io License](https://img.shields.io/crates/l/forj)](https://crates.io/crates/forj)
 
 
 A suite of tools for interacting with (System)Verilog hardware designs,
@@ -11,29 +11,29 @@ This project is currently under initial development - stay tuned!
 
 ## Packages
 
-Scarf is composed of many children projects to separate complexity and use cases
+Forj is composed of many children projects to separate complexity and use cases
 
-### `scarf-parser`
+### `forj-parser`
 
-[![Crates.io Version](https://img.shields.io/crates/v/scarf-parser)](https://crates.io/crates/scarf-parser)
-[![docs.rs](https://img.shields.io/docsrs/scarf-parser)](https://docs.rs/crate/scarf-parser/latest)
-[![Crates.io License](https://img.shields.io/crates/l/scarf-parser)](https://crates.io/crates/scarf-parser)
+[![Crates.io Version](https://img.shields.io/crates/v/forj-parser)](https://crates.io/crates/forj-parser)
+[![docs.rs](https://img.shields.io/docsrs/forj-parser)](https://docs.rs/crate/forj-parser/latest)
+[![Crates.io License](https://img.shields.io/crates/l/forj-parser)](https://crates.io/crates/forj-parser)
 
-A complete preprocessor and parser for SystemVerilog source text, forming an CST as defined by `scarf-syntax`
+A complete preprocessor and parser for SystemVerilog source text, forming an CST as defined by `forj-syntax`
 
-### `scarf-python`
+### `forj-python`
 
-[![Crates.io Version](https://img.shields.io/crates/v/scarf-python)](https://crates.io/crates/scarf-python)
-[![PyPI Version](https://img.shields.io/pypi/v/scarf_python)](https://pypi.org/project/scarf_python)
-[![ReadTheDocs](https://img.shields.io/readthedocs/scarf-python)](https://scarf-python.readthedocs.io/en/latest/?badge=latest)
-[![Crates.io License](https://img.shields.io/crates/l/scarf-python)](https://crates.io/crates/scarf-python)
+[![Crates.io Version](https://img.shields.io/crates/v/forj-python)](https://crates.io/crates/forj-python)
+[![PyPI Version](https://img.shields.io/pypi/v/forj_python)](https://pypi.org/project/forj_python)
+[![ReadTheDocs](https://img.shields.io/readthedocs/forj-python)](https://forj-python.readthedocs.io/en/latest/?badge=latest)
+[![Crates.io License](https://img.shields.io/crates/l/forj-python)](https://crates.io/crates/forj-python)
 
-Python bindings for the `scarf` SystemVerilog tools
+Python bindings for the `forj` SystemVerilog tools
 
-### `scarf-syntax`
+### `forj-syntax`
 
 An object definition of a SystemVerilog CST
 
-[![Crates.io Version](https://img.shields.io/crates/v/scarf-syntax)](https://crates.io/crates/scarf-syntax)
-[![docs.rs](https://img.shields.io/docsrs/scarf-syntax)](https://docs.rs/crate/scarf-syntax/latest)
-[![Crates.io License](https://img.shields.io/crates/l/scarf-syntax)](https://crates.io/crates/scarf-syntax)
+[![Crates.io Version](https://img.shields.io/crates/v/forj-syntax)](https://crates.io/crates/forj-syntax)
+[![docs.rs](https://img.shields.io/docsrs/forj-syntax)](https://docs.rs/crate/forj-syntax/latest)
+[![Crates.io License](https://img.shields.io/crates/l/forj-syntax)](https://crates.io/crates/forj-syntax)
