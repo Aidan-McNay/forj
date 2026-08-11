@@ -809,7 +809,7 @@ pub enum Token<'a> {
     SystemTfIdentifier(&'a str),
     #[regex(r"[a-zA-Z_][a-zA-Z0-9_\$]*", |lex| lex.slice())]
     SimpleIdentifier(&'a str),
-    #[regex(r"\\[!-~]+\s", |lex| lex.slice())]
+    #[regex(r"\\[!-~]+(\s|$)", |lex| lex.slice())]
     EscapedIdentifier(&'a str),
     #[regex(r"[a-zA-Z_][a-zA-Z0-9_\$]*(``([a-zA-Z_][a-zA-Z0-9_\$]*)?)+", |lex| lex.slice())]
     PreprocessorIdentifier(&'a str),

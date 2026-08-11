@@ -1,7 +1,7 @@
 [package]
 name = "forj"
 description = "A suite of tools for interacting with (System)Verilog hardware designs"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Aidan McNay <aidanmcnay@gmail.com>"]
 edition = "2024"
 license = "Apache-2.0"

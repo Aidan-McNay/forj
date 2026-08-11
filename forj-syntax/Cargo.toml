@@ -1,7 +1,7 @@
 [package]
 name = "forj-syntax"
 description = "A helper crate of forj for expressing a SystemVerilog concrete syntax tree"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Aidan McNay <aidanmcnay@gmail.com>"]
 edition = "2024"
 license = "Apache-2.0"
