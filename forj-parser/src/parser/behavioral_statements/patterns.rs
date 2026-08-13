@@ -70,6 +70,12 @@ pub fn pattern_parser<'s>(
 pub fn assignment_pattern_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<AssignmentPattern<'s>, VerboseError<'s>> {
+    let _empty_parser = (
+        token(Token::Apost),
+        token(Token::Brace),
+        token(Token::EBrace),
+    )
+        .map(|(a, b, c)| AssignmentPattern::Empty(Box::new((a, b, c))));
     let _expression_parser = (
         token(Token::Apost),
         token(Token::Brace),
@@ -128,6 +134,7 @@ pub fn assignment_pattern_parser<'s>(
             AssignmentPattern::Constant(Box::new((a, b, c, d, e, f, g, h)))
         });
     alt((
+        _empty_parser,
         _expression_parser,
         _structure_parser,
         _array_parser,

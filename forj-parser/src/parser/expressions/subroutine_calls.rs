@@ -66,7 +66,7 @@ pub fn system_tf_call_parser<'s>(
         .map(|(a, b, c, d, e, f)| {
             SystemTfCall::Expressions(Box::new((a, b, c, d, e, f)))
         });
-    alt((_args_parser, _data_parser, _expressions_parser)).parse_next(input)
+    alt((_expressions_parser, _data_parser, _args_parser)).parse_next(input)
 }
 
 pub fn subroutine_call_parser<'s>(
@@ -256,12 +256,15 @@ fn primary_parser_method_root<'s>(
 ) -> ModalResult<Primary<'s>, VerboseError<'s>> {
     let _primary_literal_parser =
         primary_literal_parser.map(|a| Primary::PrimaryLiteral(Box::new(a)));
-    let _hierarchical_identifier_parser = (
-        opt_note(class_qualifier_or_package_scope_parser),
-        hierarchical_identifier_parser_method_root,
-        select_parser_method_root,
+    let _hierarchical_identifier_parser = terminated(
+        (
+            opt_note(class_qualifier_or_package_scope_parser),
+            hierarchical_identifier_parser_method_root,
+            select_parser_method_root,
+        ),
+        peek(not(token(Token::Paren))),
     )
-        .map(|(a, b, c)| Primary::HierarchicalIdentifier(Box::new((a, b, c))));
+    .map(|(a, b, c)| Primary::HierarchicalIdentifier(Box::new((a, b, c))));
     let _empty_unpacked_array_concatenation_parser =
         empty_unpacked_array_concatenation_parser
             .map(|a| Primary::EmptyUnpackedArrayConcatenation(Box::new(a)));
@@ -305,13 +308,13 @@ fn primary_parser_method_root<'s>(
     alt((
         _dollar_parser,
         _null_parser,
-        _this_parser,
         _assignment_pattern_expression_parser,
         _primary_literal_parser,
         terminated(
             _hierarchical_identifier_parser,
             peek(not(token(Token::Paren))),
         ),
+        _this_parser,
         _empty_unpacked_array_concatenation_parser,
         _concatenation_parser,
         _multiple_concatenation_parser,

@@ -79,13 +79,24 @@ pub fn class_property_parser<'s>(
         repeat_note(class_item_qualifier_parser),
         data_type_parser,
         const_identifier_parser,
-        opt_note((token(Token::Eq), constant_expression_parser)),
+        opt_note((token(Token::Eq), constant_expression_or_class_new_parser)),
         token(Token::SColon),
     )
         .map(|(a, b, c, d, e, f)| {
             ClassProperty::Const(Box::new((a, b, c, d, e, f)))
         });
     alt((_const_parser, _data_parser)).parse_next(input)
+}
+
+pub fn constant_expression_or_class_new_parser<'s>(
+    input: &mut Tokens<'s>,
+) -> ModalResult<ConstantExpressionOrClassNew<'s>, VerboseError<'s>> {
+    alt((
+        class_new_parser.map(|a| ConstantExpressionOrClassNew::ClassNew(a)),
+        constant_expression_parser
+            .map(|a| ConstantExpressionOrClassNew::ConstantExpression(a)),
+    ))
+    .parse_next(input)
 }
 
 pub fn class_method_parser<'s>(

@@ -45,6 +45,13 @@ pub enum Pattern<'a> {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum AssignmentPattern<'a> {
+    Empty(
+        Box<(
+            Metadata<'a>, // '
+            Metadata<'a>, // {
+            Metadata<'a>, // }
+        )>,
+    ),
     Expression(
         Box<(
             Metadata<'a>, // '

@@ -40,11 +40,17 @@ pub enum ClassProperty<'a> {
             ConstIdentifier<'a>,
             Option<(
                 Metadata<'a>, // =
-                ConstantExpression<'a>,
+                ConstantExpressionOrClassNew<'a>,
             )>,
             Metadata<'a>, // ;
         )>,
     ),
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum ConstantExpressionOrClassNew<'a> {
+    ConstantExpression(ConstantExpression<'a>),
+    ClassNew(ClassNew<'a>),
 }
 
 #[derive(Clone, Debug, PartialEq)]
