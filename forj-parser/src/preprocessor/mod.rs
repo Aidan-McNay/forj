@@ -11,6 +11,7 @@ pub(crate) mod implicit_nettype;
 pub(crate) mod include;
 pub(crate) mod keywords;
 pub(crate) mod line;
+pub(crate) mod number;
 pub mod state;
 pub(crate) mod text_macro;
 pub(crate) mod timescale;
@@ -25,6 +26,7 @@ use implicit_nettype::*;
 use include::*;
 use keywords::*;
 use line::*;
+use number::*;
 pub use state::*;
 use std::collections::VecDeque;
 use text_macro::*;
@@ -292,6 +294,16 @@ pub(crate) fn preprocess_helper<'s>(
                         (macro_name, spanned_token.1),
                     )?;
                 }
+                Token::Apost | Token::UnsignedNumber(_)
+                    if state.in_define_arg() || state.in_text_macro_arg() =>
+                {
+                    preprocess_possible_number(
+                        src,
+                        state,
+                        cache,
+                        spanned_token,
+                    )?;
+                }
                 _ => dest.push(spanned_token),
             }
         }
@@ -367,6 +379,14 @@ pub(crate) fn preprocess_helper<'s>(
                         state,
                         cache,
                         (macro_name, spanned_token.1),
+                    )?;
+                }
+                Token::Apost | Token::UnsignedNumber(_) => {
+                    preprocess_possible_number(
+                        src,
+                        state,
+                        cache,
+                        spanned_token,
                     )?;
                 }
                 Token::DirUndef => {

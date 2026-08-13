@@ -13,7 +13,7 @@ categories = ["development-tools", "parsing"]
 [dependencies]
 ariadne = { version = "0.5.1", features = ["auto-color"] }
 forj-syntax = { version = "0.1.0", path = "../forj-syntax" }
-logos = "0.16.0"
+logos = { git = "https://github.com/maciejhirsz/logos", rev = "030e589", version = "0.16.1" }
 winnow = "0.7.13"
 elsa = "1.11.2"
 
