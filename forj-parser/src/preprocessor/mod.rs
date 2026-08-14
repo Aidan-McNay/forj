@@ -299,6 +299,7 @@ pub(crate) fn preprocess_helper<'s>(
                 {
                     preprocess_possible_number(
                         src,
+                        dest,
                         state,
                         cache,
                         spanned_token,
@@ -384,6 +385,7 @@ pub(crate) fn preprocess_helper<'s>(
                 Token::Apost | Token::UnsignedNumber(_) => {
                     preprocess_possible_number(
                         src,
+                        dest,
                         state,
                         cache,
                         spanned_token,
@@ -489,6 +491,7 @@ pub(crate) fn preprocess_single<'s>(
 /// `define TEST(a, b) a + b
 /// `TEST(1, 2)
 /// ";
+/// state.retain_file("test_file.v".to_string(), file_contents.to_string(), &cache);
 /// let tokens = lex(file_contents, "test_file.v").tokens();
 /// let mut pp_tokens = preprocess(tokens, &mut state, &cache).unwrap().into_iter();
 /// assert_eq!(pp_tokens.next().unwrap().0, Token::UnsignedNumber("1"));

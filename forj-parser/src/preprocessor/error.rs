@@ -28,6 +28,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `endif
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(),&cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -50,6 +51,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `ifdef TEST
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -78,6 +80,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `elsif
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -100,6 +103,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `else
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -122,6 +126,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `end_keywords
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -144,6 +149,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `begin_keywords \"1800-2009\"
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -166,6 +172,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `define TEST()
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -193,6 +200,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `define TEST(a, b c)
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -220,6 +228,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `begin_keywords \"MyVersion\"
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -251,6 +260,7 @@ pub enum PreprocessorError<'a> {
     /// # let mut state = PreprocessorState::new(vec![], vec![]);
     /// # let cache = PreprocessorCache::new();
     /// let source = "`line";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -276,6 +286,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `define TEST(
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -306,6 +317,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `TEST
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -333,6 +345,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `define TEST(a, b, a) a + b
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -365,6 +378,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `define TEST(a = 1, b) a + b
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -398,6 +412,7 @@ pub enum PreprocessorError<'a> {
     /// `define TEST(a, b) a + b
     /// `TEST
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -428,6 +443,7 @@ pub enum PreprocessorError<'a> {
     /// `define TEST(a, b) a + b
     /// `TEST(1, 2, 3)
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -464,6 +480,7 @@ pub enum PreprocessorError<'a> {
     /// `define TEST(a, b) a + b
     /// `TEST(1)
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -494,6 +511,7 @@ pub enum PreprocessorError<'a> {
     /// `define TEST(a, b) a``_with_``b
     /// `TEST(\"one\", \"two\")
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -521,6 +539,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `timescale 100 fs / 1 s
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -544,6 +563,7 @@ pub enum PreprocessorError<'a> {
     /// `define TEST(a, b) a + b
     /// `TEST(a = 1, b = 2])
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -572,6 +592,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `include \"other.v\"
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -603,11 +624,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `include \"test.v\"
     /// ";
-    /// state.retain_file(
-    ///     "test.v".to_string(),
-    ///     source.to_string(),
-    ///     &cache,
-    /// );
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -632,6 +649,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `line
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -660,6 +678,7 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `undef TEST
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -688,6 +707,7 @@ pub enum PreprocessorError<'a> {
     /// `define TEST definition_one
     /// `define TEST definition_two
     /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,

@@ -791,14 +791,14 @@ pub enum Token<'a> {
     UnsignedNumber(&'a str),
     #[regex(r"[0-9][0-9_]*\.[0-9][0-9_]*", |lex| lex.slice())]
     FixedPointNumber(&'a str),
-    #[regex(r"([0-9][0-9_]*)?\s*'[s|S]?(b|B)\s*[0-1xXzZ\?][0-1xXzZ\?_]*", |lex| lex.slice())]
+    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(b|B)[^\S\r\n]*[0-1xXzZ\?][0-1xXzZ\?_]*", |lex| lex.slice())]
     BinaryNumber(&'a str),
-    #[regex(r"([0-9][0-9_]*)?\s*'[s|S]?(o|O)\s*[0-7xXzZ\?][0-7xXzZ\?_]*", |lex| lex.slice())]
+    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(o|O)[^\S\r\n]*[0-7xXzZ\?][0-7xXzZ\?_]*", |lex| lex.slice())]
     OctalNumber(&'a str),
-    #[regex(r"([0-9][0-9_]*)?\s*'[s|S]?(d|D)\s*[0-9][0-9_]*", |lex| lex.slice())]
-    #[regex(r"([0-9][0-9_]*)?\s*'[s|S]?(d|D)\s*(x|X|z|Z|\?)_*", |lex| lex.slice())]
+    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(d|D)[^\S\r\n]*[0-9][0-9_]*", |lex| lex.slice())]
+    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(d|D)[^\S\r\n]*(x|X|z|Z|\?)_*", |lex| lex.slice())]
     DecimalNumber(&'a str),
-    #[regex(r"([0-9][0-9_]*)?\s*'[s|S]?(h|H)\s*[0-9a-fA-FxXzZ\?][0-9a-fA-FxXzZ\?_]*", |lex| lex.slice())]
+    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(h|H)[^\S\r\n]*[0-9a-fA-FxXzZ\?][0-9a-fA-FxXzZ\?_]*", |lex| lex.slice())]
     HexNumber(&'a str),
     #[regex(r"[0-9][0-9_]*(\.[0-9][0-9_]*)?(e|E)(\+|-)?[0-9][0-9_]*", |lex| lex.slice())]
     ScientificNumber(&'a str),
