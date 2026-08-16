@@ -150,7 +150,7 @@ pub struct PreprocessorState<'a> {
     pub line_directives: Vec<LineDirective<'a>>,
     /// The contents of included files (`file_name` -> `content`)
     pub included_files: HashMap<&'a str, &'a str>,
-    /// The current standard for reserved keywords
+    /// The current standard for reserved keywords, as a LIFO stack
     pub curr_standard: StandardVersion,
     /// Any errors encountered so far
     pub errors: Vec<PreprocessorError<'a>>,
@@ -627,7 +627,7 @@ impl<'a> PreprocessorState<'a> {
     }
 
     /// Add a error encountered during preprocessing
-    pub fn err(&mut self, warning: PreprocessorError<'a>) {
-        self.errors.push(warning);
+    pub fn err(&mut self, error: PreprocessorError<'a>) {
+        self.errors.push(error);
     }
 }

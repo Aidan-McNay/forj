@@ -112,8 +112,8 @@ pub(crate) fn recover_newline<'s>(
     }
 }
 
-/// Attempt to recover from a preprocessor error, returning whether it
-/// was successful
+/// Attempt to recover from a preprocessor error, reproducing the error if
+/// not possible
 ///
 /// Many of these are trivial, as they are removed from the token stream
 /// already
@@ -121,7 +121,7 @@ pub(crate) fn recover<'s>(
     src: &mut TokenIterator<'s, impl Iterator<Item = SpannedToken<'s>>>,
     state: &mut PreprocessorState<'s>,
     err: PreprocessorError<'s>,
-) -> bool {
+) -> Result<(), PreprocessorError<'s>> {
     let recovered = match err {
         PreprocessorError::Endif { .. } => true,
         PreprocessorError::NoEndif { .. } => false, // EOF
@@ -146,7 +146,9 @@ pub(crate) fn recover<'s>(
         PreprocessorError::MissingMacroArgument { .. } => true,
         PreprocessorError::InvalidIdentifierFormation { .. } => true,
         PreprocessorError::InvalidRelativeTimescales { .. } => true,
-        PreprocessorError::IncompleteMacroWithToken { .. } => true,
+        PreprocessorError::IncompleteMacroWithToken { .. } => {
+            recover_newline(src)
+        }
         PreprocessorError::Include { .. } => true,
         PreprocessorError::IncludeDepth { .. } => true,
         PreprocessorError::VerboseError { .. } => recover_newline(src),
@@ -159,8 +161,12 @@ pub(crate) fn recover<'s>(
             panic!("Tried to recover from an internal error")
         }
     };
-    state.err(err);
-    recovered
+    if recovered {
+        state.err(err);
+        Ok(())
+    } else {
+        Err(err)
+    }
 }
 
 pub(crate) fn preprocess_helper<'s>(
@@ -224,12 +230,14 @@ pub(crate) fn preprocess_helper<'s>(
                             );
                         }
                         _ => {
-                            return Err(
+                            recover(
+                                src,
+                                state,
                                 PreprocessorError::IncompleteMacroWithToken {
                                     error_token: spanned_token.0,
                                     error_span: spanned_token.1,
                                 },
-                            );
+                            )?;
                         }
                     }
                 }
@@ -239,12 +247,14 @@ pub(crate) fn preprocess_helper<'s>(
                     match enclosures.pop() {
                         Some(Token::Bracket) => dest.push(spanned_token),
                         _ => {
-                            return Err(
+                            recover(
+                                src,
+                                state,
                                 PreprocessorError::IncompleteMacroWithToken {
                                     error_token: spanned_token.0,
                                     error_span: spanned_token.1,
                                 },
-                            );
+                            )?;
                         }
                     }
                 }
@@ -254,12 +264,14 @@ pub(crate) fn preprocess_helper<'s>(
                     match enclosures.pop() {
                         Some(Token::Brace) => dest.push(spanned_token),
                         _ => {
-                            return Err(
+                            recover(
+                                src,
+                                state,
                                 PreprocessorError::IncompleteMacroWithToken {
                                     error_token: spanned_token.0,
                                     error_span: spanned_token.1,
                                 },
-                            );
+                            )?;
                         }
                     }
                 }
@@ -287,23 +299,27 @@ pub(crate) fn preprocess_helper<'s>(
                 Token::TextMacro(macro_name)
                     if state.in_define_arg() || state.in_text_macro_arg() =>
                 {
-                    preprocess_macro(
+                    if let Err(err) = preprocess_macro(
                         src,
                         state,
                         cache,
                         (macro_name, spanned_token.1),
-                    )?;
+                    ) {
+                        recover(src, state, err)?;
+                    }
                 }
                 Token::Apost | Token::UnsignedNumber(_)
                     if state.in_define_arg() || state.in_text_macro_arg() =>
                 {
-                    preprocess_possible_number(
+                    if let Err(err) = preprocess_possible_number(
                         src,
                         dest,
                         state,
                         cache,
                         spanned_token,
-                    )?;
+                    ) {
+                        recover(src, state, err)?;
+                    }
                 }
                 _ => dest.push(spanned_token),
             }
@@ -317,22 +333,36 @@ pub(crate) fn preprocess_helper<'s>(
                 }
                 Token::DirInclude => {
                     let include_span = cache.retain_span(spanned_token.1);
-                    preprocess_include(src, dest, state, cache, include_span)?;
+                    if let Err(err) = preprocess_include(
+                        src,
+                        dest,
+                        state,
+                        cache,
+                        include_span,
+                    ) {
+                        recover(src, state, err)?;
+                    }
                 }
                 Token::DirUndefineall => {
                     state.undefineall();
                 }
                 Token::DirBeginKeywords => {
-                    preprocess_keyword_standard(
+                    if let Err(err) = preprocess_keyword_standard(
                         src,
                         dest,
                         state,
                         cache,
                         spanned_token.1,
-                    )?;
+                    ) {
+                        recover(src, state, err)?;
+                    }
                 }
                 Token::DirDefine => {
-                    preprocess_define(src, state, cache, spanned_token.1)?;
+                    if let Err(err) =
+                        preprocess_define(src, state, cache, spanned_token.1)
+                    {
+                        recover(src, state, err)?;
+                    }
                 }
                 Token::DirElse => {
                     return Err(PreprocessorError::Else {
@@ -355,26 +385,31 @@ pub(crate) fn preprocess_helper<'s>(
                     });
                 }
                 Token::DirIfdef => {
-                    preprocess_ifdef(
+                    if let Err(err) = preprocess_ifdef(
                         src,
                         dest,
                         state,
                         cache,
                         spanned_token.1,
                         true,
-                    )?;
+                    ) {
+                        recover(src, state, err)?;
+                    }
                 }
                 Token::DirIfndef => {
-                    preprocess_ifdef(
+                    if let Err(err) = preprocess_ifdef(
                         src,
                         dest,
                         state,
                         cache,
                         spanned_token.1,
                         false,
-                    )?;
+                    ) {
+                        recover(src, state, err)?;
+                    }
                 }
                 Token::TextMacro(macro_name) => {
+                    // TODO: Resume recovery testing
                     preprocess_macro(
                         src,
                         state,
@@ -516,7 +551,8 @@ pub fn preprocess<'s>(
                 }
             }
             Err(err) => {
-                if !recover(&mut token_iter, state, err) {
+                if let Err(err) = recover(&mut token_iter, state, err) {
+                    state.errors.push(err);
                     return Err(());
                 }
             }
