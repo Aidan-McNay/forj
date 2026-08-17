@@ -410,42 +410,65 @@ pub(crate) fn preprocess_helper<'s>(
                     }
                 }
                 Token::TextMacro(macro_name) => {
-                    // TODO: Resume recovery testing
-                    preprocess_macro(
+                    if let Err(err) = preprocess_macro(
                         src,
                         state,
                         cache,
                         (macro_name, spanned_token.1),
-                    )?;
+                    ) {
+                        recover(src, state, err)?;
+                    }
                 }
                 Token::Apost | Token::UnsignedNumber(_) => {
-                    preprocess_possible_number(
+                    if let Err(err) = preprocess_possible_number(
                         src,
                         dest,
                         state,
                         cache,
                         spanned_token,
-                    )?;
+                    ) {
+                        recover(src, state, err)?;
+                    }
                 }
                 Token::DirUndef => {
-                    preprocess_undefine(src, state, spanned_token.1)?;
+                    if let Err(err) =
+                        preprocess_undefine(src, state, spanned_token.1)
+                    {
+                        recover(src, state, err)?;
+                    }
                 }
                 Token::DirTimescale => {
-                    preprocess_timescale(src, state, cache, spanned_token.1)?;
+                    if let Err(err) =
+                        preprocess_timescale(src, state, cache, spanned_token.1)
+                    {
+                        recover(src, state, err)?;
+                    }
                 }
                 Token::DirDefaultNettype => {
-                    preprocess_default_nettype(
+                    if let Err(err) = preprocess_default_nettype(
                         src,
                         state,
                         cache,
                         spanned_token.1,
-                    )?;
+                    ) {
+                        recover(src, state, err)?;
+                    }
                 }
                 Token::DirUnconnectedDrive => {
-                    preprocess_unconnected_drive(src, state, spanned_token.1)?;
+                    if let Err(err) = preprocess_unconnected_drive(
+                        src,
+                        state,
+                        spanned_token.1,
+                    ) {
+                        recover(src, state, err)?;
+                    }
                 }
                 Token::DirNounconnectedDrive => {
-                    preprocess_nounconnected_drive(state, spanned_token.1)?;
+                    if let Err(err) =
+                        preprocess_nounconnected_drive(state, spanned_token.1)
+                    {
+                        recover(src, state, err)?;
+                    }
                 }
                 Token::DirCelldefine => {
                     state.add_cell_define(true, spanned_token.1);
@@ -454,7 +477,11 @@ pub(crate) fn preprocess_helper<'s>(
                     state.add_cell_define(false, spanned_token.1);
                 }
                 Token::DirLine => {
-                    preprocess_line(src, state, cache, spanned_token.1)?;
+                    if let Err(err) =
+                        preprocess_line(src, state, cache, spanned_token.1)
+                    {
+                        recover(src, state, err)?;
+                    }
                 }
                 Token::DirUnderscoreFile => dest.push(SpannedToken(
                     Token::StringLiteral(

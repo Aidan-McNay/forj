@@ -174,16 +174,18 @@ pub fn preprocess_possible_number<'s>(
                                     ),
                                 ));
                             } else {
-                                // Clean up first
+                                // EOF - clean up first
                                 src.prepend_tokens(popped_tokens.into_iter());
                                 dest.push(start_token);
                             }
                             return Ok(());
                         }
                         Err(err) => {
-                            // Clean up first
-                            src.prepend_tokens(popped_tokens.into_iter());
+                            // Undefined macro - clean up first
                             dest.push(start_token);
+                            for popped_token in popped_tokens {
+                                dest.push(popped_token)
+                            }
                             return Err(err);
                         }
                     };
