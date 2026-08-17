@@ -79,7 +79,7 @@ pub fn preprocess_include<'s>(
     cache: &'s PreprocessorCache<'s>,
     include_span: &'s Span<'s>,
 ) -> Result<(), PreprocessorError<'s>> {
-    if state.include_depth >= MAX_INCLUDE_DEPTH {
+    if include_span.inclusion_depth() >= MAX_INCLUDE_DEPTH {
         return Err(PreprocessorError::IncludeDepth {
             include_span: include_span.clone(),
         });
@@ -94,19 +94,54 @@ pub fn preprocess_include<'s>(
     let (include_path, included_file) =
         state.retain_include_file(include_path_text, file_span, cache)?;
     let included_file_contents =
-        lex_helper(included_file, include_path, Some(include_span)).tokens();
-    if let Some(size_hint) = included_file_contents.size_hint().1 {
-        dest.reserve(size_hint);
-    }
-    state.include_depth += 1;
-    let result = preprocess_helper(
-        &mut TokenIterator::new(included_file_contents),
-        dest,
-        state,
-        cache,
+        lex_helper(included_file, include_path, Some(include_span))
+            .tokens()
+            .collect::<Vec<_>>();
+    dest.reserve(included_file_contents.len());
+    src.prepend_tokens(included_file_contents.into_iter());
+    Ok(())
+}
+
+#[test]
+fn basic_include() {
+    let mut state = PreprocessorState::new(vec![], vec![]);
+    let cache = PreprocessorCache::new();
+    let _ = state.retain_file(
+        "included.sv".to_string(),
+        "1 + 2".to_string(),
+        &cache,
     );
-    state.include_depth -= 1;
-    result
+    let (_, src) = state.retain_file(
+        "<test>".to_string(),
+        "`include \"included.sv\"
+        + 3"
+        .to_string(),
+        &cache,
+    );
+    let input = lex(src, "<test>").tokens().collect::<Vec<_>>();
+    let preprocess_result = preprocess(
+        &mut TokenIterator::new(input.into_iter()),
+        &mut state,
+        &cache,
+    );
+    match preprocess_result {
+        Ok(result) => {
+            assert_eq!(
+                result,
+                vec![
+                    Token::UnsignedNumber("1"),
+                    Token::Plus,
+                    Token::UnsignedNumber("2"),
+                    Token::Plus,
+                    Token::UnsignedNumber("3")
+                ]
+            );
+            if let Some(err) = state.errors.first() {
+                panic!("{:?}", err)
+            }
+        }
+        Err(()) => panic!("{:?}", state.errors.first()),
+    }
 }
 
 #[test]

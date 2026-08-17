@@ -36,6 +36,30 @@ pub enum SpanRelation {
     Same,
 }
 
+/// A helper function for [`Span::expansion_depth`] with tail recursion
+const fn expansion_depth_helper<'a>(
+    span: &Span<'a>,
+    curr_depth: usize,
+) -> usize {
+    if let Some(expanded_from_span) = span.expanded_from {
+        expansion_depth_helper(expanded_from_span, curr_depth + 1)
+    } else {
+        curr_depth
+    }
+}
+
+/// A helper function for [`Span::inclusion_depth`] with tail recursion
+const fn inclusion_depth_helper<'a>(
+    span: &Span<'a>,
+    curr_depth: usize,
+) -> usize {
+    if let Some(included_from_span) = span.included_from {
+        inclusion_depth_helper(included_from_span, curr_depth + 1)
+    } else {
+        curr_depth
+    }
+}
+
 impl<'a> Span<'a> {
     fn include_indeces(&self) -> Vec<usize> {
         match &self.included_from {
@@ -137,32 +161,12 @@ impl<'a> Span<'a> {
 
     /// How many preprocessor macros this [`Span`] was expanded from
     pub const fn expansion_depth(&self) -> usize {
-        let mut curr_span: &Span = self;
-        let mut depth = 0;
-        loop {
-            if let Some(expanded_from_span) = curr_span.expanded_from {
-                curr_span = expanded_from_span;
-                depth += 1;
-            } else {
-                break;
-            }
-        }
-        depth
+        expansion_depth_helper(self, 0)
     }
 
     /// How many `` `include `` macros this [`Span`] was included with
     pub const fn inclusion_depth(&self) -> usize {
-        let mut curr_span: &Span = self;
-        let mut depth = 0;
-        loop {
-            if let Some(included_from_span) = curr_span.included_from {
-                curr_span = included_from_span;
-                depth += 1;
-            } else {
-                break;
-            }
-        }
-        depth
+        inclusion_depth_helper(self, 0)
     }
 }
 

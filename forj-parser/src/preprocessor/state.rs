@@ -382,6 +382,7 @@ impl<'a> PreprocessorState<'a> {
     }
 
     /// Get the full path from an `` `include `` statement
+    #[cfg(not(test))]
     pub fn get_file_path(&self, include_path: &str) -> Option<PathBuf> {
         for dir_path in &self.includes {
             let full_path = Path::new(dir_path).join(include_path);
@@ -390,6 +391,12 @@ impl<'a> PreprocessorState<'a> {
             }
         }
         None
+    }
+
+    /// Return the path as-is for testing
+    #[cfg(test)]
+    pub fn get_file_path(&self, include_path: &str) -> Option<PathBuf> {
+        Some(Path::new(include_path).to_path_buf())
     }
 
     /// Add a compiler directive timescale
