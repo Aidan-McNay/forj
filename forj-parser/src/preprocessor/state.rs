@@ -19,6 +19,9 @@ const DEFAULT_NETTYPE: DefaultNettype = DefaultNettype::Wire;
 const DEFAULT_UNCONNECTED_DRIVE: UnconnectedDrive =
     UnconnectedDrive::NoUnconnected;
 
+const DEFAULT_KEYWORD_STANDARD: StandardVersion =
+    StandardVersion::IEEE1800_2023;
+
 /// A preprocessor definition
 #[derive(Clone, Debug)]
 pub struct Define<'a> {
@@ -151,7 +154,7 @@ pub struct PreprocessorState<'a> {
     /// The contents of included files (`file_name` -> `content`)
     pub included_files: HashMap<&'a str, &'a str>,
     /// The current standard for reserved keywords, as a LIFO stack
-    pub curr_standard: StandardVersion,
+    pub curr_standard: Vec<(StandardVersion, Span<'a>)>,
     /// Any errors encountered so far
     pub errors: Vec<PreprocessorError<'a>>,
     pub(crate) in_define: bool,
@@ -172,7 +175,7 @@ impl<'a> PreprocessorState<'a> {
             cell_defines: vec![],
             line_directives: vec![],
             included_files: HashMap::new(),
-            curr_standard: StandardVersion::default(),
+            curr_standard: vec![],
             errors: vec![],
             in_define: false,
             in_define_arg: false,
@@ -190,7 +193,7 @@ impl<'a> PreprocessorState<'a> {
         self.unconnected_drives = vec![];
         self.cell_defines = vec![];
         self.line_directives = vec![];
-        self.curr_standard = StandardVersion::default();
+        self.curr_standard = vec![];
         self.errors = vec![];
         self.in_define = false;
         self.in_define_arg = false;
@@ -428,6 +431,14 @@ impl<'a> PreprocessorState<'a> {
             }
         }
         &DEFAULT_NETTYPE
+    }
+
+    /// Get the current [`StandardVersion`] used
+    pub fn get_keyword_standard(&self) -> &StandardVersion {
+        match self.curr_standard.last() {
+            Some((standard, _)) => standard,
+            None => &DEFAULT_KEYWORD_STANDARD,
+        }
     }
 
     /// Retain the contents of a file found from an `` `include `` statement

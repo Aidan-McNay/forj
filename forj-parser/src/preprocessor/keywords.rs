@@ -10,11 +10,11 @@ fn get_keyword_standard<'s>(
     src: &mut TokenIterator<'s, impl Iterator<Item = SpannedToken<'s>>>,
     state: &mut PreprocessorState<'s>,
     cache: &'s PreprocessorCache<'s>,
-    err_span: Span<'s>,
+    err_span: &Span<'s>,
 ) -> Result<StandardVersion, PreprocessorError<'s>> {
     let Some(spanned_token) = preprocess_single(src, state, cache)? else {
         return Err(PreprocessorError::IncompleteDirective {
-            directive_span: err_span,
+            directive_span: err_span.clone(),
         });
     };
     match spanned_token.0 {
@@ -40,25 +40,27 @@ fn get_keyword_standard<'s>(
     }
 }
 
-pub fn preprocess_keyword_standard<'s>(
+pub fn preprocess_begin_keyword<'s>(
     src: &mut TokenIterator<'s, impl Iterator<Item = SpannedToken<'s>>>,
-    dest: &mut Vec<SpannedToken<'s>>,
     state: &mut PreprocessorState<'s>,
     cache: &'s PreprocessorCache<'s>,
     begin_keywords_span: Span<'s>,
 ) -> Result<(), PreprocessorError<'s>> {
     let new_standard =
-        get_keyword_standard(src, state, cache, begin_keywords_span.clone())?;
-    let old_standard = state.curr_standard.clone();
-    state.curr_standard = new_standard;
-    let result = preprocess_helper(src, dest, state, cache);
-    state.curr_standard = old_standard;
-    match result {
-        Ok(()) => Err(PreprocessorError::NoEndKeywords {
-            begin_keywords_span,
-        }),
-        Err(PreprocessorError::EndKeywords { .. }) => Ok(()),
-        Err(err) => Err(err),
+        get_keyword_standard(src, state, cache, &begin_keywords_span)?;
+    state
+        .curr_standard
+        .push((new_standard, begin_keywords_span));
+    Ok(())
+}
+
+pub fn preprocess_end_keyword<'s>(
+    state: &mut PreprocessorState<'s>,
+    end_keywords_span: Span<'s>,
+) -> Result<(), PreprocessorError<'s>> {
+    match state.curr_standard.pop() {
+        Some(_) => Ok(()),
+        None => Err(PreprocessorError::EndKeywords { end_keywords_span }),
     }
 }
 

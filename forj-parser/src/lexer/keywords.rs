@@ -19,12 +19,6 @@ pub enum StandardVersion {
     IEEE1800_2023,
 }
 
-impl Default for StandardVersion {
-    fn default() -> Self {
-        StandardVersion::IEEE1800_2023
-    }
-}
-
 impl<'a> Token<'a> {
     /// Whether the token is a keyword that needs to be replaced, based on
     /// the current standard

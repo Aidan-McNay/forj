@@ -347,9 +347,8 @@ pub(crate) fn preprocess_helper<'s>(
                     state.undefineall();
                 }
                 Token::DirBeginKeywords => {
-                    if let Err(err) = preprocess_keyword_standard(
+                    if let Err(err) = preprocess_begin_keyword(
                         src,
-                        dest,
                         state,
                         cache,
                         spanned_token.1,
@@ -375,9 +374,11 @@ pub(crate) fn preprocess_helper<'s>(
                     });
                 }
                 Token::DirEndKeywords => {
-                    return Err(PreprocessorError::EndKeywords {
-                        end_keywords_span: spanned_token.1,
-                    });
+                    if let Err(err) =
+                        preprocess_end_keyword(state, spanned_token.1)
+                    {
+                        recover(src, state, err)?;
+                    }
                 }
                 Token::DirEndif => {
                     return Err(PreprocessorError::Endif {
@@ -475,7 +476,9 @@ pub(crate) fn preprocess_helper<'s>(
                         dest.push(spanned_token)
                     }
                 }
-                token if token.keyword_replace(&state.curr_standard) => {
+                token
+                    if token.keyword_replace(state.get_keyword_standard()) =>
+                {
                     let new_token = SpannedToken(
                         Token::SimpleIdentifier(token.as_str()),
                         spanned_token.1,
@@ -506,6 +509,18 @@ pub(crate) fn preprocess_single<'s>(
             other => break Ok(other),
         }
     }
+}
+
+/// Produce any additional errors from examining the [`PreprocessorState`],
+/// specifically those from preprocessor directives that expected a
+/// pair and did not already produce an error
+pub(crate) fn preprocess_cleanup<'s>(state: &mut PreprocessorState<'s>) {
+    let keyword_standard_err = state.curr_standard.iter().map(|(_, span)| {
+        PreprocessorError::NoEndKeywords {
+            begin_keywords_span: span.clone(),
+        }
+    });
+    state.errors.extend(keyword_standard_err);
 }
 
 /// Preprocess the given token stream, elaborating any compiler directives
@@ -544,6 +559,7 @@ pub fn preprocess<'s>(
     loop {
         match preprocess_helper(&mut token_iter, &mut dest, state, cache) {
             Ok(()) => {
+                preprocess_cleanup(state);
                 if state.errors.iter().all(|err| err.is_warning()) {
                     return Ok(dest);
                 } else {
@@ -552,6 +568,7 @@ pub fn preprocess<'s>(
             }
             Err(err) => {
                 if let Err(err) = recover(&mut token_iter, state, err) {
+                    preprocess_cleanup(state);
                     state.errors.push(err);
                     return Err(());
                 }
