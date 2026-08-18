@@ -9,7 +9,6 @@ use winnow::Parser;
 #[cfg(feature = "parse_lossless")]
 use winnow::combinator::alt;
 use winnow::error::ModalResult;
-#[cfg(feature = "parse_lossless")]
 use winnow::token::any;
 
 // A parser for matching extra nodes
@@ -76,6 +75,7 @@ pub fn token<'s>(
     }
 }
 
+// A parser for matching a token and extra nodes, producing metadata
 #[cfg(not(feature = "parse_lossless"))]
 pub fn token<'s>(
     token_to_match: Token<'s>,
@@ -86,5 +86,39 @@ pub fn token<'s>(
             .context(token_to_match)
             .map(|spanned_token| Metadata::new(spanned_token.1.clone(), vec![]))
             .parse_next(input)
+    }
+}
+
+// A parser for matching a specific identifier name and extra nodes, producing metadata
+#[cfg(feature = "parse_lossless")]
+pub fn name<'s>(
+    name: &'s str,
+) -> impl FnMut(&mut Tokens<'s>) -> ModalResult<Metadata<'s>, VerboseError<'s>>
+{
+    move |input: &mut Tokens<'s>| {
+        let name_parser = any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
+            Token::SimpleIdentifier(text) if text == name => Some(s.1.clone()),
+            _ => None,
+        });
+        (name_parser, non_trivia_parser)
+            .map(|(span, extra_nodes)| Metadata::new(span, extra_nodes))
+            .parse_next(input)
+    }
+}
+
+// A parser for matching a specific identifier name and extra nodes, producing metadata
+#[cfg(not(feature = "parse_lossless"))]
+pub fn name<'s>(
+    name: &'s str,
+) -> impl FnMut(&mut Tokens<'s>) -> ModalResult<Metadata<'s>, VerboseError<'s>>
+{
+    move |input: &mut Tokens<'s>| {
+        any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
+            Token::SimpleIdentifier(text) if text == name => {
+                Some(Metadata::new(s.1.clone(), vec![]))
+            }
+            _ => None,
+        })
+        .parse_next(input)
     }
 }

@@ -74,7 +74,7 @@ pub fn subroutine_call_parser<'s>(
 ) -> ModalResult<SubroutineCall<'s>, VerboseError<'s>> {
     alt((
         (
-            opt_note((token(Token::Std), token(Token::ColonColon))),
+            opt_note((name("std"), token(Token::ColonColon))),
             randomize_call_parser,
         )
             .map(|(a, b)| SubroutineCall::Randomize(Box::new((a, b)))),
@@ -167,10 +167,10 @@ pub fn built_in_method_call_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<BuiltInMethodCall<'s>, VerboseError<'s>> {
     alt((
-        array_manipulation_call_parser
-            .map(|a| BuiltInMethodCall::ArrayManip(Box::new(a))),
         randomize_call_parser
             .map(|a| BuiltInMethodCall::Randomize(Box::new(a))),
+        array_manipulation_call_parser
+            .map(|a| BuiltInMethodCall::ArrayManip(Box::new(a))),
     ))
     .parse_next(input)
 }
@@ -208,7 +208,7 @@ pub fn randomize_call_parser<'s>(
             .map(|a| VariableIdentifierListOrNull::Null(Box::new(a))),
     ));
     (
-        token(Token::Randomize),
+        name("randomize"),
         attribute_instance_vec_parser,
         opt_note((
             token(Token::Paren),

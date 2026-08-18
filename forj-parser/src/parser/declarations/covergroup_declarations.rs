@@ -64,7 +64,7 @@ pub fn coverage_option_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<CoverageOption<'s>, VerboseError<'s>> {
     let _option_parser = (
-        token(Token::Option),
+        name("option"),
         token(Token::Period),
         member_identifier_parser,
         token(Token::Eq),
@@ -74,7 +74,7 @@ pub fn coverage_option_parser<'s>(
             CoverageOption::Option(Box::new((a, b, c, d, e)))
         });
     let _type_option_parser = (
-        token(Token::TypeOption),
+        name("type_option"),
         token(Token::Period),
         member_identifier_parser,
         token(Token::Eq),
@@ -104,7 +104,7 @@ pub fn coverage_event_parser<'s>(
     let _function_parser = (
         token(Token::With),
         token(Token::Function),
-        token(Token::Sample),
+        name("sample"),
         token(Token::Paren),
         opt_note(tf_port_list_parser),
         token(Token::EParen),

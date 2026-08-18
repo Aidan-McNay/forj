@@ -731,18 +731,8 @@ pub enum Token<'a> {
     #[token(r"\")]
     Bslash,
     // Other Language Grammar
-    #[token("std")]
-    Std,
     #[token("PATHPULSE$")]
     PathpulseDollar,
-    #[token("option")]
-    Option,
-    #[token("type_option")]
-    TypeOption,
-    #[token("randomize")]
-    Randomize,
-    #[token("sample")]
-    Sample,
     #[token("1step")]
     OneStep,
     #[token("$setup")]
@@ -1224,12 +1214,7 @@ impl<'a> Token<'a> {
             Token::PipeMinusGt => "|->",
             Token::PipeEqGt => "|=>",
             Token::Bslash => r"\",
-            Token::Std => "std",
             Token::PathpulseDollar => "PATHPULSE$",
-            Token::Option => "option",
-            Token::TypeOption => "type_option",
-            Token::Randomize => "randomize",
-            Token::Sample => "sample",
             Token::OneStep => "1step",
             Token::DollarSetup => "$setup",
             Token::DollarHold => "$hold",

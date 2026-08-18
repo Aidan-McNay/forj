@@ -660,8 +660,6 @@ General
 
             The text referenced by the token
 
-      .. py:class:: Token.Option(Token)
-
       .. py:class:: Token.Or(Token)
 
       .. py:class:: Token.Output(Token)
@@ -769,8 +767,6 @@ General
 
       .. py:class:: Token.Randcase(Token)
 
-      .. py:class:: Token.Randomize(Token)
-
       .. py:class:: Token.Randsequence(Token)
 
       .. py:class:: Token.Rcmos(Token)
@@ -814,8 +810,6 @@ General
       .. py:class:: Token.SUntil(Token)
 
       .. py:class:: Token.SUntilWith(Token)
-
-      .. py:class:: Token.Sample(Token)
 
       .. py:class:: Token.Scalared(Token)
 
@@ -866,8 +860,6 @@ General
       .. py:class:: Token.StarStar(Token)
 
       .. py:class:: Token.Static(Token)
-
-      .. py:class:: Token.Std(Token)
 
       .. py:class:: Token.String(Token)
 
@@ -967,8 +959,6 @@ General
       .. py:class:: Token.Trireg(Token)
 
       .. py:class:: Token.Type(Token)
-
-      .. py:class:: Token.TypeOption(Token)
 
       .. py:class:: Token.Typedef(Token)
 

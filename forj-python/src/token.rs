@@ -4,8 +4,8 @@
 //! A wrapper around [`forj_parser::Token`]
 
 use crate::Span;
-use pyo3::prelude::*;
 use forj_parser::{self, PreprocessorCache};
+use pyo3::prelude::*;
 
 /// A wrapper around [`forj_parser::Token`]
 #[pyclass(eq, from_py_object, module = "forj_python", str)]
@@ -373,12 +373,7 @@ pub enum Token {
     PipeEqGt(),
     Bslash(),
     // Other Language Grammar
-    Std(),
     PathpulseDollar(),
-    Option(),
-    TypeOption(),
-    Randomize(),
-    Sample(),
     OneStep(),
     DollarSetup(),
     DollarHold(),
@@ -555,9 +550,7 @@ impl<'a> From<forj_parser::Token<'a>> for Token {
             forj_parser::Token::PulsestyleOndetect => {
                 Token::PulsestyleOndetect()
             }
-            forj_parser::Token::PulsestyleOnevent => {
-                Token::PulsestyleOnevent()
-            }
+            forj_parser::Token::PulsestyleOnevent => Token::PulsestyleOnevent(),
             forj_parser::Token::Showcancelled => Token::Showcancelled(),
             forj_parser::Token::Signed => Token::Signed(),
             forj_parser::Token::Unsigned => Token::Unsigned(),
@@ -687,17 +680,11 @@ impl<'a> From<forj_parser::Token<'a>> for Token {
             forj_parser::Token::Interconnect => Token::Interconnect(),
             forj_parser::Token::Nettype => Token::Nettype(),
             forj_parser::Token::Soft => Token::Soft(),
-            forj_parser::Token::DirUnderscoreFile => {
-                Token::DirUnderscoreFile()
-            }
-            forj_parser::Token::DirUnderscoreLine => {
-                Token::DirUnderscoreLine()
-            }
+            forj_parser::Token::DirUnderscoreFile => Token::DirUnderscoreFile(),
+            forj_parser::Token::DirUnderscoreLine => Token::DirUnderscoreLine(),
             forj_parser::Token::DirBeginKeywords => Token::DirBeginKeywords(),
             forj_parser::Token::DirCelldefine => Token::DirCelldefine(),
-            forj_parser::Token::DirDefaultNettype => {
-                Token::DirDefaultNettype()
-            }
+            forj_parser::Token::DirDefaultNettype => Token::DirDefaultNettype(),
             forj_parser::Token::DirDefine => Token::DirDefine(),
             forj_parser::Token::DirElse => Token::DirElse(),
             forj_parser::Token::DirElsif => Token::DirElsif(),
@@ -800,12 +787,7 @@ impl<'a> From<forj_parser::Token<'a>> for Token {
             forj_parser::Token::PipeMinusGt => Token::PipeMinusGt(),
             forj_parser::Token::PipeEqGt => Token::PipeEqGt(),
             forj_parser::Token::Bslash => Token::Bslash(),
-            forj_parser::Token::Std => Token::Std(),
             forj_parser::Token::PathpulseDollar => Token::PathpulseDollar(),
-            forj_parser::Token::Option => Token::Option(),
-            forj_parser::Token::TypeOption => Token::TypeOption(),
-            forj_parser::Token::Randomize => Token::Randomize(),
-            forj_parser::Token::Sample => Token::Sample(),
             forj_parser::Token::OneStep => Token::OneStep(),
             forj_parser::Token::DollarSetup => Token::DollarSetup(),
             forj_parser::Token::DollarHold => Token::DollarHold(),
@@ -1036,9 +1018,7 @@ impl<'a> From<&'a Token> for forj_parser::Token<'a> {
             Token::PulsestyleOndetect() => {
                 forj_parser::Token::PulsestyleOndetect
             }
-            Token::PulsestyleOnevent() => {
-                forj_parser::Token::PulsestyleOnevent
-            }
+            Token::PulsestyleOnevent() => forj_parser::Token::PulsestyleOnevent,
             Token::Showcancelled() => forj_parser::Token::Showcancelled,
             Token::Signed() => forj_parser::Token::Signed,
             Token::Unsigned() => forj_parser::Token::Unsigned,
@@ -1168,17 +1148,11 @@ impl<'a> From<&'a Token> for forj_parser::Token<'a> {
             Token::Interconnect() => forj_parser::Token::Interconnect,
             Token::Nettype() => forj_parser::Token::Nettype,
             Token::Soft() => forj_parser::Token::Soft,
-            Token::DirUnderscoreFile() => {
-                forj_parser::Token::DirUnderscoreFile
-            }
-            Token::DirUnderscoreLine() => {
-                forj_parser::Token::DirUnderscoreLine
-            }
+            Token::DirUnderscoreFile() => forj_parser::Token::DirUnderscoreFile,
+            Token::DirUnderscoreLine() => forj_parser::Token::DirUnderscoreLine,
             Token::DirBeginKeywords() => forj_parser::Token::DirBeginKeywords,
             Token::DirCelldefine() => forj_parser::Token::DirCelldefine,
-            Token::DirDefaultNettype() => {
-                forj_parser::Token::DirDefaultNettype
-            }
+            Token::DirDefaultNettype() => forj_parser::Token::DirDefaultNettype,
             Token::DirDefine() => forj_parser::Token::DirDefine,
             Token::DirElse() => forj_parser::Token::DirElse,
             Token::DirElsif() => forj_parser::Token::DirElsif,
@@ -1281,12 +1255,7 @@ impl<'a> From<&'a Token> for forj_parser::Token<'a> {
             Token::PipeMinusGt() => forj_parser::Token::PipeMinusGt,
             Token::PipeEqGt() => forj_parser::Token::PipeEqGt,
             Token::Bslash() => forj_parser::Token::Bslash,
-            Token::Std() => forj_parser::Token::Std,
             Token::PathpulseDollar() => forj_parser::Token::PathpulseDollar,
-            Token::Option() => forj_parser::Token::Option,
-            Token::TypeOption() => forj_parser::Token::TypeOption,
-            Token::Randomize() => forj_parser::Token::Randomize,
-            Token::Sample() => forj_parser::Token::Sample,
             Token::OneStep() => forj_parser::Token::OneStep,
             Token::DollarSetup() => forj_parser::Token::DollarSetup,
             Token::DollarHold() => forj_parser::Token::DollarHold,
