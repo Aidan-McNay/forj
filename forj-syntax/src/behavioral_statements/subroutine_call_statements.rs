@@ -19,6 +19,7 @@ pub enum SubroutineCallStatement<'a> {
             Metadata<'a>, // (
             FunctionSubroutineCall<'a>,
             Metadata<'a>, // )
+            Metadata<'a>, // ;
         )>,
     ),
 }

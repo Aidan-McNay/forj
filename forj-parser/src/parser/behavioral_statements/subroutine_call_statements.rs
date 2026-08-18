@@ -20,9 +20,10 @@ pub fn subroutine_call_statement_parser<'s>(
         token(Token::Paren),
         function_subroutine_call_parser,
         token(Token::EParen),
+        token(Token::SColon),
     )
-        .map(|(a, b, c, d, e)| {
-            SubroutineCallStatement::Void(Box::new((a, b, c, d, e)))
+        .map(|(a, b, c, d, e, f)| {
+            SubroutineCallStatement::Void(Box::new((a, b, c, d, e, f)))
         });
     alt((_subroutine_parser, _void_parser)).parse_next(input)
 }
