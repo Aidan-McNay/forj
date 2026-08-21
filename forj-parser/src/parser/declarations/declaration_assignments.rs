@@ -7,7 +7,7 @@ use crate::*;
 use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::Parser;
-use winnow::combinator::alt;
+use winnow::combinator::{alt, not, peek, terminated};
 
 pub fn defparam_assignment_parser<'s>(
     input: &mut Tokens<'s>,
@@ -156,22 +156,28 @@ pub fn variable_decl_assignment_parser<'s>(
         opt_note((token(Token::Eq), expression_parser)),
     )
         .map(|(a, b, c)| VariableDeclAssignment::Variable(Box::new((a, b, c))));
-    let _dynamic_variable_parser = (
-        dynamic_array_variable_identifier_parser,
-        unsized_dimension_parser,
-        repeat_note(variable_dimension_parser),
-        opt_note((token(Token::Eq), dynamic_array_new_parser)),
+    let _dynamic_variable_parser = terminated(
+        (
+            dynamic_array_variable_identifier_parser,
+            unsized_dimension_parser,
+            repeat_note(variable_dimension_parser),
+            opt_note((token(Token::Eq), dynamic_array_new_parser)),
+        ),
+        peek(not(token(Token::Eq))),
     )
-        .map(|(a, b, c, d)| {
-            VariableDeclAssignment::DynamicVariable(Box::new((a, b, c, d)))
-        });
-    let _class_variable_parser = (
-        class_variable_identifier_parser,
-        ((token(Token::Eq), class_new_parser)), // Optional, but gets picked up by variable parser
+    .map(|(a, b, c, d)| {
+        VariableDeclAssignment::DynamicVariable(Box::new((a, b, c, d)))
+    });
+    let _class_variable_parser = terminated(
+        (
+            class_variable_identifier_parser,
+            ((token(Token::Eq), class_new_parser)), // Optional, but gets picked up by variable parser
+        ),
+        peek(not(token(Token::Eq))),
     )
-        .map(|(a, b)| {
-            VariableDeclAssignment::ClassVariable(Box::new((a, Some(b))))
-        });
+    .map(|(a, b)| {
+        VariableDeclAssignment::ClassVariable(Box::new((a, Some(b))))
+    });
     alt((
         _dynamic_variable_parser,
         _class_variable_parser,

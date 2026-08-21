@@ -82,9 +82,12 @@ pub fn constant_primary_parser<'s>(
             .map(|a| ConstantPrimary::AssignmentPatternExpression(Box::new(a)));
     let _type_reference_parser = type_reference_parser
         .map(|a| ConstantPrimary::TypeReference(Box::new(a)));
+    let _dollar_parser =
+        token(Token::Dollar).map(|a| ConstantPrimary::Dollar(Box::new(a)));
     let _null_parser =
         token(Token::Null).map(|a| ConstantPrimary::Null(Box::new(a)));
     alt((
+        _dollar_parser,
         _null_parser,
         _assignment_pattern_expression_parser,
         _cast_parser,

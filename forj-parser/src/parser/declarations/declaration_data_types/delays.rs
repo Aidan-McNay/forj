@@ -6,7 +6,7 @@
 use crate::*;
 use forj_syntax::*;
 use winnow::Parser;
-use winnow::combinator::alt;
+use winnow::combinator::{alt, not, peek, terminated};
 use winnow::error::ModalResult;
 
 pub fn delay2_parser<'s>(
@@ -49,11 +49,16 @@ pub fn delay_value_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<DelayValue<'s>, VerboseError<'s>> {
     alt((
+        token(Token::OneStep).map(|a| DelayValue::OneStep(a)),
+        time_literal_parser.map(|a| DelayValue::Time(a)),
         unsigned_number_parser.map(|a| DelayValue::Unsigned(a)),
         real_number_parser.map(|a| DelayValue::Real(a)),
+        terminated(
+            hierarchical_identifier_parser,
+            peek(not(token(Token::Pound))),
+        )
+        .map(|a| DelayValue::Hierarchical(a)),
         ps_identifier_parser.map(|a| DelayValue::Ps(a)),
-        time_literal_parser.map(|a| DelayValue::Time(a)),
-        token(Token::OneStep).map(|a| DelayValue::OneStep(a)),
     ))
     .parse_next(input)
 }

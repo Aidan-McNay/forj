@@ -40,7 +40,7 @@ pub fn always_keyword_parser<'s>(
 pub fn final_construct_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<FinalConstruct<'s>, VerboseError<'s>> {
-    (token(Token::Initial), function_statement_parser)
+    (token(Token::Final), function_statement_parser)
         .map(|(a, b)| FinalConstruct(a, b))
         .parse_next(input)
 }

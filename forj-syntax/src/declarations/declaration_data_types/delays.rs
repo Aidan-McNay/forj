@@ -57,6 +57,7 @@ pub enum DelayValue<'a> {
     Unsigned(UnsignedNumber<'a>),
     Real(RealNumber<'a>),
     Ps(PsIdentifier<'a>),
+    Hierarchical(HierarchicalIdentifier<'a>),
     Time(TimeLiteral<'a>),
     OneStep(Metadata<'a>),
 }

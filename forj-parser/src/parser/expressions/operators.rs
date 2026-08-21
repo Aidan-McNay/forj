@@ -7,7 +7,7 @@ use crate::*;
 use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::Parser;
-use winnow::combinator::alt;
+use winnow::combinator::{alt, not, peek, terminated};
 
 pub fn unary_operator_parser<'s>(
     input: &mut Tokens<'s>,
@@ -36,7 +36,8 @@ pub fn binary_operator_parser<'s>(
     let temp1 = alt((
         token(Token::Plus).map(|a| BinaryOperator::Plus(a)),
         token(Token::Minus).map(|a| BinaryOperator::Minus(a)),
-        token(Token::Star).map(|a| BinaryOperator::Star(a)),
+        terminated(token(Token::Star), peek(not(token(Token::EParen))))
+            .map(|a| BinaryOperator::Star(a)), // Don't match end of attribute
         token(Token::Slash).map(|a| BinaryOperator::Slash(a)),
         token(Token::Percent).map(|a| BinaryOperator::Percent(a)),
         token(Token::EqEq).map(|a| BinaryOperator::EqEq(a)),

@@ -10,7 +10,7 @@ use logos::{Lexer, Logos};
 enum StringToken {
     #[token(r#"""#)]
     Delimeter,
-    #[token(r#"\\""#)]
+    #[token(r#"\""#, priority = 4)]
     EscapedDelimeter,
     #[token("\n")]
     #[token("\r")]
@@ -27,7 +27,7 @@ enum StringToken {
     #[token("\\\u{2029}")]
     EscapedNewline,
     #[regex(r#"[^"\r\n\\]"#)]
-    #[regex(r#"\\([ -~]|[0-7]{1,3})"#)]
+    #[regex(r#"\\([ -~]|[0-7]{1,3})"#, priority = 2)]
     #[regex(r#"\\x[0-9a-fA-F]{1,2}"#)]
     Other,
 }

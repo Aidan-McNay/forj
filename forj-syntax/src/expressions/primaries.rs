@@ -43,6 +43,7 @@ pub enum ConstantPrimary<'a> {
     Cast(Box<ConstantCast<'a>>),
     AssignmentPatternExpression(Box<ConstantAssignmentPatternExpression<'a>>),
     TypeReference(Box<TypeReference<'a>>),
+    Dollar(Box<Metadata<'a>>),
     Null(Box<Metadata<'a>>),
 }
 
