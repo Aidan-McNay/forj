@@ -129,6 +129,7 @@ pub(crate) fn recover<'s>(
         PreprocessorError::Else { .. } => true,
         PreprocessorError::EndKeywords { .. } => true,
         PreprocessorError::NoEndKeywords { .. } => false, // EOF
+        PreprocessorError::RedefinedDirective { .. } => recover_newline(src),
         PreprocessorError::InvalidDefineParameter { .. } => {
             recover_newline(src)
         }

@@ -25,11 +25,9 @@ pub enum Expectation {
 impl<'a> From<forj_parser::Expectation<'a>> for Expectation {
     fn from(value: forj_parser::Expectation<'a>) -> Self {
         match value {
-            forj_parser::Expectation::Token(rust_token) => {
-                Expectation::Token {
-                    token: rust_token.into(),
-                }
-            }
+            forj_parser::Expectation::Token(rust_token) => Expectation::Token {
+                token: rust_token.into(),
+            },
             forj_parser::Expectation::Label(rust_str) => Expectation::Label {
                 label: rust_str.to_string(),
             },
@@ -148,6 +146,12 @@ pub enum PreprocessorError {
     NoEndKeywords {
         /// The [`Span`] of the unterminated `` `begin_keywords ``
         begin_keywords_span: Span,
+    },
+    RedefinedDirective {
+        /// The compiler directive that was being overriden
+        directive_name: String,
+        /// The [`Span`] of the name specification
+        directive_span: Span,
     },
     InvalidDefineParameter {
         /// The [`Token`] found instead of the `` `define `` parameter
@@ -323,6 +327,13 @@ impl<'a> From<forj_parser::PreprocessorError<'a>> for PreprocessorError {
                 begin_keywords_span,
             } => PreprocessorError::NoEndKeywords {
                 begin_keywords_span: begin_keywords_span.into(),
+            },
+            forj_parser::PreprocessorError::RedefinedDirective {
+                directive_name,
+                directive_span,
+            } => PreprocessorError::RedefinedDirective {
+                directive_name: directive_name.to_string(),
+                directive_span: directive_span.into(),
             },
             forj_parser::PreprocessorError::InvalidDefineParameter {
                 other_token,

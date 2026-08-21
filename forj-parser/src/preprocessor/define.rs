@@ -6,6 +6,34 @@
 use crate::Span;
 use crate::*;
 
+fn is_compiler_directive(name: &str) -> bool {
+    match name {
+        "__FILE__"
+        | "__LINE__"
+        | "begin_keywords"
+        | "celldefine"
+        | "default_nettype"
+        | "define"
+        | "else"
+        | "elsif"
+        | "end_keywords"
+        | "endcelldefine"
+        | "endif"
+        | "ifdef"
+        | "ifndef"
+        | "include"
+        | "line"
+        | "nounconnected_drive"
+        | "pragma"
+        | "resetall"
+        | "timescale"
+        | "unconnected_drive"
+        | "undef"
+        | "undefineall" => true,
+        _ => false,
+    }
+}
+
 fn get_define_token<'s>(
     src: &mut TokenIterator<'s, impl Iterator<Item = SpannedToken<'s>>>,
     err_span: Span<'s>,
@@ -290,6 +318,12 @@ pub fn preprocess_define<'s>(
         cache,
     )?;
     let define_text = get_define_body(src, state, cache)?;
+    if is_compiler_directive(define_name.0) {
+        return Err(PreprocessorError::RedefinedDirective {
+            directive_name: define_name.0,
+            directive_span: define_name.1,
+        });
+    }
     let (define_body, define_span) = match function_args {
         Some((end_span, arg_vec)) => {
             let mut overall_span = define_name.1;
@@ -389,6 +423,16 @@ fn escaped_newlines() {
 fn illegal_name() {
     check_preprocessor!(
         "`define logic 2
+        ",
+        Vec::<Token<'_>>::new()
+    )
+}
+
+#[test]
+#[should_panic(expected = "RedefinedDirective")]
+fn redefine_directive() {
+    check_preprocessor!(
+        "`define end_keywords 'illegal'
         ",
         Vec::<Token<'_>>::new()
     )

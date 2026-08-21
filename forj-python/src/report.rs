@@ -4,8 +4,8 @@
 //! A wrapper around [`forj_parser::report::Report`]
 
 use crate::{PreprocessorError, Span};
-use pyo3::prelude::*;
 use forj_parser::{PreprocessorCache, report::Sources};
+use pyo3::prelude::*;
 use std::fs;
 use yansi::Color;
 
@@ -323,6 +323,26 @@ impl PreprocessorError {
                 );
                 report
             }
+            PreprocessorError::RedefinedDirective {
+                directive_name,
+                directive_span,
+            } => {
+                let mut report = Report::new(
+                    ReportKind::Error(),
+                    directive_span.clone(),
+                    "PP7".to_owned(),
+                    format!(
+                        "Attempted to redefine compiler directive '{}'",
+                        directive_name
+                    ),
+                );
+                report.label(
+                    directive_span.clone(),
+                    ReportKind::Error(),
+                    format!("Redefining {}", directive_name),
+                );
+                report
+            }
             PreprocessorError::InvalidDefineParameter {
                 other_token,
                 other_span,
@@ -330,7 +350,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     other_span.clone(),
-                    "PP7".to_owned(),
+                    "PP8".to_owned(),
                     format!(
                         concat!(
                             "Found {}, expected a preprocessor ",
@@ -353,7 +373,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     other_span.clone(),
-                    "PP7".to_owned(),
+                    "PP9".to_owned(),
                     format!(
                         concat!(
                             "Found {}, expected a comma, ), ",
@@ -376,7 +396,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     invalid_version_span.clone(),
-                    "PP8".to_owned(),
+                    "PP10".to_owned(),
                     match invalid_version {
                         crate::Token::StringLiteral { text } => {
                             format!("{} is not a valid version specifier", text)
@@ -400,7 +420,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     directive_span.clone(),
-                    "PP9".to_owned(),
+                    "PP11".to_owned(),
                     "Incomplete directive".to_owned(),
                 );
                 report.label(
@@ -417,7 +437,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     other_span.clone(),
-                    "PP10".to_owned(),
+                    "PP12".to_owned(),
                     format!(
                         "Found {}, expected more in the preprocessor definition",
                         other_token
@@ -437,7 +457,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     undefined_span.clone(),
-                    "PP11".to_owned(),
+                    "PP13".to_owned(),
                     format!("{undefined_name} has not been previously defined"),
                 );
                 report.label(
@@ -455,7 +475,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Warning(),
                     redef_span.clone(),
-                    "PP12".to_owned(),
+                    "PP14".to_owned(),
                     format!("Redefining {macro_name}"),
                 );
                 report.label(
@@ -477,7 +497,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Warning(),
                     macro_span.clone(),
-                    "PP13".to_owned(),
+                    "PP15".to_owned(),
                     format!(
                         "Undefining {}, which has not been previously defined",
                         macro_name
@@ -499,7 +519,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     dup_span.clone(),
-                    "PP14".to_owned(),
+                    "PP16".to_owned(),
                     format!(
                         "'{}' was already declared as a macro parameter for {}",
                         param_name, define_name
@@ -526,7 +546,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                 ReportKind::Error(),
                 non_default_param_span.clone(),
-                "PP15".to_owned(),
+                "PP17".to_owned(),
                 "No default specified for argument after one with a default".to_owned(),
             );
                 report.label(
@@ -549,7 +569,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     use_span.clone(),
-                    "PP16".to_owned(),
+                    "PP18".to_owned(),
                     format!("Expected arguments when using {macro_name}"),
                 );
                 report.label(
@@ -574,7 +594,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     use_span.clone(),
-                    "PP17".to_owned(),
+                    "PP19".to_owned(),
                     format!(
                         "{} expected {} arguments, but {} were provided",
                         macro_name, expected, found
@@ -600,7 +620,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     use_span.clone(),
-                    "PP18".to_owned(),
+                    "PP20".to_owned(),
                     format!(
                         "'{param_name}' wasn't specified and has no default"
                     ),
@@ -624,7 +644,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     arg_span.clone(),
-                    "PP19".to_owned(),
+                    "PP21".to_owned(),
                     format!(
                         concat!(
                             "The argument for '{}' cannot be ",
@@ -644,7 +664,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     timescale_span.clone(),
-                    "PP20".to_owned(),
+                    "PP22".to_owned(),
                     "Time precision is larger than the time unit".to_owned(),
                 );
                 report.label(
@@ -662,7 +682,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     error_span.clone(),
-                    "PP21".to_owned(),
+                    "PP23".to_owned(),
                     format!(
                         "Usage of {} resulted in an incomplete macro",
                         error_token
@@ -687,7 +707,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     include_path_span.clone(),
-                    "PP22".to_owned(),
+                    "PP24".to_owned(),
                     format!("Error when reading {}", include_path),
                 );
                 report.label(
@@ -701,7 +721,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     include_span.clone(),
-                    "PP23".to_owned(),
+                    "PP25".to_owned(),
                     "Max include depth reached".to_owned(),
                 );
                 report.label(
@@ -712,7 +732,7 @@ impl PreprocessorError {
                 report
             }
             PreprocessorError::VerboseError { err } => {
-                return err.report_with_code("PP24".to_owned());
+                return err.report_with_code("PP26".to_owned());
             }
         };
         Ok(report)

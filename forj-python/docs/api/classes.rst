@@ -1176,6 +1176,18 @@ Preprocessing
                The error-causing :py:class:`Token` (either :py:class:`Token::EParen`\ ,
                :py:class:`Token::EBracket`\ , or :py:class:`Token::EBrace`\ )
    
+      .. py:class:: PreprocessorError.RedefinedDirective(PreprocessorError)
+         
+         .. py:property:: directive_name
+            :type: str
+   
+               The name of the compiler directive being redefined
+         
+         .. py:property:: directive_span
+            :type: Span
+   
+               The :py:class:`Span` of the compiler directive name
+      
       .. py:class:: PreprocessorError.InvalidDefineArgument(PreprocessorError)
          
          .. py:property:: other_span
