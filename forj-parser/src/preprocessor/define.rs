@@ -475,6 +475,22 @@ fn redefining() {
 }
 
 #[test]
+fn coverage_constants() {
+    check_preprocessor!(
+        "`SV_COV_START
+        `SV_COV_HIER
+        `SV_COV_TOGGLE
+        `SV_COV_OK",
+        vec![
+            Token::UnsignedNumber("0"),
+            Token::UnsignedNumber("11"),
+            Token::UnsignedNumber("23"),
+            Token::UnsignedNumber("1")
+        ]
+    )
+}
+
+#[test]
 fn function() {
     check_preprocessor!("`define TEST(a, b) a + b", Vec::<Token<'_>>::new())
 }

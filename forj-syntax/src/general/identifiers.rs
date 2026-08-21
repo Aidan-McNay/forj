@@ -85,15 +85,21 @@ pub struct HierarchicalBlockIdentifier<'a>(pub HierarchicalIdentifier<'a>);
 pub struct HierarchicalEventIdentifier<'a>(pub HierarchicalIdentifier<'a>);
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct HierarchicalIdentifier<'a>(
-    pub Option<(Metadata<'a>, Metadata<'a>)>, // $root .
-    pub  Vec<(
-        Identifier<'a>,
-        ConstantBitSelect<'a>,
-        Metadata<'a>, // .
-    )>,
-    pub Identifier<'a>,
-);
+pub enum HierarchicalIdentifier<'a> {
+    Hierarchical(
+        (
+            Option<(Metadata<'a>, Metadata<'a>)>, // $root .
+            Vec<(
+                Identifier<'a>,
+                ConstantBitSelect<'a>,
+                Metadata<'a>, // .
+            )>,
+            Identifier<'a>,
+        ),
+    ),
+    Root(Metadata<'a>),
+    Unit(Metadata<'a>),
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct HierarchicalNetIdentifier<'a>(pub HierarchicalIdentifier<'a>);

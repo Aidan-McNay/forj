@@ -112,6 +112,64 @@ impl<'a> DefineBody<'a> {
     }
 }
 
+fn default_define(
+    name: &'static str,
+    value: Token<'static>,
+) -> Define<'static> {
+    Define {
+        name: SpannedString(name, Span::default()),
+        body: DefineBody::Text(vec![SpannedToken(value, Span::default())]),
+    }
+}
+
+/// The default preprocessor definitions
+fn add_default_defines<'a>(
+    mut existing_defines: Vec<Define<'a>>,
+) -> Vec<Define<'a>> {
+    let default_defines: &[Define<'static>] = &[
+        // Coverage control
+        default_define("SV_COV_START", Token::UnsignedNumber("0")),
+        default_define("SV_COV_STOP", Token::UnsignedNumber("1")),
+        default_define("SV_COV_RESET", Token::UnsignedNumber("2")),
+        default_define("SV_COV_CHECK", Token::UnsignedNumber("3")),
+        // Scope definition
+        default_define("SV_COV_MODULE", Token::UnsignedNumber("10")),
+        default_define("SV_COV_HIER", Token::UnsignedNumber("11")),
+        // Coverage type identification
+        default_define("SV_COV_ASSERTION", Token::UnsignedNumber("20")),
+        default_define("SV_COV_FSM_STATE", Token::UnsignedNumber("21")),
+        default_define("SV_COV_STATEMENT", Token::UnsignedNumber("22")),
+        default_define("SV_COV_TOGGLE", Token::UnsignedNumber("23")),
+        // Status results
+        Define {
+            name: SpannedString("SV_COV_OVERFLOW", Span::default()),
+            body: DefineBody::Text(vec![
+                SpannedToken(Token::Minus, Span::default()),
+                SpannedToken(Token::UnsignedNumber("2"), Span::default()),
+            ]),
+        },
+        Define {
+            name: SpannedString("SV_COV_ERROR", Span::default()),
+            body: DefineBody::Text(vec![
+                SpannedToken(Token::Minus, Span::default()),
+                SpannedToken(Token::UnsignedNumber("1"), Span::default()),
+            ]),
+        },
+        default_define("SV_COV_NOCOV", Token::UnsignedNumber("0")),
+        default_define("SV_COV_OK", Token::UnsignedNumber("1")),
+        default_define("SV_COV_PARTIAL", Token::UnsignedNumber("2")),
+    ];
+    for default_define in default_defines.into_iter() {
+        if !existing_defines
+            .iter()
+            .any(|existing_define| existing_define.name == default_define.name)
+        {
+            existing_defines.push(default_define.clone());
+        }
+    }
+    existing_defines
+}
+
 /// A line directive found during preprocessing
 #[derive(Clone)]
 pub struct LineDirective<'a> {
@@ -168,7 +226,7 @@ impl<'a> PreprocessorState<'a> {
     pub fn new(includes: Vec<&'a Path>, defines: Vec<Define<'a>>) -> Self {
         Self {
             includes,
-            defines,
+            defines: add_default_defines(defines),
             timescales: vec![],
             default_nettypes: vec![],
             unconnected_drives: vec![],
@@ -187,7 +245,7 @@ impl<'a> PreprocessorState<'a> {
     ///
     /// This retains all files that were read in, avoiding reading in their contents again
     pub fn make_fresh(&mut self, defines: Vec<Define<'a>>) {
-        self.defines = defines;
+        self.defines = add_default_defines(defines);
         self.timescales = vec![];
         self.default_nettypes = vec![];
         self.unconnected_drives = vec![];

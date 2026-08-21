@@ -342,7 +342,7 @@ pub fn hierarchical_identifier_parser_method_root<'s>(
         identifiers_parser,
         identifier_parser,
     )
-        .map(|(a, b, c)| HierarchicalIdentifier(a, b, c))
+        .map(|(a, b, c)| HierarchicalIdentifier::Hierarchical((a, b, c)))
         .parse_next(input)
 }
 

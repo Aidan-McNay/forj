@@ -284,13 +284,18 @@ pub fn hierarchical_identifier_parser<'s>(
         ),
         peek(identifier_parser),
     ));
-    (
+    let _hierarchical_parser = (
         opt_note((token(Token::DollarRoot), token(Token::Period))),
         identifiers_parser,
         identifier_parser,
     )
-        .map(|(a, b, c)| HierarchicalIdentifier(a, b, c))
-        .parse_next(input)
+        .map(|(a, b, c)| HierarchicalIdentifier::Hierarchical((a, b, c)));
+    alt((
+        _hierarchical_parser,
+        token(Token::DollarRoot).map(|a| HierarchicalIdentifier::Root(a)),
+        token(Token::DollarUnit).map(|a| HierarchicalIdentifier::Unit(a)),
+    ))
+    .parse_next(input)
 }
 
 #[cfg(test)]
@@ -303,11 +308,11 @@ mod hierarchical_identifier {
         check_parser!(
             "test",
             hierarchical_identifier_parser,
-            HierarchicalIdentifier(
+            HierarchicalIdentifier::Hierarchical((
                 None,
                 vec![],
                 apply_parser!("test", identifier_parser, &mut storage)
-            )
+            ))
         )
     }
 
@@ -319,7 +324,7 @@ mod hierarchical_identifier {
         check_parser!(
             "parent.child1.child2",
             hierarchical_identifier_parser,
-            HierarchicalIdentifier(
+            HierarchicalIdentifier::Hierarchical((
                 None,
                 vec![
                     (
@@ -342,7 +347,7 @@ mod hierarchical_identifier {
                     )
                 ],
                 apply_parser!("child2", identifier_parser, &mut storage_child2)
-            )
+            ))
         )
     }
 
@@ -356,7 +361,7 @@ mod hierarchical_identifier {
         check_parser!(
             "food[0].fruit[3].apple",
             hierarchical_identifier_parser,
-            HierarchicalIdentifier(
+            HierarchicalIdentifier::Hierarchical((
                 None,
                 vec![
                     (
@@ -395,7 +400,7 @@ mod hierarchical_identifier {
                     )
                 ],
                 apply_parser!("apple", identifier_parser, &mut storage_apple)
-            )
+            ))
         )
     }
 
@@ -406,7 +411,7 @@ mod hierarchical_identifier {
         check_parser!(
             "$root.trunk.branch",
             hierarchical_identifier_parser,
-            HierarchicalIdentifier(
+            HierarchicalIdentifier::Hierarchical((
                 Some((test_metadata(), test_metadata())),
                 vec![(
                     apply_parser!(
@@ -418,7 +423,25 @@ mod hierarchical_identifier {
                     test_metadata()
                 )],
                 apply_parser!("branch", identifier_parser, &mut storage_branch)
-            )
+            ))
+        )
+    }
+
+    #[test]
+    fn root() {
+        check_parser!(
+            "$root",
+            hierarchical_identifier_parser,
+            HierarchicalIdentifier::Root(test_metadata())
+        )
+    }
+
+    #[test]
+    fn unit() {
+        check_parser!(
+            "$unit",
+            hierarchical_identifier_parser,
+            HierarchicalIdentifier::Unit(test_metadata())
         )
     }
 }
