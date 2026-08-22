@@ -981,18 +981,26 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
                 macro_name,
                 redef_span,
                 prev_def_span,
-            } => Report::new(
-                report::ReportKind::Warning,
-                &redef_span,
-                "PP14",
-                format!("Redefining {macro_name}"),
-            )
-            .with_label(&prev_def_span, NOTE_KIND, "Previously defined here")
-            .with_label(
-                &redef_span,
-                report::ReportKind::Warning,
-                "Redefined here",
-            ),
+            } => {
+                let mut report = Report::new(
+                    report::ReportKind::Warning,
+                    &redef_span,
+                    "PP14",
+                    format!("Redefining {macro_name}"),
+                );
+                if prev_def_span.from_source() {
+                    report = report.with_label(
+                        &prev_def_span,
+                        NOTE_KIND,
+                        "Previously defined here",
+                    );
+                }
+                report.with_label(
+                    &redef_span,
+                    report::ReportKind::Warning,
+                    "Redefined here",
+                )
+            }
             PreprocessorError::NotPreviouslyDefinedMacro {
                 macro_name,
                 macro_span,

@@ -478,11 +478,13 @@ impl PreprocessorError {
                     "PP14".to_owned(),
                     format!("Redefining {macro_name}"),
                 );
-                report.label(
-                    prev_def_span.clone(),
-                    ReportKind::Note(),
-                    "Previously defined here".to_owned(),
-                );
+                if !prev_def_span.file.is_empty() {
+                    report.label(
+                        prev_def_span.clone(),
+                        ReportKind::Note(),
+                        "Previously defined here".to_owned(),
+                    );
+                }
                 report.label(
                     redef_span.clone(),
                     ReportKind::Warning(),

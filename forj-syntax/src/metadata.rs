@@ -19,6 +19,9 @@ pub type ByteSpan = Range<usize>;
 /// text macro will have the original [`Span`] of the (now expanded) macro,
 /// with [`Span::expanded_from`] referencing the original token (in the
 /// `` `define `` directive) before expansion
+///
+/// Invalid [`Span`]s (such as those from CLI defines) will have an
+/// empty string as the `file`
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct Span<'a> {
     pub file: &'a str,
@@ -61,6 +64,11 @@ const fn inclusion_depth_helper<'a>(
 }
 
 impl<'a> Span<'a> {
+    /// Whether the [`Span`] corresponds to actual source text (as
+    /// opposed to a default [`Span`], such as from CLI defines)
+    pub fn from_source(&self) -> bool {
+        !self.file.is_empty()
+    }
     fn include_indeces(&self) -> Vec<usize> {
         match &self.included_from {
             None => {
