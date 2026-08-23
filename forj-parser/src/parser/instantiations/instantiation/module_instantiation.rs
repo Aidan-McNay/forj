@@ -29,7 +29,7 @@ pub fn parameter_value_assignment_parser<'s>(
     (
         token(Token::Pound),
         token(Token::Paren),
-        list_of_parameter_value_assignments_parser,
+        opt_note(list_of_parameter_value_assignments_parser),
         token(Token::EParen),
     )
         .map(|(a, b, c, d)| ParameterValueAssignment(a, b, c, d))

@@ -201,7 +201,7 @@ pub fn rs_case_item_parser<'s>(
         });
     let _default_parser = (
         token(Token::Default),
-        opt_note(token(Token::Comma)),
+        opt_note(token(Token::Colon)),
         rs_production_item_parser,
         token(Token::SColon),
     )

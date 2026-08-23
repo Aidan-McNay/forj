@@ -6,6 +6,7 @@
 use clap::Parser;
 use forj_parser::report::Sources;
 use forj_parser::*;
+use forj_syntax::Node;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
@@ -25,6 +26,14 @@ struct Cli {
     print: bool,
 
     paths: Vec<PathBuf>,
+}
+
+fn print_node_tree(node: Node, depth: usize) {
+    print!("{}", " ".to_owned().repeat(depth));
+    println!("{}", node.name());
+    for child_node in node.children() {
+        print_node_tree(child_node, depth + 2)
+    }
 }
 
 fn main() -> ExitCode {
@@ -74,9 +83,7 @@ fn main() -> ExitCode {
         }
         let source_text = parsed_src.unwrap();
         if args.print {
-            for node in source_text.iter() {
-                println!("{}", node.name());
-            }
+            print_node_tree((&source_text).into(), 0)
         }
     }
     ExitCode::SUCCESS

@@ -11,8 +11,8 @@ use winnow::combinator::alt;
 
 enum BlockItemDeclarationBody<'a> {
     Data(DataDeclaration<'a>),
-    LocalParameter(LocalParameterDeclaration<'a>),
-    Parameter(ParameterDeclaration<'a>),
+    LocalParameter((LocalParameterDeclaration<'a>, Metadata<'a>)),
+    Parameter((ParameterDeclaration<'a>, Metadata<'a>)),
     Let(LetDeclaration<'a>),
 }
 
@@ -21,10 +21,10 @@ pub fn block_item_declaration_parser<'s>(
 ) -> ModalResult<BlockItemDeclaration<'s>, VerboseError<'s>> {
     let _body_parser = alt((
         data_declaration_parser.map(|a| BlockItemDeclarationBody::Data(a)),
-        local_parameter_declaration_parser
-            .map(|a| BlockItemDeclarationBody::LocalParameter(a)),
-        parameter_declaration_parser
-            .map(|a| BlockItemDeclarationBody::Parameter(a)),
+        (local_parameter_declaration_parser, token(Token::SColon))
+            .map(|(a, b)| BlockItemDeclarationBody::LocalParameter((a, b))),
+        (parameter_declaration_parser, token(Token::SColon))
+            .map(|(a, b)| BlockItemDeclarationBody::Parameter((a, b))),
         let_declaration_parser.map(|a| BlockItemDeclarationBody::Let(a)),
     ));
     (attribute_instance_vec_parser, _body_parser)
@@ -32,11 +32,11 @@ pub fn block_item_declaration_parser<'s>(
             BlockItemDeclarationBody::Data(c) => {
                 BlockItemDeclaration::Data(Box::new((a, c)))
             }
-            BlockItemDeclarationBody::LocalParameter(c) => {
-                BlockItemDeclaration::LocalParameter(Box::new((a, c)))
+            BlockItemDeclarationBody::LocalParameter((c, d)) => {
+                BlockItemDeclaration::LocalParameter(Box::new((a, c, d)))
             }
-            BlockItemDeclarationBody::Parameter(c) => {
-                BlockItemDeclaration::Parameter(Box::new((a, c)))
+            BlockItemDeclarationBody::Parameter((c, d)) => {
+                BlockItemDeclaration::Parameter(Box::new((a, c, d)))
             }
             BlockItemDeclarationBody::Let(c) => {
                 BlockItemDeclaration::Let(Box::new((a, c)))

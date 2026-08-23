@@ -45,7 +45,7 @@ pub struct SolveBeforeList<'a>(
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ConstraintPrimary<'a>(
-    pub ImplicitClassHandleOrClassScope<'a>,
+    pub Option<ImplicitClassHandleOrClassScope<'a>>,
     pub HierarchicalIdentifier<'a>,
     pub Select<'a>,
     pub  Option<(

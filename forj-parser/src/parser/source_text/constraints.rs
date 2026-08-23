@@ -67,7 +67,7 @@ pub fn constraint_primary_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ConstraintPrimary<'s>, VerboseError<'s>> {
     (
-        implicit_class_handle_or_class_scope_parser,
+        opt_note(implicit_class_handle_or_class_scope_parser),
         hierarchical_identifier_parser,
         select_parser,
         opt_note((token(Token::Paren), token(Token::EParen))),

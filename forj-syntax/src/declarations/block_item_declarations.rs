@@ -8,8 +8,18 @@ use crate::*;
 pub enum BlockItemDeclaration<'a> {
     Data(Box<(Vec<AttributeInstance<'a>>, DataDeclaration<'a>)>),
     LocalParameter(
-        Box<(Vec<AttributeInstance<'a>>, LocalParameterDeclaration<'a>)>,
+        Box<(
+            Vec<AttributeInstance<'a>>,
+            LocalParameterDeclaration<'a>,
+            Metadata<'a>, // ;
+        )>,
     ),
-    Parameter(Box<(Vec<AttributeInstance<'a>>, ParameterDeclaration<'a>)>),
+    Parameter(
+        Box<(
+            Vec<AttributeInstance<'a>>,
+            ParameterDeclaration<'a>,
+            Metadata<'a>, // ;
+        )>,
+    ),
     Let(Box<(Vec<AttributeInstance<'a>>, LetDeclaration<'a>)>),
 }

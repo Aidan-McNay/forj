@@ -216,10 +216,10 @@ pub fn constant_range_expression_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ConstantRangeExpression<'s>, VerboseError<'s>> {
     alt((
-        constant_expression_parser
-            .map(|a| ConstantRangeExpression::Expression(Box::new(a))),
         constant_part_select_range_parser
             .map(|a| ConstantRangeExpression::PartSelectRange(Box::new(a))),
+        constant_expression_parser
+            .map(|a| ConstantRangeExpression::Expression(Box::new(a))),
     ))
     .parse_next(input)
 }
@@ -298,7 +298,7 @@ fn pattern_bp_parser<'s>(
         token(Token::Apost),
         token(Token::Brace),
         pattern_parser,
-        repeat_note((token(Token::Apost), pattern_parser)),
+        repeat_note((token(Token::Comma), pattern_parser)),
         token(Token::EBrace),
     )
         .map(|(a, b, c, d, e)| {
@@ -311,7 +311,7 @@ fn pattern_bp_parser<'s>(
         token(Token::Colon),
         pattern_parser,
         repeat_note((
-            token(Token::Apost),
+            token(Token::Comma),
             member_identifier_parser,
             token(Token::Colon),
             pattern_parser,

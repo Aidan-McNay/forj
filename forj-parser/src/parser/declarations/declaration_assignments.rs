@@ -199,9 +199,13 @@ pub fn class_new_parser<'s>(
         )),
     )
         .map(|(a, b, c)| ClassNew::Args(Box::new((a, b, c))));
-    let _expression_parser = (token(Token::New), expression_parser)
-        .map(|(a, b)| ClassNew::Expression(Box::new((a, b))));
-    alt((_args_parser, _expression_parser)).parse_next(input)
+    let _expression_parser = (
+        // Don't match constructor with args
+        terminated(token(Token::New), peek(not(token(Token::Paren)))),
+        expression_parser,
+    )
+        .map(|(a, b)| ClassNew::Shallow(Box::new((a, b))));
+    alt((_expression_parser, _args_parser)).parse_next(input)
 }
 
 pub fn dynamic_array_new_parser<'s>(

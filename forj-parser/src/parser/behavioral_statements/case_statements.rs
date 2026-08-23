@@ -184,7 +184,7 @@ pub fn randcase_item_parser<'s>(
 ) -> ModalResult<RandcaseItem<'s>, VerboseError<'s>> {
     (
         expression_parser,
-        token(Token::Comma),
+        token(Token::Colon),
         statement_or_null_parser,
     )
         .map(|(a, b, c)| RandcaseItem(a, b, c))

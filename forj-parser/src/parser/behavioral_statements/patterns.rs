@@ -32,7 +32,7 @@ pub fn pattern_parser<'s>(
         token(Token::Apost),
         token(Token::Brace),
         pattern_parser,
-        repeat_note((token(Token::Apost), pattern_parser)),
+        repeat_note((token(Token::Comma), pattern_parser)),
         token(Token::EBrace),
     )
         .map(|(a, b, c, d, e)| {
@@ -45,7 +45,7 @@ pub fn pattern_parser<'s>(
         token(Token::Colon),
         pattern_parser,
         repeat_note((
-            token(Token::Apost),
+            token(Token::Comma),
             member_identifier_parser,
             token(Token::Colon),
             pattern_parser,

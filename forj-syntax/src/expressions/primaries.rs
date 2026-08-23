@@ -103,6 +103,7 @@ pub enum Primary<'a> {
         Box<(Metadata<'a>, MintypmaxExpression<'a>, Metadata<'a>)>,
     ),
     Cast(Box<Cast<'a>>),
+    TypeReference(Box<TypeReference<'a>>),
     AssignmentPatternExpression(Box<AssignmentPatternExpression<'a>>),
     StreamingConcatenation(Box<StreamingConcatenation<'a>>),
     SequenceMethodCall(Box<SequenceMethodCall<'a>>),

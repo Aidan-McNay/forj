@@ -20,7 +20,7 @@ pub struct ModuleInstantiation<'a>(
 pub struct ParameterValueAssignment<'a>(
     pub Metadata<'a>, // #
     pub Metadata<'a>, // (
-    pub ListOfParameterValueAssignments<'a>,
+    pub Option<ListOfParameterValueAssignments<'a>>,
     pub Metadata<'a>, // )
 );
 

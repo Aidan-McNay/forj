@@ -136,7 +136,7 @@ pub enum NonPortModuleItem<'a> {
     Region(Box<GenerateRegion<'a>>),
     ModuleOrGenerate(Box<ModuleOrGenerateItem<'a>>),
     Specify(Box<SpecifyBlock<'a>>),
-    Specparam(Box<(Vec<AttributeInstance<'a>>, SpecparamAssignment<'a>)>),
+    Specparam(Box<(Vec<AttributeInstance<'a>>, SpecparamDeclaration<'a>)>),
     Program(Box<ProgramDeclaration<'a>>),
     Module(Box<ModuleDeclaration<'a>>),
     Interface(Box<InterfaceDeclaration<'a>>),
@@ -161,7 +161,6 @@ pub enum BindDirective<'a> {
                 BindTargetInstanceList<'a>,
             )>,
             BindInstantiation<'a>,
-            Metadata<'a>, // ;
         )>,
     ),
     Instance(
@@ -169,7 +168,6 @@ pub enum BindDirective<'a> {
             Metadata<'a>, // bind
             BindTargetInstance<'a>,
             BindInstantiation<'a>,
-            Metadata<'a>, // ;
         )>,
     ),
 }

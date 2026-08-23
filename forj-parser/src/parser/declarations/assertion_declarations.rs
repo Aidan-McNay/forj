@@ -1234,14 +1234,15 @@ pub fn const_or_range_expression_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ConstOrRangeExpression<'s>, VerboseError<'s>> {
     alt((
-        constant_expression_parser
-            .map(|a| ConstOrRangeExpression::Expr(Box::new(a))),
         cycle_delay_const_range_expression_parser
             .map(|a| ConstOrRangeExpression::Range(Box::new(a))),
+        constant_expression_parser
+            .map(|a| ConstOrRangeExpression::Expr(Box::new(a))),
     ))
     .parse_next(input)
 }
 
+// TODO: Avoid parsing twice
 pub fn cycle_delay_const_range_expression_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<CycleDelayConstRangeExpression<'s>, VerboseError<'s>> {

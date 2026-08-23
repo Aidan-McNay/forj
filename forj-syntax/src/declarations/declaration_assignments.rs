@@ -140,7 +140,7 @@ pub enum ClassNew<'a> {
             )>,
         )>,
     ),
-    Expression(
+    Shallow(
         Box<(
             Metadata<'a>, // new
             Expression<'a>,

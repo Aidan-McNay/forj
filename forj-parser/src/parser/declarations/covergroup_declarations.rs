@@ -263,7 +263,7 @@ pub fn bins_or_options_parser<'s>(
         opt_note((
             token(Token::Bracket),
             opt_note(covergroup_expression_parser),
-            token(Token::EBrace),
+            token(Token::EBracket),
         )),
         token(Token::Eq),
         alt((

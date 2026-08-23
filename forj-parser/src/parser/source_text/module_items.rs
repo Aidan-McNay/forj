@@ -258,7 +258,7 @@ pub fn non_port_module_item_parser<'s>(
     alt((
         generate_region_parser.map(|a| NonPortModuleItem::Region(Box::new(a))),
         specify_block_parser.map(|a| NonPortModuleItem::Specify(Box::new(a))),
-        (attribute_instance_vec_parser, specparam_assignment_parser)
+        (attribute_instance_vec_parser, specparam_declaration_parser)
             .map(|(a, b)| NonPortModuleItem::Specparam(Box::new((a, b)))),
         program_declaration_parser
             .map(|a| NonPortModuleItem::Program(Box::new(a))),
@@ -293,17 +293,15 @@ pub fn bind_directive_parser<'s>(
         token(Token::Bind),
         bind_target_instance_parser,
         bind_instantiation_parser,
-        token(Token::SColon),
     )
-        .map(|(a, b, c, d)| BindDirective::Instance(Box::new((a, b, c, d))));
+        .map(|(a, b, c)| BindDirective::Instance(Box::new((a, b, c))));
     let _scope_parser = (
         token(Token::Bind),
         bind_target_scope_parser,
         opt_note((token(Token::Colon), bind_target_instance_list_parser)),
         bind_instantiation_parser,
-        token(Token::SColon),
     )
-        .verify_map(|(a, b, c, d, e)| {
+        .verify_map(|(a, b, c, d)| {
             let scope_is_instance = match b {
                 BindTargetScope::Interface(_) => true,
                 BindTargetScope::Module(_) => false,
@@ -317,7 +315,7 @@ pub fn bind_directive_parser<'s>(
             if scope_is_instance & !instantiation_is_checker_or_interface {
                 None // BNF clarification 4
             } else {
-                Some(BindDirective::Scope(Box::new((a, b, c, d, e))))
+                Some(BindDirective::Scope(Box::new((a, b, c, d))))
             }
         });
     alt((_instance_parser, _scope_parser)).parse_next(input)

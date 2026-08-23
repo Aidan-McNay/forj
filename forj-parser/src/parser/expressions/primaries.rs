@@ -184,6 +184,8 @@ pub fn primary_parser<'s>(
     )
         .map(|(a, b, c)| Primary::MintypmaxExpression(Box::new((a, b, c))));
     let _cast_parser = cast_parser.map(|a| Primary::Cast(Box::new(a)));
+    let _type_reference_parser =
+        type_reference_parser.map(|a| Primary::TypeReference(Box::new(a)));
     let _assignment_pattern_expression_parser =
         assignment_pattern_expression_parser
             .map(|a| Primary::AssignmentPatternExpression(Box::new(a)));
@@ -207,6 +209,7 @@ pub fn primary_parser<'s>(
         ),
         _assignment_pattern_expression_parser,
         _cast_parser,
+        _type_reference_parser,
         _primary_literal_parser,
         _empty_unpacked_array_concatenation_parser,
         _concatenation_parser,
@@ -265,9 +268,9 @@ pub fn range_expression_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<RangeExpression<'s>, VerboseError<'s>> {
     alt((
-        expression_parser.map(|a| RangeExpression::Expression(Box::new(a))),
         part_select_range_parser
             .map(|a| RangeExpression::PartSelectRange(Box::new(a))),
+        expression_parser.map(|a| RangeExpression::Expression(Box::new(a))),
     ))
     .parse_next(input)
 }
