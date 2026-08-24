@@ -132,13 +132,13 @@ fn get_identifier_substitute<'a>(
             | Token::UnbasedUnsizedLiteral(text)
             | Token::SystemTfIdentifier(text)
             | Token::SimpleIdentifier(text)
-            | Token::EscapedIdentifier(text) => Ok(text),
+            | Token::EscapedIdentifier(text)
+            | Token::StringLiteral(text)
+            | Token::TripleQuoteStringLiteral(text) => Ok(text),
             Token::OnelineComment(_)
             | Token::BlockComment(_)
             | Token::PreprocessorIdentifier(_)
             | Token::TextMacro(_)
-            | Token::StringLiteral(_)
-            | Token::TripleQuoteStringLiteral(_)
             | Token::Newline => {
                 return Err(PreprocessorError::InvalidIdentifierFormation {
                     param_name: arg_name,
