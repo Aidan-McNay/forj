@@ -756,6 +756,36 @@ pub enum PreprocessorError<'a> {
         /// The [`Span`] where the macro was previously defined
         prev_def_span: Span<'a>,
     },
+    /// Use of a directive inside of a design unit, where it isn't allowed
+    ///
+    /// ```rust
+    /// # use forj_parser::*;
+    /// # let mut state = PreprocessorState::new(vec![], vec![]);
+    /// # let cache = PreprocessorCache::new();
+    /// let source = "
+    /// module my_module();
+    ///     `resetall
+    /// endmodule
+    /// ";
+    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// let input = lex(source, "test.v").tokens();
+    /// let preprocess_result = preprocess(
+    ///     input,
+    ///     &mut state,
+    ///     &cache,
+    /// );
+    /// assert!(preprocess_result.is_ok());
+    /// assert!(matches!(state.errors.first(), Some(PreprocessorError::IllegalInDesignUnit{
+    ///     directive: Token::DirResetall,
+    ///     ..
+    /// })))
+    /// ```
+    IllegalInDesignUnit {
+        /// The preprocessor directive used
+        directive: Token<'a>,
+        /// The [`Span`] of the usage
+        directive_span: Span<'a>,
+    },
     // Internal "errors" used for communication
     // - Should not be exposed outside of main preprocess function
     /// **INTERNAL**: A newline encountered in a `` `define `` directive
@@ -1192,7 +1222,21 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
                 report::ReportKind::Error,
                 "Check for an `include loop",
             ),
-            PreprocessorError::VerboseError { err } => err.report("PP26"),
+            PreprocessorError::IllegalInDesignUnit {
+                directive,
+                directive_span,
+            } => Report::new(
+                report::ReportKind::Error,
+                &directive_span,
+                "PP26",
+                format!("Tried to use {} inside a design element", directive),
+            )
+            .with_label(
+                &directive_span,
+                report::ReportKind::Error,
+                "Illegal inside a design element",
+            ),
+            PreprocessorError::VerboseError { err } => err.report("PP27"),
             PreprocessorError::NewlineInDefine(newline_span) => Report::new(
                 report::ReportKind::Error,
                 &newline_span,

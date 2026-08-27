@@ -153,6 +153,7 @@ pub(crate) fn recover<'s>(
         PreprocessorError::Include { .. } => true,
         PreprocessorError::IncludeDepth { .. } => true,
         PreprocessorError::VerboseError { .. } => recover_newline(src),
+        PreprocessorError::IllegalInDesignUnit { .. } => true,
         PreprocessorError::NotPreviouslyDefinedMacro { .. }
         | PreprocessorError::RedefinedMacro { .. } => {
             panic!("Shouldn't need to recover from warnings")
@@ -330,7 +331,18 @@ pub(crate) fn preprocess_helper<'s>(
         while let Some(spanned_token) = src.next() {
             match spanned_token.0 {
                 Token::DirResetall => {
-                    state.reset_all(spanned_token.1);
+                    if state.in_design_element() {
+                        recover(
+                            src,
+                            state,
+                            PreprocessorError::IllegalInDesignUnit {
+                                directive: Token::DirResetall,
+                                directive_span: spanned_token.1,
+                            },
+                        )?;
+                    } else {
+                        state.reset_all(spanned_token.1);
+                    }
                 }
                 Token::DirInclude => {
                     let include_span = cache.retain_span(spanned_token.1);
@@ -503,6 +515,26 @@ pub(crate) fn preprocess_helper<'s>(
                     {
                         dest.push(spanned_token)
                     }
+                }
+                Token::Module
+                | Token::Program
+                | Token::Interface
+                | Token::Checker
+                | Token::Package
+                | Token::Primitive
+                | Token::Config => {
+                    state.enter_design_element();
+                    dest.push(spanned_token)
+                }
+                Token::Endmodule
+                | Token::Endprogram
+                | Token::Endinterface
+                | Token::Endchecker
+                | Token::Endpackage
+                | Token::Endprimitive
+                | Token::Endconfig => {
+                    state.exit_design_element();
+                    dest.push(spanned_token)
                 }
                 token
                     if token.keyword_replace(state.get_keyword_standard()) =>

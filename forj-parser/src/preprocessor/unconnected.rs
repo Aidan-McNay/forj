@@ -15,10 +15,12 @@ pub enum UnconnectedDrive {
 
 fn get_unconnected_drive<'s>(
     src: &mut TokenIterator<'s, impl Iterator<Item = SpannedToken<'s>>>,
-    directive_span: Span<'s>,
+    directive_span: &Span<'s>,
 ) -> Result<UnconnectedDrive, PreprocessorError<'s>> {
     let Some(spanned_token) = src.next() else {
-        return Err(PreprocessorError::IncompleteDirective { directive_span });
+        return Err(PreprocessorError::IncompleteDirective {
+            directive_span: directive_span.clone(),
+        });
     };
     match spanned_token.0 {
         Token::Pull0 => Ok(UnconnectedDrive::PullDown),
@@ -38,7 +40,13 @@ pub fn preprocess_unconnected_drive<'s>(
     state: &mut PreprocessorState<'s>,
     directive_span: Span<'s>,
 ) -> Result<(), PreprocessorError<'s>> {
-    let unconnected_drive = get_unconnected_drive(src, directive_span.clone())?;
+    let unconnected_drive = get_unconnected_drive(src, &directive_span)?;
+    if state.in_design_element() {
+        return Err(PreprocessorError::IllegalInDesignUnit {
+            directive: Token::DirUnconnectedDrive,
+            directive_span: directive_span,
+        });
+    }
     state.add_unconnected_drive(directive_span, unconnected_drive);
     Ok(())
 }
@@ -47,6 +55,12 @@ pub fn preprocess_nounconnected_drive<'s>(
     state: &mut PreprocessorState<'s>,
     directive_span: Span<'s>,
 ) -> Result<(), PreprocessorError<'s>> {
+    if state.in_design_element() {
+        return Err(PreprocessorError::IllegalInDesignUnit {
+            directive: Token::DirNounconnectedDrive,
+            directive_span: directive_span,
+        });
+    }
     state
         .add_unconnected_drive(directive_span, UnconnectedDrive::NoUnconnected);
     Ok(())

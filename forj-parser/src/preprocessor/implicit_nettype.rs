@@ -25,11 +25,11 @@ fn get_nettype<'s>(
     src: &mut TokenIterator<'s, impl Iterator<Item = SpannedToken<'s>>>,
     state: &mut PreprocessorState<'s>,
     cache: &'s PreprocessorCache<'s>,
-    define_span: Span<'s>,
+    define_span: &Span<'s>,
 ) -> Result<DefaultNettype, PreprocessorError<'s>> {
     let Some(spanned_token) = preprocess_single(src, state, cache)? else {
         return Err(PreprocessorError::IncompleteDirective {
-            directive_span: define_span,
+            directive_span: define_span.clone(),
         });
     };
     match spanned_token.0 {
@@ -72,8 +72,13 @@ pub fn preprocess_default_nettype<'s>(
     cache: &'s PreprocessorCache<'s>,
     directive_span: Span<'s>,
 ) -> Result<(), PreprocessorError<'s>> {
-    let default_nettype =
-        get_nettype(src, state, cache, directive_span.clone())?;
+    let default_nettype = get_nettype(src, state, cache, &directive_span)?;
+    if state.in_design_element() {
+        return Err(PreprocessorError::IllegalInDesignUnit {
+            directive: Token::DirDefaultNettype,
+            directive_span: directive_span,
+        });
+    }
     state.add_default_nettype(directive_span, default_nettype);
     Ok(())
 }

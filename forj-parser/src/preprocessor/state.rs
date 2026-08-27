@@ -219,6 +219,7 @@ pub struct PreprocessorState<'a> {
     pub(crate) in_define_arg: bool,
     pub(crate) in_text_macro_arg: bool,
     pub(crate) include_depth: usize,
+    pub(crate) design_element_depth: usize,
 }
 
 impl<'a> PreprocessorState<'a> {
@@ -239,8 +240,10 @@ impl<'a> PreprocessorState<'a> {
             in_define_arg: false,
             in_text_macro_arg: false,
             include_depth: 0,
+            design_element_depth: 0,
         }
     }
+
     /// Make the [`PreprocessorState`] fresh, as though it had just started preprocessing
     ///
     /// This retains all files that were read in, avoiding reading in their contents again
@@ -256,7 +259,26 @@ impl<'a> PreprocessorState<'a> {
         self.in_define = false;
         self.in_define_arg = false;
         self.include_depth = 0;
+        self.design_element_depth = 0;
     }
+
+    /// Called when starting to preprocess a design element
+    pub(crate) fn enter_design_element(&mut self) {
+        self.design_element_depth += 1;
+    }
+
+    /// Called when stopping preprocessing of a design element
+    pub(crate) fn exit_design_element(&mut self) {
+        if self.in_design_element() {
+            self.design_element_depth -= 1;
+        }
+    }
+
+    /// Whether we're currently preprocessing a design element
+    pub(crate) fn in_design_element(&self) -> bool {
+        self.design_element_depth > 0
+    }
+
     /// Reset all resetable configs
     ///
     /// This is called when a `` `resetall `` is encountered

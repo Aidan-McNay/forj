@@ -1395,7 +1395,20 @@ Preprocessing
          .. py:property:: err
             :type: VerboseError
    
-               The [`VerboseError`] for the preprocessor error
+               The :py:class:`VerboseError` for the preprocessor error
+
+      .. py:class:: PreprocessorError.IllegalInDesignUnit(PreprocessorError)
+
+         .. py:property:: directive
+            :type: Token
+
+               The :py:class:`Token` for the directive that was illegally
+               used in a preprocessor directive
+
+         .. py:property:: directive_span
+            :type: Span
+
+               The :py:class:`Span` of the usage
 
 .. py:class:: PreprocessorResult
 

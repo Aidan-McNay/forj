@@ -733,8 +733,28 @@ impl PreprocessorError {
                 );
                 report
             }
+            PreprocessorError::IllegalInDesignUnit {
+                directive,
+                directive_span,
+            } => {
+                let mut report = Report::new(
+                    ReportKind::Error(),
+                    directive_span.clone(),
+                    "PP26".to_owned(),
+                    format!(
+                        "Tried to use {} inside a design element",
+                        directive
+                    ),
+                );
+                report.label(
+                    directive_span.clone(),
+                    ReportKind::Error(),
+                    "Illegal inside a design element".to_owned(),
+                );
+                report
+            }
             PreprocessorError::VerboseError { err } => {
-                return err.report_with_code("PP26".to_owned());
+                return err.report_with_code("PP27".to_owned());
             }
         };
         Ok(report)

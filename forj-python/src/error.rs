@@ -291,6 +291,12 @@ pub enum PreprocessorError {
         /// The [`Span`] where the macro was previously defined
         prev_def_span: Span,
     },
+    IllegalInDesignUnit {
+        /// The preprocessor directive used
+        directive: Token,
+        /// The [`Span`] of the usage
+        directive_span: Span,
+    },
 }
 
 impl<'a> From<forj_parser::PreprocessorError<'a>> for PreprocessorError {
@@ -479,6 +485,13 @@ impl<'a> From<forj_parser::PreprocessorError<'a>> for PreprocessorError {
             } => PreprocessorError::NotPreviouslyDefinedMacro {
                 macro_name: macro_name.to_string(),
                 macro_span: macro_span.into(),
+            },
+            forj_parser::PreprocessorError::IllegalInDesignUnit {
+                directive,
+                directive_span,
+            } => PreprocessorError::IllegalInDesignUnit {
+                directive: directive.into(),
+                directive_span: directive_span.into(),
             },
             forj_parser::PreprocessorError::EndOfFunctionArgument(_)
             | forj_parser::PreprocessorError::NewlineInDefine(_) => panic!(
