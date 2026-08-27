@@ -12,6 +12,7 @@ pub(crate) mod include;
 pub(crate) mod keywords;
 pub(crate) mod line;
 pub(crate) mod number;
+pub mod pragma;
 pub mod state;
 pub(crate) mod text_macro;
 pub(crate) mod timescale;
@@ -27,6 +28,7 @@ use include::*;
 use keywords::*;
 use line::*;
 use number::*;
+use pragma::*;
 pub use state::*;
 use std::collections::VecDeque;
 use text_macro::*;
@@ -344,14 +346,24 @@ pub(crate) fn preprocess_helper<'s>(
                         state.reset_all(spanned_token.1);
                     }
                 }
+                Token::DirPragma => {
+                    if let Err(err) = preprocess_pragma(
+                        src,
+                        dest,
+                        state,
+                        cache,
+                        spanned_token.1,
+                    ) {
+                        recover(src, state, err)?;
+                    }
+                }
                 Token::DirInclude => {
-                    let include_span = cache.retain_span(spanned_token.1);
                     if let Err(err) = preprocess_include(
                         src,
                         dest,
                         state,
                         cache,
-                        include_span,
+                        spanned_token.1,
                     ) {
                         recover(src, state, err)?;
                     }

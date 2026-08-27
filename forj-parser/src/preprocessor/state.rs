@@ -5,6 +5,7 @@
 
 use crate::*;
 use forj_syntax::SpanRelation;
+use pragma::PragmaHandler;
 use std::collections::HashMap;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -219,6 +220,8 @@ pub struct PreprocessorState<'a> {
     pub(crate) in_text_macro_arg: bool,
     pub(crate) include_depth: usize,
     pub(crate) design_element_depth: usize,
+    pub(crate) pragma_handlers:
+        HashMap<&'a str, Box<&'a mut dyn PragmaHandler<'a>>>,
 }
 
 impl<'a> PreprocessorState<'a> {
@@ -240,6 +243,7 @@ impl<'a> PreprocessorState<'a> {
             in_text_macro_arg: false,
             include_depth: 0,
             design_element_depth: 0,
+            pragma_handlers: HashMap::new(),
         }
     }
 
@@ -259,6 +263,7 @@ impl<'a> PreprocessorState<'a> {
         self.in_define_arg = false;
         self.include_depth = 0;
         self.design_element_depth = 0;
+        self.pragma_handlers.clear();
     }
 
     /// Called when starting to preprocess a design element
@@ -721,6 +726,14 @@ impl<'a> PreprocessorState<'a> {
         cache: &'a PreprocessorCache<'a>,
     ) -> &'a str {
         cache.retain_string(string)
+    }
+
+    /// Set the [`PragmaHandler`] for a given pragma name
+    pub fn set_pragma_handler<H>(&mut self, name: &'a str, handler: &'a mut H)
+    where
+        H: PragmaHandler<'a>,
+    {
+        self.pragma_handlers.insert(name, Box::new(handler));
     }
 
     /// Add a error encountered during preprocessing
