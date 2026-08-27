@@ -192,7 +192,6 @@ pub struct LineDirective<'a> {
 /// This is primarily meant to be used in the preprocessor, but
 /// can be examined afterwards to glean extra information, such
 /// as which files were included.
-#[derive(Clone)]
 pub struct PreprocessorState<'a> {
     /// The include paths to search for included files
     pub includes: Vec<&'a Path>,
@@ -249,13 +248,13 @@ impl<'a> PreprocessorState<'a> {
     /// This retains all files that were read in, avoiding reading in their contents again
     pub fn make_fresh(&mut self, defines: Vec<Define<'a>>) {
         self.defines = add_default_defines(defines);
-        self.timescales = vec![];
-        self.default_nettypes = vec![];
-        self.unconnected_drives = vec![];
-        self.cell_defines = vec![];
-        self.line_directives = vec![];
-        self.curr_standard = vec![];
-        self.errors = vec![];
+        self.timescales.clear();
+        self.default_nettypes.clear();
+        self.unconnected_drives.clear();
+        self.cell_defines.clear();
+        self.line_directives.clear();
+        self.curr_standard.clear();
+        self.errors.clear();
         self.in_define = false;
         self.in_define_arg = false;
         self.include_depth = 0;
