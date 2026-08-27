@@ -537,7 +537,7 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `define TEST(a, b) a``_with_``b
-    /// `TEST(\"one\", \"two\")
+    /// `TEST(multiple tokens, \"two\")
     /// ";
     /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
     /// let input = lex(source, "test.v").tokens();
@@ -774,7 +774,7 @@ pub enum PreprocessorError<'a> {
     ///     &mut state,
     ///     &cache,
     /// );
-    /// assert!(preprocess_result.is_ok());
+    /// assert!(preprocess_result.is_err());
     /// assert!(matches!(state.errors.first(), Some(PreprocessorError::IllegalInDesignUnit{
     ///     directive: Token::DirResetall,
     ///     ..
