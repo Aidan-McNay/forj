@@ -68,13 +68,21 @@ pub(crate) fn get_pragma_value<'s>(
                 get_pragma_expressions(src, state, cache, pragma_span)?;
             let Some(spanned_token) = preprocess_single(src, state, cache)?
             else {
-                return Err(PreprocessorError::IncompleteDirective {
-                    directive_span: pragma_span.clone(),
+                return Err(PreprocessorError::VerboseError {
+                    err: VerboseError {
+                        span: curr_token.1,
+                        found: None,
+                        expected: vec![Expectation::Label("a corresponding )")],
+                    },
                 });
             };
             if spanned_token.0 != Token::EParen {
-                return Err(PreprocessorError::IncompleteDirective {
-                    directive_span: pragma_span.clone(),
+                return Err(PreprocessorError::VerboseError {
+                    err: VerboseError {
+                        span: spanned_token.1,
+                        found: Some(spanned_token.0),
+                        expected: vec![Expectation::Token(Token::EParen)],
+                    },
                 });
             }
             Ok(PragmaValue::Expressions(Box::new(expressions)))
@@ -90,8 +98,12 @@ pub(crate) fn get_pragma_value<'s>(
             Ok(PragmaValue::Identifier(text))
         }
         Token::StringLiteral(text) => Ok(PragmaValue::String(text)),
-        _ => Err(PreprocessorError::IncompleteDirective {
-            directive_span: pragma_span.clone(), // TODO: Add `InvalidPragmaSpec` error
+        _ => Err(PreprocessorError::VerboseError {
+            err: VerboseError {
+                span: curr_token.1,
+                found: Some(curr_token.0),
+                expected: vec![Expectation::Label("a pragma keyword or value")],
+            },
         }),
     }
 }
