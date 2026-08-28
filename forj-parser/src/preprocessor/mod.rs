@@ -528,6 +528,15 @@ pub(crate) fn preprocess_helper<'s>(
                         dest.push(spanned_token)
                     }
                 }
+                token
+                    if token.keyword_replace(state.get_keyword_standard()) =>
+                {
+                    let new_token = SpannedToken(
+                        Token::SimpleIdentifier(token.as_str()),
+                        spanned_token.1,
+                    );
+                    dest.push(new_token)
+                }
                 Token::Module
                 | Token::Program
                 | Token::Interface
@@ -547,15 +556,6 @@ pub(crate) fn preprocess_helper<'s>(
                 | Token::Endconfig => {
                     state.exit_design_element();
                     dest.push(spanned_token)
-                }
-                token
-                    if token.keyword_replace(state.get_keyword_standard()) =>
-                {
-                    let new_token = SpannedToken(
-                        Token::SimpleIdentifier(token.as_str()),
-                        spanned_token.1,
-                    );
-                    dest.push(new_token)
                 }
                 _ => dest.push(spanned_token),
             }
@@ -578,7 +578,20 @@ pub(crate) fn preprocess_single<'s>(
             Some(SpannedToken(Token::TextMacro(macro_name), macro_span)) => {
                 preprocess_macro(src, state, cache, (macro_name, macro_span))?;
             }
-            other => break Ok(other),
+            Some(spanned_token) => {
+                if spanned_token
+                    .0
+                    .keyword_replace(state.get_keyword_standard())
+                {
+                    let new_token = SpannedToken(
+                        Token::SimpleIdentifier(spanned_token.0.as_str()),
+                        spanned_token.1,
+                    );
+                    break Ok(Some(new_token));
+                } else {
+                    break Ok(Some(spanned_token));
+                }
+            }
         }
     }
 }

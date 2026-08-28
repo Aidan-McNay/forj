@@ -49,8 +49,12 @@ pub(crate) fn get_pragma_name<'s>(
     };
     match spanned_token.0 {
         Token::SimpleIdentifier(text) => Ok((text, spanned_token.1)),
-        _ => Err(PreprocessorError::IncompleteDirective {
-            directive_span: pragma_span.clone(), // TODO: Add `InvalidPragmaSpec` error
+        _ => Err(PreprocessorError::VerboseError {
+            err: VerboseError {
+                span: spanned_token.1,
+                found: Some(spanned_token.0),
+                expected: vec![Expectation::Label("a pragma name")],
+            },
         }),
     }
 }
@@ -60,6 +64,7 @@ pub(crate) fn get_pragma_value<'s>(
     state: &mut PreprocessorState<'s>,
     cache: &'s PreprocessorCache<'s>,
     curr_token: SpannedToken<'s>,
+    keyword_possible: bool,
     pragma_span: &Span<'s>,
 ) -> Result<PragmaValue<'s>, PreprocessorError<'s>> {
     match curr_token.0 {
@@ -102,7 +107,11 @@ pub(crate) fn get_pragma_value<'s>(
             err: VerboseError {
                 span: curr_token.1,
                 found: Some(curr_token.0),
-                expected: vec![Expectation::Label("a pragma keyword or value")],
+                expected: if keyword_possible {
+                    vec![Expectation::Label("a pragma expression")]
+                } else {
+                    vec![Expectation::Label("a pragma value")]
+                },
             },
         }),
     }
@@ -145,8 +154,12 @@ pub(crate) fn get_pragma_expressions<'s>(
     let mut expressions = vec![];
     loop {
         let Some(spanned_token) = preprocess_single(src, state, cache)? else {
-            return Err(PreprocessorError::IncompleteDirective {
-                directive_span: pragma_span.clone(),
+            return Err(PreprocessorError::VerboseError {
+                err: VerboseError {
+                    span: pragma_span.clone(),
+                    found: None,
+                    expected: vec![Expectation::Label("a pragma expression")],
+                },
             });
         };
         let next_expression = match spanned_token.0 {
@@ -156,8 +169,14 @@ pub(crate) fn get_pragma_expressions<'s>(
                     let Some(value_token) =
                         preprocess_single(src, state, cache)?
                     else {
-                        return Err(PreprocessorError::IncompleteDirective {
-                            directive_span: pragma_span.clone(),
+                        return Err(PreprocessorError::VerboseError {
+                            err: VerboseError {
+                                span: pragma_span.clone(),
+                                found: None,
+                                expected: vec![Expectation::Label(
+                                    "a pragma value",
+                                )],
+                            },
                         });
                     };
                     let value = get_pragma_value(
@@ -165,6 +184,7 @@ pub(crate) fn get_pragma_expressions<'s>(
                         state,
                         cache,
                         value_token,
+                        false,
                         pragma_span,
                     )?;
                     PragmaExpression::KeywordValue(text, value)
@@ -178,6 +198,7 @@ pub(crate) fn get_pragma_expressions<'s>(
                     state,
                     cache,
                     spanned_token,
+                    true,
                     pragma_span,
                 )?;
                 PragmaExpression::Value(value)
@@ -310,12 +331,12 @@ fn test_pragma(
 }
 
 #[test]
-fn basic_pragma() {
+fn basic() {
     test_pragma("`pragma hello", "hello", 0, vec![])
 }
 
 #[test]
-fn keyword_pragma() {
+fn keyword() {
     test_pragma(
         "`pragma keyword these, are, some, keywords",
         "keyword",
@@ -325,7 +346,7 @@ fn keyword_pragma() {
 }
 
 #[test]
-fn dictionary_pragma() {
+fn dictionary() {
     test_pragma(
         "`pragma dictionary baba=you, count=5",
         "dictionary",
@@ -335,11 +356,75 @@ fn dictionary_pragma() {
 }
 
 #[test]
-fn nested_pragma() {
+fn nested() {
     test_pragma(
         "`pragma nested outer    =   (middle=\"this\", inner=(i_am=your_father, depth = 2))",
         "nested",
         1,
+        vec![],
+    )
+}
+
+#[test]
+fn empty() {
+    test_pragma("`pragma empty", "empty", 0, vec![])
+}
+
+#[test]
+#[should_panic(expected = "a pragma name")]
+fn no_name() {
+    test_pragma(
+        "`pragma
+        module test(); endmodule",
+        "nested",
+        0,
+        vec![],
+    )
+}
+
+#[test]
+#[should_panic(expected = "a pragma value")]
+fn no_value() {
+    test_pragma("`pragma no_value item = module", "no_value", 1, vec![])
+}
+
+#[test]
+#[should_panic(expected = "a pragma value")]
+fn no_value_eof() {
+    test_pragma("`pragma no_value item =", "no_value", 1, vec![])
+}
+
+#[test]
+#[should_panic(expected = "a pragma expression")]
+fn no_expression() {
+    test_pragma(
+        "`pragma no_expression first_item, class",
+        "no_expression",
+        1,
+        vec![],
+    )
+}
+
+#[test]
+#[should_panic(expected = "a pragma expression")]
+fn no_expression_eof() {
+    test_pragma(
+        "`pragma no_expression first_item, ",
+        "no_expression",
+        1,
+        vec![],
+    )
+}
+
+#[test]
+fn pragma_replace_keyword() {
+    // class should be an identifier, not a keyword
+    test_pragma(
+        "`begin_keywords \"1364-1995\"
+        `pragma class_pragma first_item, class
+        `end_keywords",
+        "class_pragma",
+        2,
         vec![],
     )
 }
