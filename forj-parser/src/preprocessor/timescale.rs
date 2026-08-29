@@ -166,12 +166,6 @@ pub fn preprocess_timescale<'s>(
     let timeunit = get_timescale(src, state, cache, &directive_span)?;
     let _ = get_divider(src, state, cache, &directive_span)?;
     let timeprecision = get_timescale(src, state, cache, &directive_span)?;
-    if state.in_design_element() {
-        return Err(PreprocessorError::IllegalInDesignUnit {
-            directive: Token::DirTimescale,
-            directive_span: directive_span,
-        });
-    }
     state.add_timescale(Timescale::new(
         directive_span,
         timeunit,

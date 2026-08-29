@@ -807,7 +807,7 @@ pub enum Token<'a> {
     #[regex(r"`\\[!-~]+", text_macro)]
     TextMacro(&'a str),
     #[regex(
-        r"`[a-zA-Z_][a-zA-Z0-9_\$]*(``([a-zA-Z_][a-zA-Z0-9_\$]*)?)+",
+        r"`([a-zA-Z_][a-zA-Z0-9_\$]*)?(``([a-zA-Z_][a-zA-Z0-9_\$]*)?)+",
         text_macro
     )]
     ConcatenatedTextMacro(&'a str),
