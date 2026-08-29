@@ -128,7 +128,7 @@ pub fn case_generate_item_parser<'s>(
         });
     let _default_parser = (
         token(Token::Default),
-        opt_note(token(Token::Comma)),
+        opt_note(token(Token::Colon)),
         generate_block_parser,
     )
         .map(|(a, b, c)| CaseGenerateItem::Default(Box::new((a, b, c))));
