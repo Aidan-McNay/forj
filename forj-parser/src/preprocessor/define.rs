@@ -116,7 +116,6 @@ fn get_define_function_args<'s>(
                 return Ok(None);
             }
             let paren_span = src.next().unwrap().1;
-            let mut started_defaults = None;
             let mut function_args: Vec<(
                 SpannedString<'s>,
                 Option<(Span, Vec<SpannedToken<'s>>)>,
@@ -128,7 +127,6 @@ fn get_define_function_args<'s>(
                     state,
                     cache,
                     define_name,
-                    &mut started_defaults,
                     paren_span.clone(),
                 ) {
                     Ok(()) => {
@@ -207,7 +205,6 @@ fn get_define_function_arg<'s>(
     state: &mut PreprocessorState<'s>,
     cache: &'s PreprocessorCache<'s>,
     define_name: &'s str,
-    started_defaults: &mut Option<SpannedString<'s>>,
     paren_span: Span<'s>,
 ) -> Result<(), PreprocessorError<'s>> {
     let arg_id = loop {
@@ -247,14 +244,6 @@ fn get_define_function_arg<'s>(
             eq_span
         }
         Some(_) => {
-            if let Some(last_define_arg) = started_defaults {
-                return Err(PreprocessorError::NoDefaultAfterDefault {
-                    default_param: last_define_arg.0,
-                    default_param_span: last_define_arg.1.clone(),
-                    non_default_param: arg_id.0,
-                    non_default_param_span: arg_id.1,
-                });
-            }
             dest.push((arg_id, None));
             return Ok(());
         }
@@ -271,7 +260,6 @@ fn get_define_function_arg<'s>(
             other_span: paren_span,
         }),
         Err(PreprocessorError::EndOfFunctionArgument(spanned_token)) => {
-            *started_defaults = Some(arg_id.clone());
             dest.push((arg_id, Some((eq_span, default_arg_text))));
             Err(PreprocessorError::EndOfFunctionArgument(spanned_token))
         }
@@ -516,7 +504,6 @@ fn function_with_defaults() {
 }
 
 #[test]
-#[should_panic(expected = "NoDefaultAfterDefault")]
 fn function_with_no_default_after_default() {
     check_preprocessor!(
         "`define TEST(a, b = 1 + 2, c) a - b + c",

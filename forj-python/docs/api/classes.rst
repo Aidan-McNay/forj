@@ -1263,28 +1263,6 @@ Preprocessing
    
                The :py:class:`Span` where the macro was used with a missing argument
    
-      .. py:class:: PreprocessorError.NoDefaultAfterDefault(PreprocessorError)
-         
-         .. py:property:: default_param
-            :type: str
-   
-               The name of the previously-specified default parameter
-         
-         .. py:property:: default_param_span
-            :type: Span
-   
-               The :py:class:`Span` of the previously-specified default parameter
-         
-         .. py:property:: non_default_param
-            :type: str
-   
-               The name of the non-default parameter
-         
-         .. py:property:: non_default_param_span
-            :type: Span
-   
-               The :py:class:`Span` of the non-default parameter
-   
       .. py:class:: PreprocessorError.NoEndKeywords(PreprocessorError)
          
          .. py:property:: begin_keywords_span

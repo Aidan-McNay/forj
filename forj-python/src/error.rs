@@ -206,16 +206,6 @@ pub enum PreprocessorError {
         /// The [`Span`] of the previous/original specification
         prev_span: Span,
     },
-    NoDefaultAfterDefault {
-        /// The name of the previously-specified default parameter
-        default_param: String,
-        /// The [`Span`] of the previously-specified default parameter
-        default_param_span: Span,
-        /// The name of the non-default parameter
-        non_default_param: String,
-        /// The [`Span`] of the non-default parameter
-        non_default_param_span: Span,
-    },
     NoMacroArguments {
         /// The name of the macro
         macro_name: String,
@@ -391,17 +381,6 @@ impl<'a> From<forj_parser::PreprocessorError<'a>> for PreprocessorError {
                 param_name: param_name.to_string(),
                 dup_span: dup_span.into(),
                 prev_span: prev_span.into(),
-            },
-            forj_parser::PreprocessorError::NoDefaultAfterDefault {
-                default_param,
-                default_param_span,
-                non_default_param,
-                non_default_param_span,
-            } => PreprocessorError::NoDefaultAfterDefault {
-                default_param: default_param.to_string(),
-                default_param_span: default_param_span.into(),
-                non_default_param: non_default_param.to_string(),
-                non_default_param_span: non_default_param_span.into(),
             },
             forj_parser::PreprocessorError::NoMacroArguments {
                 macro_name,

@@ -539,30 +539,6 @@ impl PreprocessorError {
                 );
                 report
             }
-            PreprocessorError::NoDefaultAfterDefault {
-                default_param,
-                default_param_span,
-                non_default_param,
-                non_default_param_span,
-            } => {
-                let mut report = Report::new(
-                ReportKind::Error(),
-                non_default_param_span.clone(),
-                "PP17".to_owned(),
-                "No default specified for argument after one with a default".to_owned(),
-            );
-                report.label(
-                    default_param_span.clone(),
-                    ReportKind::Note(),
-                    format!("{} had a default specified", default_param),
-                );
-                report.label(
-                    non_default_param_span.clone(),
-                    ReportKind::Error(),
-                    format!("No default specified for {}", non_default_param),
-                );
-                report
-            }
             PreprocessorError::NoMacroArguments {
                 macro_name,
                 define_span,
@@ -571,7 +547,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     use_span.clone(),
-                    "PP18".to_owned(),
+                    "PP17".to_owned(),
                     format!("Expected arguments when using {macro_name}"),
                 );
                 report.label(
@@ -596,7 +572,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     use_span.clone(),
-                    "PP19".to_owned(),
+                    "PP18".to_owned(),
                     format!(
                         "{} expected {} arguments, but {} were provided",
                         macro_name, expected, found
@@ -622,7 +598,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     use_span.clone(),
-                    "PP20".to_owned(),
+                    "PP19".to_owned(),
                     format!(
                         "'{param_name}' wasn't specified and has no default"
                     ),
@@ -646,7 +622,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     arg_span.clone(),
-                    "PP21".to_owned(),
+                    "PP20".to_owned(),
                     format!(
                         concat!(
                             "The argument for '{}' cannot be ",
@@ -666,7 +642,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     timescale_span.clone(),
-                    "PP22".to_owned(),
+                    "PP21".to_owned(),
                     "Time precision is larger than the time unit".to_owned(),
                 );
                 report.label(
@@ -684,7 +660,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     error_span.clone(),
-                    "PP23".to_owned(),
+                    "PP22".to_owned(),
                     format!(
                         "Usage of {} resulted in an incomplete macro",
                         error_token
@@ -709,7 +685,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     include_path_span.clone(),
-                    "PP24".to_owned(),
+                    "PP23".to_owned(),
                     format!("Error when reading {}", include_path),
                 );
                 report.label(
@@ -723,7 +699,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     include_span.clone(),
-                    "PP25".to_owned(),
+                    "PP24".to_owned(),
                     "Max include depth reached".to_owned(),
                 );
                 report.label(
@@ -740,7 +716,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     directive_span.clone(),
-                    "PP26".to_owned(),
+                    "PP25".to_owned(),
                     format!(
                         "Tried to use {} inside a design element",
                         directive
@@ -754,7 +730,7 @@ impl PreprocessorError {
                 report
             }
             PreprocessorError::VerboseError { err } => {
-                return err.report_with_code("PP27".to_owned());
+                return err.report_with_code("PP26".to_owned());
             }
         };
         Ok(report)

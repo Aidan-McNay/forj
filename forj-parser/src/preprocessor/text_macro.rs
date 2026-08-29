@@ -86,8 +86,23 @@ fn resolve_text_macro_args<'s>(
     for (arg_name, arg_tokens) in original_args.into_iter() {
         match specified_args_iter.next() {
             Some(specified_tokens) => {
-                resolved_args
-                    .insert(arg_name.0, (arg_name.1, specified_tokens));
+                if specified_tokens.len() > 0 {
+                    resolved_args
+                        .insert(arg_name.0, (arg_name.1, specified_tokens));
+                } else {
+                    match arg_tokens {
+                        Some(default_tokens) => {
+                            resolved_args.insert(
+                                arg_name.0,
+                                (arg_name.1, default_tokens),
+                            );
+                        }
+                        None => {
+                            resolved_args
+                                .insert(arg_name.0, (arg_name.1, vec![]));
+                        }
+                    }
+                }
             }
             None => match arg_tokens {
                 Some(default_tokens) => {
@@ -565,6 +580,43 @@ fn default_function() {
             Token::UnsignedNumber("32"),
             Token::Plus,
             Token::UnsignedNumber("2")
+        ]
+    )
+}
+
+#[test]
+fn default_complex() {
+    check_preprocessor!(
+        "`define MACRO2(a=5, b, c=\"C\") a + b - c
+        `MACRO2 (1, , 3)",
+        vec![
+            Token::UnsignedNumber("1"),
+            Token::Plus,
+            // Empty `b`
+            Token::Minus,
+            Token::UnsignedNumber("3")
+        ]
+    );
+    check_preprocessor!(
+        "`define MACRO2(a=5, b, c=\"C\") a + b - c
+        `MACRO2 (, 2, )",
+        vec![
+            Token::UnsignedNumber("5"),
+            Token::Plus,
+            Token::UnsignedNumber("2"),
+            Token::Minus,
+            Token::StringLiteral("C")
+        ]
+    );
+    check_preprocessor!(
+        "`define MACRO2(a=5, b, c=\"C\") a + b - c
+        `MACRO2 (, 2)",
+        vec![
+            Token::UnsignedNumber("5"),
+            Token::Plus,
+            Token::UnsignedNumber("2"),
+            Token::Minus,
+            Token::StringLiteral("C")
         ]
     )
 }

@@ -397,39 +397,6 @@ pub enum PreprocessorError<'a> {
         /// The [`Span`] of the previous/original specification
         prev_span: Span<'a>,
     },
-    /// Attempting to have a macro parameter with no default value after one that does
-    ///
-    /// ```rust
-    /// # use forj_parser::*;
-    /// # let mut state = PreprocessorState::new(vec![], vec![]);
-    /// # let cache = PreprocessorCache::new();
-    /// let source = "
-    /// `define TEST(a = 1, b) a + b
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
-    /// let input = lex(source, "test.v").tokens();
-    /// let preprocess_result = preprocess(
-    ///     input,
-    ///     &mut state,
-    ///     &cache,
-    /// );
-    /// assert!(preprocess_result.is_err());
-    /// assert!(matches!(state.errors.first(), Some(PreprocessorError::NoDefaultAfterDefault{
-    ///     default_param: "a",
-    ///     non_default_param: "b",
-    ///     ..
-    /// })));
-    /// ```
-    NoDefaultAfterDefault {
-        /// The name of the previously-specified default parameter
-        default_param: &'a str,
-        /// The [`Span`] of the previously-specified default parameter
-        default_param_span: Span<'a>,
-        /// The name of the non-default parameter
-        non_default_param: &'a str,
-        /// The [`Span`] of the non-default parameter
-        non_default_param_span: Span<'a>,
-    },
     /// Specifying no arguments for a macro function that takes arguments
     ///
     /// ```rust
@@ -1068,27 +1035,6 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
                 report::ReportKind::Error,
                 "Duplicate parameter declaration",
             ),
-            PreprocessorError::NoDefaultAfterDefault {
-                default_param,
-                default_param_span,
-                non_default_param,
-                non_default_param_span,
-            } => Report::new(
-                report::ReportKind::Error,
-                &non_default_param_span,
-                "PP17",
-                "No default specified for argument after one with a default",
-            )
-            .with_label(
-                &default_param_span,
-                NOTE_KIND,
-                format!("{} had a default specified", default_param),
-            )
-            .with_label(
-                &non_default_param_span,
-                report::ReportKind::Error,
-                format!("No default specified for {}", non_default_param),
-            ),
             PreprocessorError::NoMacroArguments {
                 macro_name,
                 define_span,
@@ -1096,7 +1042,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &use_span,
-                "PP18",
+                "PP17",
                 format!("Expected arguments when using {macro_name}"),
             )
             .with_label(&define_span, NOTE_KIND, "Macro defined here")
@@ -1114,7 +1060,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &use_span,
-                "PP19",
+                "PP18",
                 format!(
                     "{} expected {} arguments, but {} were provided",
                     macro_name, expected, found
@@ -1137,7 +1083,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &use_span,
-                "PP20",
+                "PP19",
                 format!("'{param_name}' wasn't specified and has no default"),
             )
             .with_label(&define_span, NOTE_KIND, "Macro defined here")
@@ -1152,7 +1098,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &arg_span,
-                "PP21",
+                "PP20",
                 format!(
                     concat!(
                         "The argument for '{}' cannot be ",
@@ -1170,7 +1116,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
                 Report::new(
                     report::ReportKind::Error,
                     &timescale_span,
-                    "PP22",
+                    "PP21",
                     "Time precision is larger than the time unit",
                 )
                 .with_label(
@@ -1185,7 +1131,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &error_span,
-                "PP23",
+                "PP22",
                 format!(
                     "Usage of {} resulted in an incomplete macro",
                     error_token
@@ -1203,7 +1149,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &include_path_span,
-                "PP24",
+                "PP23",
                 format!("Error when reading {}", include_path),
             )
             .with_label(
@@ -1214,7 +1160,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             PreprocessorError::IncludeDepth { include_span } => Report::new(
                 report::ReportKind::Error,
                 &include_span,
-                "PP25",
+                "PP24",
                 format!("Max include depth of {} reached", MAX_INCLUDE_DEPTH),
             )
             .with_label(
@@ -1228,7 +1174,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &directive_span,
-                "PP26",
+                "PP25",
                 format!("Tried to use {} inside a design element", directive),
             )
             .with_label(
@@ -1236,7 +1182,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
                 report::ReportKind::Error,
                 "Illegal inside a design element",
             ),
-            PreprocessorError::VerboseError { err } => err.report("PP27"),
+            PreprocessorError::VerboseError { err } => err.report("PP26"),
             PreprocessorError::NewlineInDefine(newline_span) => Report::new(
                 report::ReportKind::Error,
                 &newline_span,

@@ -143,7 +143,6 @@ pub(crate) fn recover<'s>(
         PreprocessorError::DuplicateMacroParameter { .. } => {
             recover_newline(src)
         }
-        PreprocessorError::NoDefaultAfterDefault { .. } => recover_newline(src),
         PreprocessorError::NoMacroArguments { .. } => true,
         PreprocessorError::TooManyMacroArguments { .. } => true,
         PreprocessorError::MissingMacroArgument { .. } => true,
