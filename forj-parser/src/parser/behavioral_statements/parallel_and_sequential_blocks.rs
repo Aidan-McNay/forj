@@ -13,13 +13,13 @@ pub fn action_block_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ActionBlock<'s>, VerboseError<'s>> {
     alt((
-        statement_or_null_parser.map(|a| ActionBlock::Basic(Box::new(a))),
         (
             opt_note(statement_parser),
             token(Token::Else),
             statement_or_null_parser,
         )
             .map(|(a, b, c)| ActionBlock::Conditional(Box::new((a, b, c)))),
+        statement_or_null_parser.map(|a| ActionBlock::Basic(Box::new(a))),
     ))
     .parse_next(input)
 }
