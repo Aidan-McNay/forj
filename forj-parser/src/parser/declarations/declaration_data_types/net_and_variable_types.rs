@@ -23,6 +23,18 @@ pub fn casting_type_parser<'s>(
     .parse_next(input)
 }
 
+pub(crate) fn casting_type_parser_no_primary<'s>(
+    input: &mut Tokens<'s>,
+) -> ModalResult<CastingType<'s>, VerboseError<'s>> {
+    alt((
+        simple_type_parser.map(|a| CastingType::SimpleType(Box::new(a))),
+        signing_parser.map(|a| CastingType::Signing(Box::new(a))),
+        token(Token::String).map(|a| CastingType::String(Box::new(a))),
+        token(Token::Const).map(|a| CastingType::Const(Box::new(a))),
+    ))
+    .parse_next(input)
+}
+
 fn constant_primary_parser_without_cast<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ConstantPrimary<'s>, VerboseError<'s>> {

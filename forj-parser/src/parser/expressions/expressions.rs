@@ -168,23 +168,22 @@ pub fn constant_expression_parser<'s>(
 pub fn constant_mintypmax_expression_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ConstantMintypmaxExpression<'s>, VerboseError<'s>> {
-    alt((
-        (
-            constant_expression_parser,
+    (
+        constant_expression_parser,
+        opt_note((
             token(Token::Colon),
             constant_expression_parser,
             token(Token::Colon),
             constant_expression_parser,
-        )
-            .map(|(a, b, c, d, e)| {
-                ConstantMintypmaxExpression::Mintypmax(Box::new((
-                    a, b, c, d, e,
-                )))
-            }),
-        constant_expression_parser
-            .map(|a| ConstantMintypmaxExpression::Single(Box::new(a))),
-    ))
-    .parse_next(input)
+        )),
+    )
+        .map(|(a, b)| match b {
+            None => ConstantMintypmaxExpression::Single(Box::new(a)),
+            Some((b, c, d, e)) => ConstantMintypmaxExpression::Mintypmax(
+                Box::new((a, b, c, d, e)),
+            ),
+        })
+        .parse_next(input)
 }
 
 pub fn constant_param_expression_parser<'s>(
@@ -637,20 +636,22 @@ pub fn inside_expression_parser<'s>(
 pub fn mintypmax_expression_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<MintypmaxExpression<'s>, VerboseError<'s>> {
-    alt((
-        (
-            expression_parser,
+    (
+        expression_parser,
+        opt_note((
             token(Token::Colon),
             expression_parser,
             token(Token::Colon),
             expression_parser,
-        )
-            .map(|(a, b, c, d, e)| {
+        )),
+    )
+        .map(|(a, b)| match b {
+            None => MintypmaxExpression::Single(Box::new(a)),
+            Some((b, c, d, e)) => {
                 MintypmaxExpression::Mintypmax(Box::new((a, b, c, d, e)))
-            }),
-        expression_parser.map(|a| MintypmaxExpression::Single(Box::new(a))),
-    ))
-    .parse_next(input)
+            }
+        })
+        .parse_next(input)
 }
 
 #[allow(dead_code)] // Parsed in Pratt parsing

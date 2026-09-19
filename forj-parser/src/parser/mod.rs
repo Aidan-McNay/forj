@@ -20,11 +20,11 @@ pub(crate) use behavioral_statements::*;
 pub(crate) use combinators::*;
 pub(crate) use declarations::*;
 pub(crate) use expressions::*;
+use forj_syntax::*;
 pub(crate) use general::*;
 pub(crate) use instantiations::*;
 pub(crate) use pratt::*;
 pub(crate) use primitive_instances::*;
-use forj_syntax::*;
 pub(crate) use source_text::*;
 pub(crate) use spanned_token::*;
 pub(crate) use specify_section::*;
@@ -48,13 +48,15 @@ use winnow::error::{ErrMode, ParserError};
 pub fn parse<'s>(
     input: &'s [SpannedToken<'s>],
 ) -> Result<SourceText<'s>, VerboseError<'s>> {
+    let stream = TokenSlice::new(input);
+    let state = (None, MemoizedState::new(&stream));
     let mut stateful_input = Tokens {
-        input: TokenSlice::new(input),
-        state: None,
+        input: stream,
+        state,
     };
     match source_text_parser.parse_next(&mut stateful_input) {
         Ok(source_text) => Ok(source_text),
-        Err(ErrMode::Backtrack(err)) => Err(match stateful_input.state {
+        Err(ErrMode::Backtrack(err)) => Err(match stateful_input.state.0 {
             None => err,
             Some(prev_err) => err.or(prev_err),
         }),

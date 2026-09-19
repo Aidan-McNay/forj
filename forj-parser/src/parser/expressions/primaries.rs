@@ -8,6 +8,7 @@ use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::{alt, not, peek, terminated};
+use winnow::stream::Stream;
 use winnow::token::any;
 
 pub fn constant_primary_parser<'s>(
@@ -75,8 +76,8 @@ pub fn constant_primary_parser<'s>(
         .map(|(a, b, c)| {
             ConstantPrimary::MintypmaxExpression(Box::new((a, b, c)))
         });
-    let _cast_parser =
-        constant_cast_parser.map(|a| ConstantPrimary::Cast(Box::new(a)));
+    let _cast_parser = constant_cast_parser_no_primary
+        .map(|a| ConstantPrimary::Cast(Box::new(a)));
     let _assignment_pattern_expression_parser =
         constant_assignment_pattern_expression_parser
             .map(|a| ConstantPrimary::AssignmentPatternExpression(Box::new(a)));
@@ -86,7 +87,7 @@ pub fn constant_primary_parser<'s>(
         token(Token::Dollar).map(|a| ConstantPrimary::Dollar(Box::new(a)));
     let _null_parser =
         token(Token::Null).map(|a| ConstantPrimary::Null(Box::new(a)));
-    alt((
+    let mut base_primary = alt((
         _dollar_parser,
         _null_parser,
         _assignment_pattern_expression_parser,
@@ -107,7 +108,30 @@ pub fn constant_primary_parser<'s>(
         _let_expression_parser,
         _type_reference_parser,
     ))
-    .parse_next(input)
+    .parse_next(input)?;
+    loop {
+        match opt_note((
+            token(Token::Apost),
+            token(Token::Paren),
+            constant_expression_parser,
+            token(Token::EParen),
+        ))
+        .parse_next(input)?
+        {
+            None => {
+                break Ok(base_primary);
+            }
+            Some((b, c, d, e)) => {
+                base_primary = ConstantPrimary::Cast(Box::new(ConstantCast(
+                    CastingType::ConstantPrimary(Box::new(base_primary)),
+                    b,
+                    c,
+                    d,
+                    e,
+                )))
+            }
+        }
+    }
 }
 
 pub fn module_path_primary_parser<'s>(
@@ -137,6 +161,13 @@ pub fn module_path_primary_parser<'s>(
 pub fn primary_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<Primary<'s>, VerboseError<'s>> {
+    let offset = input.state.1.offset(&input.input);
+    if let Some((result, advance_offset)) = input.state.1.primaries.get(&offset)
+    {
+        let memoized_result = result.clone();
+        input.next_slice(*advance_offset);
+        return memoized_result;
+    }
     let _primary_literal_parser =
         primary_literal_parser.map(|a| Primary::PrimaryLiteral(Box::new(a)));
     let _hierarchical_identifier_parser = (
@@ -197,7 +228,7 @@ pub fn primary_parser<'s>(
     let _dollar_parser =
         token(Token::Dollar).map(|a| Primary::This(Box::new(a)));
     let _null_parser = token(Token::Null).map(|a| Primary::This(Box::new(a)));
-    alt((
+    let result = alt((
         terminated(
             _hierarchical_identifier_parser,
             peek(not(alt((
@@ -223,7 +254,14 @@ pub fn primary_parser<'s>(
         _dollar_parser,
         _null_parser,
     ))
-    .parse_next(input)
+    .parse_next(input);
+    let result_offset = input.state.1.offset(&input.input);
+    input
+        .state
+        .1
+        .primaries
+        .insert(offset, (result.clone(), result_offset - offset));
+    result
 }
 
 pub fn class_qualifier_or_package_scope_parser<'s>(
@@ -500,11 +538,11 @@ pub fn cast_parser<'s>(
         .parse_next(input)
 }
 
-pub fn constant_cast_parser<'s>(
+pub fn constant_cast_parser_no_primary<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ConstantCast<'s>, VerboseError<'s>> {
     (
-        casting_type_parser,
+        casting_type_parser_no_primary,
         token(Token::Apost),
         token(Token::Paren),
         constant_expression_parser,

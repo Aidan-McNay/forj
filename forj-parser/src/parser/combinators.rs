@@ -41,7 +41,7 @@ where
         &mut self,
         i: &mut Tokens<'s>,
     ) -> Result<Vec<O>, ErrMode<VerboseError<'s>>> {
-        trace("repeat_strict", move |i: &mut Tokens<'s>| {
+        trace("repeat_note", move |i: &mut Tokens<'s>| {
             fold_repeat0_(
                 &mut self.parser,
                 &mut || Vec::initial(None),
@@ -78,7 +78,7 @@ where
                 if input.eof_offset() == len {
                     return Err(ParserError::assert(
                         input,
-                        "`repeat_strict` parsers must always consume",
+                        "`repeat_note` parsers must always consume",
                     ));
                 }
 
@@ -87,8 +87,8 @@ where
             Err(err) => match err {
                 ErrMode::Backtrack(verbose_error) => {
                     input.reset(&start);
-                    match &mut input.state {
-                        None => input.state = Some(verbose_error),
+                    match &mut input.state.0 {
+                        None => input.state.0 = Some(verbose_error),
                         Some(prev_error) => {
                             prev_error.or_in_place(verbose_error)
                         }
@@ -114,8 +114,8 @@ where
             Err(err) => match err {
                 ErrMode::Backtrack(verbose_error) => {
                     input.reset(&start);
-                    match &mut input.state {
-                        None => input.state = Some(verbose_error),
+                    match &mut input.state.0 {
+                        None => input.state.0 = Some(verbose_error),
                         Some(prev_error) => {
                             prev_error.or_in_place(verbose_error)
                         }

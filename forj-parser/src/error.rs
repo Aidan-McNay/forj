@@ -6,8 +6,8 @@
 use crate::report::Report;
 use crate::*;
 use core::ops::Range;
-use lexer::Token;
 use forj_syntax::*;
+use lexer::Token;
 use std::fmt;
 use std::fs;
 use winnow::{
