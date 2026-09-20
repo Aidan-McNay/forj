@@ -27,8 +27,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `endif
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(),&cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(),&cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -50,8 +50,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `ifdef TEST
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -79,8 +79,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `elsif
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -102,8 +102,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `else
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -125,8 +125,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `end_keywords
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -148,8 +148,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `begin_keywords \"1800-2009\"
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -171,8 +171,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `define ifdef 'whoops'
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -199,8 +199,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `define TEST()
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -227,8 +227,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `define TEST(a, b c)
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -237,7 +237,7 @@ pub enum PreprocessorError<'a> {
     /// );
     /// assert!(preprocess_result.is_err());
     /// assert!(matches!(state.errors.first(), Some(PreprocessorError::InvalidDefineArgument{
-    ///     other_token: Token::SimpleIdentifier("c"),
+    ///     other_token: Token::SimpleIdentifier(_), // c
     ///     ..
     /// })));
     /// ```
@@ -255,8 +255,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `begin_keywords \"MyVersion\"
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -265,7 +265,7 @@ pub enum PreprocessorError<'a> {
     /// );
     /// assert!(preprocess_result.is_err());
     /// assert!(matches!(state.errors.first(), Some(PreprocessorError::InvalidVersionSpecifier{
-    ///     invalid_version: Token::StringLiteral("MyVersion"),
+    ///     invalid_version: Token::StringLiteral(_), // MyVersion
     ///     ..
     /// })));
     /// ```
@@ -287,8 +287,8 @@ pub enum PreprocessorError<'a> {
     /// # use forj_parser::*;
     /// # let mut state = PreprocessorState::new(vec![], vec![]);
     /// # let cache = PreprocessorCache::new();
-    /// let source = "`line";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// let source = "`line".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -313,8 +313,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `define TEST(
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -344,8 +344,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `TEST
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -372,8 +372,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `define TEST(a, b, a) a + b
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -406,8 +406,8 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `define TEST(a, b) a + b
     /// `TEST
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -437,8 +437,8 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `define TEST(a, b) a + b
     /// `TEST(1, 2, 3)
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -474,8 +474,8 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `define TEST(a, b) a + b
     /// `TEST(1)
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -505,8 +505,8 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `define TEST(a, b) a``_with_``b
     /// `TEST(multiple tokens, \"two\")
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -533,8 +533,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `timescale 100 fs / 1 s
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -557,8 +557,8 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `define TEST(a, b) a + b
     /// `TEST(a = 1, b = 2])
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -586,8 +586,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `include \"other.v\"
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -618,8 +618,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `include \"test.v\"
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -643,8 +643,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `line
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -672,8 +672,8 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `undef TEST
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -701,8 +701,8 @@ pub enum PreprocessorError<'a> {
     /// let source = "
     /// `define TEST definition_one
     /// `define TEST definition_two
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,
@@ -733,8 +733,8 @@ pub enum PreprocessorError<'a> {
     /// module my_module();
     ///     `resetall
     /// endmodule
-    /// ";
-    /// state.retain_file("test.v".to_string(), source.to_string(), &cache);
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
     /// let preprocess_result = preprocess(
     ///     input,

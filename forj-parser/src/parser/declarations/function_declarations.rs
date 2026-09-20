@@ -162,11 +162,17 @@ pub fn dpi_spec_string_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<DpiSpecString<'s>, VerboseError<'s>> {
     any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
-        Token::StringLiteral("DPI-C") => {
-            Some(DpiSpecString::DpiC(Metadata::new(s.1.clone(), vec![])))
-        }
-        Token::StringLiteral("DPI") => {
-            Some(DpiSpecString::Dpi(Metadata::new(s.1.clone(), vec![])))
+        Token::StringLiteral(string_text) => {
+            match Into::<&[u8]>::into(string_text) {
+                b"DPI-C" => Some(DpiSpecString::DpiC(Metadata::new(
+                    s.1.clone(),
+                    vec![],
+                ))),
+                b"DPI" => {
+                    Some(DpiSpecString::Dpi(Metadata::new(s.1.clone(), vec![])))
+                }
+                _ => None,
+            }
         }
         _ => None,
     })

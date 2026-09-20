@@ -1276,60 +1276,78 @@ impl<'a> From<&'a Token> for forj_parser::Token<'a> {
             Token::DollarWarning() => forj_parser::Token::DollarWarning,
             Token::DollarInfo() => forj_parser::Token::DollarInfo,
             Token::OnelineComment { text } => {
-                forj_parser::Token::OnelineComment(&text)
+                forj_parser::Token::OnelineComment((*text).as_bytes().into())
             }
             Token::BlockComment { text } => {
-                forj_parser::Token::BlockComment(&text)
+                forj_parser::Token::BlockComment((*text).as_bytes().into())
             }
             Token::UnsignedNumber { text } => {
-                forj_parser::Token::UnsignedNumber(&text)
+                forj_parser::Token::UnsignedNumber((*text).as_bytes().into())
             }
             Token::FixedPointNumber { text } => {
-                forj_parser::Token::FixedPointNumber(&text)
+                forj_parser::Token::FixedPointNumber((*text).as_bytes().into())
             }
             Token::BinaryNumber { text } => {
-                forj_parser::Token::BinaryNumber(&text)
+                forj_parser::Token::BinaryNumber((*text).as_bytes().into())
             }
             Token::OctalNumber { text } => {
-                forj_parser::Token::OctalNumber(&text)
+                forj_parser::Token::OctalNumber((*text).as_bytes().into())
             }
             Token::DecimalNumber { text } => {
-                forj_parser::Token::DecimalNumber(&text)
+                forj_parser::Token::DecimalNumber((*text).as_bytes().into())
             }
-            Token::HexNumber { text } => forj_parser::Token::HexNumber(&text),
+            Token::HexNumber { text } => {
+                forj_parser::Token::HexNumber((*text).as_bytes().into())
+            }
             Token::ScientificNumber { text } => {
-                forj_parser::Token::ScientificNumber(&text)
+                forj_parser::Token::ScientificNumber((*text).as_bytes().into())
             }
             Token::UnbasedUnsizedLiteral { text } => {
-                forj_parser::Token::UnbasedUnsizedLiteral(&text)
+                forj_parser::Token::UnbasedUnsizedLiteral(
+                    (*text).as_bytes().into(),
+                )
             }
             Token::SystemTfIdentifier { text } => {
-                forj_parser::Token::SystemTfIdentifier(&text)
+                forj_parser::Token::SystemTfIdentifier(
+                    (*text).as_bytes().into(),
+                )
             }
             Token::SimpleIdentifier { text } => {
-                forj_parser::Token::SimpleIdentifier(&text)
+                forj_parser::Token::SimpleIdentifier((*text).as_bytes().into())
             }
             Token::EscapedIdentifier { text } => {
-                forj_parser::Token::EscapedIdentifier(&text)
+                forj_parser::Token::EscapedIdentifier((*text).as_bytes().into())
             }
             Token::PreprocessorIdentifier { text } => {
-                forj_parser::Token::PreprocessorIdentifier(&text)
+                forj_parser::Token::PreprocessorIdentifier(
+                    (*text).as_bytes().into(),
+                )
             }
-            Token::TextMacro { text } => forj_parser::Token::TextMacro(&text),
+            Token::TextMacro { text } => {
+                forj_parser::Token::TextMacro((*text).as_bytes().into())
+            }
             Token::ConcatenatedTextMacro { text } => {
-                forj_parser::Token::ConcatenatedTextMacro(&text)
+                forj_parser::Token::ConcatenatedTextMacro(
+                    (*text).as_bytes().into(),
+                )
             }
             Token::StringLiteral { text } => {
-                forj_parser::Token::StringLiteral(&text)
+                forj_parser::Token::StringLiteral((*text).as_bytes().into())
             }
             Token::PreprocessorStringLiteral { text } => {
-                forj_parser::Token::PreprocessorStringLiteral(&text)
+                forj_parser::Token::PreprocessorStringLiteral(
+                    (*text).as_bytes().into(),
+                )
             }
             Token::TripleQuoteStringLiteral { text } => {
-                forj_parser::Token::TripleQuoteStringLiteral(&text)
+                forj_parser::Token::TripleQuoteStringLiteral(
+                    (*text).as_bytes().into(),
+                )
             }
             Token::PreprocessorTripleQuoteStringLiteral { text } => {
-                forj_parser::Token::PreprocessorTripleQuoteStringLiteral(&text)
+                forj_parser::Token::PreprocessorTripleQuoteStringLiteral(
+                    (*text).as_bytes().into(),
+                )
             }
             Token::Newline() => forj_parser::Token::Newline,
         }

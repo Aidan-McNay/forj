@@ -16,6 +16,7 @@ forj-syntax = { version = "0.1.0", path = "../forj-syntax" }
 logos = { git = "https://github.com/maciejhirsz/logos", rev = "030e589", version = "0.16.1" }
 winnow = "0.7.13"
 elsa = "1.11.2"
+bstr = "1.13.1"
 
 [dev-dependencies]
 clap = { version = "4.5.39", features = ["derive"] }

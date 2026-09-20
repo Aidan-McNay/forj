@@ -43,7 +43,7 @@ struct FormatArgs {
 
 fn format(args: &FormatArgs) {
     for path in &args.paths {
-        let src = std::fs::read_to_string(&path).unwrap();
+        let src = std::fs::read(&path).unwrap();
         let string_cache = PreprocessorCache::new();
         let mut state = PreprocessorState::new(vec![], vec![]);
         let (_, src) = state.retain_file(path.clone(), src, &string_cache);

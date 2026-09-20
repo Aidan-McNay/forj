@@ -94,9 +94,22 @@ fn get_timescale<'s>(
         });
     };
     let timescale_value = match spanned_token.0 {
-        Token::UnsignedNumber("1") => TimescaleValue::One,
-        Token::UnsignedNumber("10") => TimescaleValue::Ten,
-        Token::UnsignedNumber("100") => TimescaleValue::Hundred,
+        Token::UnsignedNumber(num_bytes) => {
+            match Into::<&[u8]>::into(num_bytes) {
+                b"1" => TimescaleValue::One,
+                b"10" => TimescaleValue::Ten,
+                b"100" => TimescaleValue::Hundred,
+                _ => {
+                    return Err(PreprocessorError::VerboseError {
+                        err: VerboseError {
+                            span: spanned_token.1,
+                            found: Some(spanned_token.0),
+                            expected: vec![Expectation::Label("1, 10, or 100")],
+                        },
+                    });
+                }
+            }
+        }
         _ => {
             return Err(PreprocessorError::VerboseError {
                 err: VerboseError {
@@ -113,12 +126,27 @@ fn get_timescale<'s>(
         });
     };
     let timescale_unit = match spanned_token.0 {
-        Token::SimpleIdentifier("s") => TimescaleUnit::S,
-        Token::SimpleIdentifier("ms") => TimescaleUnit::MS,
-        Token::SimpleIdentifier("us") => TimescaleUnit::US,
-        Token::SimpleIdentifier("ns") => TimescaleUnit::NS,
-        Token::SimpleIdentifier("ps") => TimescaleUnit::PS,
-        Token::SimpleIdentifier("fs") => TimescaleUnit::FS,
+        Token::SimpleIdentifier(id_bytes) => {
+            match Into::<&[u8]>::into(id_bytes) {
+                b"s" => TimescaleUnit::S,
+                b"ms" => TimescaleUnit::MS,
+                b"us" => TimescaleUnit::US,
+                b"ns" => TimescaleUnit::NS,
+                b"ps" => TimescaleUnit::PS,
+                b"fs" => TimescaleUnit::FS,
+                _ => {
+                    return Err(PreprocessorError::VerboseError {
+                        err: VerboseError {
+                            span: spanned_token.1,
+                            found: Some(spanned_token.0),
+                            expected: vec![Expectation::Label(
+                                "a recognized unit of time",
+                            )],
+                        },
+                    });
+                }
+            }
+        }
         _ => {
             return Err(PreprocessorError::VerboseError {
                 err: VerboseError {

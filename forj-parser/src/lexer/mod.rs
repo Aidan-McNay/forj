@@ -8,10 +8,10 @@ pub(crate) mod keywords;
 pub(crate) mod tokens;
 use crate::SpannedToken;
 use crate::report::{Report, ReportKind};
+use forj_syntax::Span;
 pub use keywords::StandardVersion;
 use logos::Logos;
 use logos::Span as ByteSpan;
-use forj_syntax::Span;
 use std::fs::{self, File};
 use std::io::{self, BufWriter, Write};
 use std::path::Path;
@@ -133,7 +133,7 @@ fn token_span_mapper<'a>(
 }
 
 pub(crate) fn lex_helper<'a>(
-    src: &'a str,
+    src: &'a [u8],
     file_name: &'a str,
     included_from: Option<&'a Span<'a>>,
 ) -> impl LexedSource<'a> {
@@ -145,17 +145,18 @@ pub(crate) fn lex_helper<'a>(
 ///
 /// ```rust
 /// # use forj_parser::*;
-/// let file_contents = "module test_module; endmodule";
+/// # use bstr::BStr;
+/// let file_contents = "module test_module; endmodule".as_bytes();
 /// let mut tokens = lex(file_contents, "test_file.v");
-/// assert!(matches!(tokens.next().unwrap(), (Ok(Token::Module), _)));
-/// assert!(matches!(tokens.next().unwrap(), (Ok(Token::SimpleIdentifier("test_module")), _)));
-/// assert!(matches!(tokens.next().unwrap(), (Ok(Token::SColon), _)));
-/// assert!(matches!(tokens.next().unwrap(), (Ok(Token::Endmodule), _)));
+/// assert_eq!(tokens.next().unwrap().0, Ok(Token::Module));
+/// assert_eq!(tokens.next().unwrap().0, Ok(Token::SimpleIdentifier(BStr::new("test_module"))));
+/// assert_eq!(tokens.next().unwrap().0, Ok(Token::SColon));
+/// assert_eq!(tokens.next().unwrap().0, Ok(Token::Endmodule));
 /// assert!(tokens.next().is_none());
 /// ```
 ///
 /// If the lexer encounters an error, the resulting `Err(string)` may contain
 /// more information if possible to discern.
-pub fn lex<'a>(src: &'a str, file_name: &'a str) -> impl LexedSource<'a> {
+pub fn lex<'a>(src: &'a [u8], file_name: &'a str) -> impl LexedSource<'a> {
     lex_helper(src, file_name, None)
 }

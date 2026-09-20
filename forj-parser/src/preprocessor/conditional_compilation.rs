@@ -100,12 +100,18 @@ fn get_ifdef_condition<'s>(
         });
     };
     match spanned_token.0 {
-        Token::SimpleIdentifier(id_str) => Ok(IfdefCondition::TextMacro(
-            Box::new(TextMacroIdentifier(id_str, spanned_token.1)),
-        )),
-        Token::EscapedIdentifier(id_str) => Ok(IfdefCondition::TextMacro(
-            Box::new(TextMacroIdentifier(id_str, spanned_token.1)),
-        )),
+        Token::SimpleIdentifier(id_str) => {
+            Ok(IfdefCondition::TextMacro(Box::new(TextMacroIdentifier(
+                unsafe { std::str::from_utf8_unchecked(id_str) },
+                spanned_token.1,
+            ))))
+        }
+        Token::EscapedIdentifier(id_str) => {
+            Ok(IfdefCondition::TextMacro(Box::new(TextMacroIdentifier(
+                unsafe { std::str::from_utf8_unchecked(id_str) },
+                spanned_token.1,
+            ))))
+        }
         Token::Paren => {
             let ifdef_macro_expression =
                 get_ifdef_macro_expression(src, ifdef_span, 0)?;
@@ -169,12 +175,18 @@ fn get_ifdef_macro_expression<'s>(
         });
     };
     let mut lhs = match spanned_token.0 {
-        Token::SimpleIdentifier(id_str) => IfdefMacroExpression::Text(
-            Box::new(TextMacroIdentifier(id_str, spanned_token.1)),
-        ),
-        Token::EscapedIdentifier(id_str) => IfdefMacroExpression::Text(
-            Box::new(TextMacroIdentifier(id_str, spanned_token.1)),
-        ),
+        Token::SimpleIdentifier(id_str) => {
+            IfdefMacroExpression::Text(Box::new(TextMacroIdentifier(
+                unsafe { std::str::from_utf8_unchecked(id_str) },
+                spanned_token.1,
+            )))
+        }
+        Token::EscapedIdentifier(id_str) => {
+            IfdefMacroExpression::Text(Box::new(TextMacroIdentifier(
+                unsafe { std::str::from_utf8_unchecked(id_str) },
+                spanned_token.1,
+            )))
+        }
         Token::Paren => {
             let inner_expression =
                 get_ifdef_macro_expression(src, previous_span.clone(), 0)?;
@@ -403,7 +415,7 @@ fn basic_ifdef() {
         `ifdef TEST
         this_should_be_included
         `endif",
-        vec![Token::SimpleIdentifier("this_should_be_included")]
+        vec![Token::SimpleIdentifier("this_should_be_included".into())]
     )
 }
 
@@ -413,7 +425,7 @@ fn basic_ifndef() {
         "`ifndef TEST
         this_should_be_included
         `endif",
-        vec![Token::SimpleIdentifier("this_should_be_included")]
+        vec![Token::SimpleIdentifier("this_should_be_included".into())]
     )
 }
 
@@ -449,11 +461,11 @@ fn else_used() {
         1 + 1 = 2
         `endif",
         vec![
-            Token::UnsignedNumber("1"),
+            Token::UnsignedNumber("1".into()),
             Token::Plus,
-            Token::UnsignedNumber("1"),
+            Token::UnsignedNumber("1".into()),
             Token::Eq,
-            Token::UnsignedNumber("2")
+            Token::UnsignedNumber("2".into())
         ]
     )
 }
@@ -467,7 +479,7 @@ fn else_unused() {
         `else
         use_other_signal
         `endif",
-        vec![Token::SimpleIdentifier("use_this_signal"),]
+        vec![Token::SimpleIdentifier("use_this_signal".into()),]
     )
 }
 
@@ -485,11 +497,11 @@ fn elsif() {
         1 + 1 = ?
         `endif",
         vec![
-            Token::UnsignedNumber("1"),
+            Token::UnsignedNumber("1".into()),
             Token::Plus,
-            Token::UnsignedNumber("1"),
+            Token::UnsignedNumber("1".into()),
             Token::Eq,
-            Token::UnsignedNumber("2")
+            Token::UnsignedNumber("2".into())
         ]
     )
 }
@@ -544,7 +556,7 @@ fn negate_expression() {
         `ifdef ( !TEST )
         bruh_just_use_ifndef
         `endif",
-        vec![Token::SimpleIdentifier("bruh_just_use_ifndef")]
+        vec![Token::SimpleIdentifier("bruh_just_use_ifndef".into())]
     )
 }
 
@@ -562,7 +574,7 @@ fn and_expression() {
         `ifdef (PEAR && ORANGE)
         none_true
         `endif",
-        vec![Token::SimpleIdentifier("both_true")]
+        vec![Token::SimpleIdentifier("both_true".into())]
     )
 }
 
@@ -581,8 +593,8 @@ fn or_expression() {
         none_true
         `endif",
         vec![
-            Token::SimpleIdentifier("both_true"),
-            Token::SimpleIdentifier("one_true")
+            Token::SimpleIdentifier("both_true".into()),
+            Token::SimpleIdentifier("one_true".into())
         ]
     )
 }
@@ -605,9 +617,9 @@ fn implication_expression() {
         false_implies_false
         `endif",
         vec![
-            Token::SimpleIdentifier("true_implies_true"),
-            Token::SimpleIdentifier("false_implies_true"),
-            Token::SimpleIdentifier("false_implies_false"),
+            Token::SimpleIdentifier("true_implies_true".into()),
+            Token::SimpleIdentifier("false_implies_true".into()),
+            Token::SimpleIdentifier("false_implies_false".into()),
         ]
     )
 }
@@ -630,8 +642,8 @@ fn equivalence_expression() {
         false_false
         `endif",
         vec![
-            Token::SimpleIdentifier("true_true"),
-            Token::SimpleIdentifier("false_false"),
+            Token::SimpleIdentifier("true_true".into()),
+            Token::SimpleIdentifier("false_false".into()),
         ]
     )
 }
@@ -645,7 +657,7 @@ fn elsif_expression() {
         `elsif (APPLES || BANANAS)
         oh_no_wait_use_or
         `endif",
-        vec![Token::SimpleIdentifier("oh_no_wait_use_or")]
+        vec![Token::SimpleIdentifier("oh_no_wait_use_or".into())]
     )
 }
 
@@ -656,7 +668,7 @@ fn composite_expression() {
         `ifdef ((APPLE -> (BANANA || ORANGE)) <-> PEAR)
         whoa_multiple_operators
         `endif",
-        vec![Token::SimpleIdentifier("whoa_multiple_operators")]
+        vec![Token::SimpleIdentifier("whoa_multiple_operators".into())]
     )
 }
 
@@ -669,7 +681,7 @@ fn associativity() {
         `else
         left_associative
         `endif",
-        vec![Token::SimpleIdentifier("right_associative")]
+        vec![Token::SimpleIdentifier("right_associative".into())]
     );
     // Equal precedence
     check_preprocessor!(
@@ -679,7 +691,7 @@ fn associativity() {
         `else
         left_associative
         `endif",
-        vec![Token::SimpleIdentifier("right_associative")]
+        vec![Token::SimpleIdentifier("right_associative".into())]
     );
     check_preprocessor!(
         "`define MIDDLE
@@ -689,7 +701,7 @@ fn associativity() {
         `else
         right_associative
         `endif",
-        vec![Token::SimpleIdentifier("right_associative")]
+        vec![Token::SimpleIdentifier("right_associative".into())]
     )
 }
 
@@ -702,7 +714,7 @@ fn precedence() {
         `else
         not_higher_than_and
         `endif",
-        vec![Token::SimpleIdentifier("not_higher_than_and")]
+        vec![Token::SimpleIdentifier("not_higher_than_and".into())]
     );
     check_preprocessor!(
         "
@@ -712,7 +724,7 @@ fn precedence() {
         `else
         or_higher_than_and
         `endif",
-        vec![Token::SimpleIdentifier("and_higher_than_or")]
+        vec![Token::SimpleIdentifier("and_higher_than_or".into())]
     );
     check_preprocessor!(
         "
@@ -723,7 +735,7 @@ fn precedence() {
         `else
         or_higher_than_implication
         `endif",
-        vec![Token::SimpleIdentifier("or_higher_than_implication")]
+        vec![Token::SimpleIdentifier("or_higher_than_implication".into())]
     );
     check_preprocessor!(
         "`define APPLE
@@ -732,7 +744,7 @@ fn precedence() {
         `else
         or_higher_than_equivalence
         `endif",
-        vec![Token::SimpleIdentifier("or_higher_than_equivalence")]
+        vec![Token::SimpleIdentifier("or_higher_than_equivalence".into())]
     )
 }
 
@@ -747,7 +759,7 @@ fn nested_ifndef_else() {
         this_should_not_be_included
         `endif
         `endif",
-        vec![Token::SimpleIdentifier("this_should_be_included")]
+        vec![Token::SimpleIdentifier("this_should_be_included".into())]
     );
     check_preprocessor!(
         "`define TEST
@@ -758,7 +770,7 @@ fn nested_ifndef_else() {
         this_should_not_be_included
         `endif
         `endif",
-        vec![Token::SimpleIdentifier("this_should_be_included")]
+        vec![Token::SimpleIdentifier("this_should_be_included".into())]
     );
     check_preprocessor!(
         "`define TEST
@@ -769,7 +781,7 @@ fn nested_ifndef_else() {
         this_should_not_be_included
         `endif
         `endif",
-        vec![Token::SimpleIdentifier("this_should_be_included")]
+        vec![Token::SimpleIdentifier("this_should_be_included".into())]
     );
     check_preprocessor!(
         "`define TEST
@@ -780,7 +792,7 @@ fn nested_ifndef_else() {
         this_should_not_be_included
         `endif
         `endif",
-        vec![Token::SimpleIdentifier("this_should_be_included")]
+        vec![Token::SimpleIdentifier("this_should_be_included".into())]
     );
     check_preprocessor!(
         "`define TEST
@@ -795,6 +807,6 @@ fn nested_ifndef_else() {
         `endif
         `endif
         `endif",
-        vec![Token::SimpleIdentifier("this_should_be_included")]
+        vec![Token::SimpleIdentifier("this_should_be_included".into())]
     );
 }

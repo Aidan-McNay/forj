@@ -96,14 +96,22 @@ pub fn finish_number_parser<'s>(
 ) -> ModalResult<FinishNumber<'s>, VerboseError<'s>> {
     (
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
-            Token::UnsignedNumber("0") => {
-                Some(FinishNumber::Zero(Metadata::new(s.1.clone(), vec![])))
-            }
-            Token::UnsignedNumber("1") => {
-                Some(FinishNumber::One(Metadata::new(s.1.clone(), vec![])))
-            }
-            Token::UnsignedNumber("2") => {
-                Some(FinishNumber::Two(Metadata::new(s.1.clone(), vec![])))
+            Token::UnsignedNumber(number_bytes) => {
+                match Into::<&[u8]>::into(number_bytes) {
+                    b"0" => Some(FinishNumber::Zero(Metadata::new(
+                        s.1.clone(),
+                        vec![],
+                    ))),
+                    b"1" => Some(FinishNumber::One(Metadata::new(
+                        s.1.clone(),
+                        vec![],
+                    ))),
+                    b"2" => Some(FinishNumber::Two(Metadata::new(
+                        s.1.clone(),
+                        vec![],
+                    ))),
+                    _ => None,
+                }
             }
             _ => None,
         }),

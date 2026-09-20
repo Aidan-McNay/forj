@@ -38,7 +38,7 @@ use winnow::error::{ErrMode, ParserError};
 /// # use forj_parser::*;
 /// # let mut state = PreprocessorState::new(vec![], vec![]);
 /// # let cache = PreprocessorCache::new();
-/// let file_contents = "module test_module; endmodule";
+/// let file_contents = "module test_module; endmodule".as_bytes();
 /// let tokens = lex(file_contents, "test_file.v").tokens();
 /// let pp_tokens = preprocess(tokens, &mut state, &cache).unwrap();
 /// let ast: forj_syntax::SourceText<'_> = parse(&pp_tokens).unwrap();

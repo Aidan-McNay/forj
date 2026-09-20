@@ -10,23 +10,25 @@
 use core::ops::Range;
 
 use crate::*;
+use bstr::BStr;
 use logos::{Lexer, Logos, SpannedIter};
 
 #[derive(Logos, Debug, Clone, PartialEq, Eq, Copy)]
+#[logos(utf8 = false)]
 enum Number<'a> {
-    #[regex(r"[0-9][0-9_]*\.[0-9][0-9_]*", |lex| lex.slice())]
-    FixedPointNumber(&'a str),
-    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(b|B)[^\S\r\n]*[0-1xXzZ\?][0-1xXzZ\?_]*", |lex| lex.slice())]
-    BinaryNumber(&'a str),
-    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(o|O)[^\S\r\n]*[0-7xXzZ\?][0-7xXzZ\?_]*", |lex| lex.slice())]
-    OctalNumber(&'a str),
-    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(d|D)[^\S\r\n]*[0-9][0-9_]*", |lex| lex.slice())]
-    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(d|D)[^\S\r\n]*(x|X|z|Z|\?)_*", |lex| lex.slice())]
-    DecimalNumber(&'a str),
-    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(h|H)[^\S\r\n]*[0-9a-fA-FxXzZ\?][0-9a-fA-FxXzZ\?_]*", |lex| lex.slice())]
-    HexNumber(&'a str),
-    #[regex(r"[0-9][0-9_]*(\.[0-9][0-9_]*)?(e|E)(\+|-)?[0-9][0-9_]*", |lex| lex.slice())]
-    ScientificNumber(&'a str),
+    #[regex(r"[0-9][0-9_]*\.[0-9][0-9_]*", |lex| Into::<&BStr>::into(lex.slice()))]
+    FixedPointNumber(&'a BStr),
+    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(b|B)[^\S\r\n]*[0-1xXzZ\?][0-1xXzZ\?_]*", |lex| Into::<&BStr>::into(lex.slice()))]
+    BinaryNumber(&'a BStr),
+    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(o|O)[^\S\r\n]*[0-7xXzZ\?][0-7xXzZ\?_]*", |lex| Into::<&BStr>::into(lex.slice()))]
+    OctalNumber(&'a BStr),
+    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(d|D)[^\S\r\n]*[0-9][0-9_]*", |lex| Into::<&BStr>::into(lex.slice()))]
+    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(d|D)[^\S\r\n]*(x|X|z|Z|\?)_*", |lex| Into::<&BStr>::into(lex.slice()))]
+    DecimalNumber(&'a BStr),
+    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(h|H)[^\S\r\n]*[0-9a-fA-FxXzZ\?][0-9a-fA-FxXzZ\?_]*", |lex| Into::<&BStr>::into(lex.slice()))]
+    HexNumber(&'a BStr),
+    #[regex(r"[0-9][0-9_]*(\.[0-9][0-9_]*)?(e|E)(\+|-)?[0-9][0-9_]*", |lex| Into::<&BStr>::into(lex.slice()))]
+    ScientificNumber(&'a BStr),
 }
 
 impl<'a> From<Number<'a>> for Token<'a> {
@@ -45,7 +47,7 @@ impl<'a> From<Number<'a>> for Token<'a> {
 fn get_expanded_slice<'s>(
     span: &Span<'s>,
     state: &PreprocessorState<'s>,
-) -> Option<&'s str> {
+) -> Option<&'s BStr> {
     let mut curr_span = span;
     loop {
         if let Some(expanded_span) = curr_span.expanded_from {
@@ -60,8 +62,8 @@ fn get_expanded_slice<'s>(
 // The numbers we've tried so far
 #[derive(Debug)]
 struct NumberHistory<'s> {
-    pub curr_num: (&'s str, Span<'s>),
-    pub prev_num: (&'s str, Span<'s>),
+    pub curr_num: (&'s BStr, Span<'s>),
+    pub prev_num: (&'s BStr, Span<'s>),
 }
 
 impl<'s> NumberHistory<'s> {
@@ -96,14 +98,14 @@ impl<'s> NumberHistory<'s> {
     ) {
         let mut next_num_str = self.curr_num.0.to_owned();
         if new_token.1.bytes.start > self.curr_num.1.bytes.end {
-            next_num_str = next_num_str
-                + std::iter::repeat(' ')
-                    .take(new_token.1.bytes.start - self.curr_num.1.bytes.end)
-                    .collect::<String>()
-                    .as_str();
+            next_num_str.extend(
+                std::iter::repeat(b' ')
+                    .take(new_token.1.bytes.start - self.curr_num.1.bytes.end),
+            );
         };
-        next_num_str =
-            next_num_str + get_expanded_slice(&new_token.1, state).unwrap();
+        next_num_str.extend_from_slice(
+            get_expanded_slice(&new_token.1, state).unwrap().into(),
+        );
         let next_num_span = Span {
             bytes: Range {
                 start: self.curr_num.1.bytes.start,
@@ -113,7 +115,10 @@ impl<'s> NumberHistory<'s> {
         };
         self.prev_num = std::mem::replace(
             &mut self.curr_num,
-            (cache.retain_string(next_num_str), next_num_span),
+            (
+                cache.retain_bytes(next_num_str.into()).into(),
+                next_num_span,
+            ),
         );
     }
 }
@@ -129,7 +134,7 @@ pub fn preprocess_possible_number<'s>(
     let mut popped_tokens = vec![];
     loop {
         let mut lexer: SpannedIter<'s, Number> =
-            Lexer::new_partial(number_hist.curr_num.0).spanned();
+            Lexer::new_partial(number_hist.curr_num.0.into()).spanned();
         match lexer.next() {
             Some((Ok(number), _)) => {
                 // Produces the number before the latest addition, since the lexer
@@ -164,7 +169,8 @@ pub fn preprocess_possible_number<'s>(
                         Ok(None) => {
                             // Check if we have a non-greedy match
                             let mut complete_lexer: SpannedIter<'s, Number> =
-                                Lexer::new(number_hist.curr_num.0).spanned();
+                                Lexer::new(number_hist.curr_num.0.into())
+                                    .spanned();
                             if let Some((Ok(number), _)) = complete_lexer.next()
                             {
                                 src.prepend_tokens(std::iter::once(
@@ -199,17 +205,17 @@ pub fn preprocess_possible_number<'s>(
 #[test]
 fn basic_number() {
     // Check that basic number parsing still works
-    check_preprocessor!("3'o1", vec![Token::OctalNumber("3'o1")]);
-    check_preprocessor!("7'hF", vec![Token::HexNumber("7'hF")])
+    check_preprocessor!("3'o1", vec![Token::OctalNumber("3'o1".into())]);
+    check_preprocessor!("7'hF", vec![Token::HexNumber("7'hF".into())])
 }
 
 #[test]
 fn spaced_number() {
     // Check that basic number parsing still works
-    check_preprocessor!("1 'b 0", vec![Token::BinaryNumber("1 'b 0")]);
+    check_preprocessor!("1 'b 0", vec![Token::BinaryNumber("1 'b 0".into())]);
     check_preprocessor!(
         "2    'd    7",
-        vec![Token::DecimalNumber("2    'd    7")]
+        vec![Token::DecimalNumber("2    'd    7".into())]
     )
 }
 
@@ -218,7 +224,7 @@ fn basic_substitution() {
     check_preprocessor!(
         "`define WIDTH 7
         `WIDTH'h4",
-        vec![Token::HexNumber("7'h4")]
+        vec![Token::HexNumber("7'h4".into())]
     )
 }
 
@@ -227,12 +233,12 @@ fn non_start_substitution() {
     check_preprocessor!(
         "`define BASE 'd
         5`BASE 4",
-        vec![Token::DecimalNumber("5'd 4")]
+        vec![Token::DecimalNumber("5'd 4".into())]
     );
     check_preprocessor!(
         "`define VALUE 12
         4'O`VALUE",
-        vec![Token::OctalNumber("4'O12")]
+        vec![Token::OctalNumber("4'O12".into())]
     )
 }
 
@@ -243,28 +249,28 @@ fn multiple_substitution() {
         `define BASE 'h
         `define VALUE 7
         `SIZE`BASE 7",
-        vec![Token::HexNumber("3'h 7")]
+        vec![Token::HexNumber("3'h 7".into())]
     );
     check_preprocessor!(
         "`define SIZE 3
         `define BASE 'h
         `define VALUE 7
         `SIZE'h`VALUE",
-        vec![Token::HexNumber("3'h7")]
+        vec![Token::HexNumber("3'h7".into())]
     );
     check_preprocessor!(
         "`define SIZE 3
         `define BASE 'h
         `define VALUE 7
         3`BASE`VALUE",
-        vec![Token::HexNumber("3'h7")]
+        vec![Token::HexNumber("3'h7".into())]
     );
     check_preprocessor!(
         "`define SIZE 3
         `define BASE 'h
         `define VALUE 7
         `SIZE`BASE`VALUE",
-        vec![Token::HexNumber("3'h7")]
+        vec![Token::HexNumber("3'h7".into())]
     );
 }
 
@@ -274,7 +280,7 @@ fn multi_substitution_value() {
         "`define VALUE1 F
         `define VALUE2 A
         16'h`VALUE1`VALUE2",
-        vec![Token::HexNumber("16'hFA")]
+        vec![Token::HexNumber("16'hFA".into())]
     );
 }
 
@@ -284,18 +290,18 @@ fn trailing_tokens() {
         "`define DEPTH 9
         `DEPTH'h4 + 9'h5",
         vec![
-            Token::HexNumber("9'h4"),
+            Token::HexNumber("9'h4".into()),
             Token::Plus,
-            Token::HexNumber("9'h5")
+            Token::HexNumber("9'h5".into())
         ]
     );
     check_preprocessor!(
         "`define DEPTH 13
         `DEPTH'hFA+8'hDE",
         vec![
-            Token::HexNumber("13'hFA"),
+            Token::HexNumber("13'hFA".into()),
             Token::Plus,
-            Token::HexNumber("8'hDE")
+            Token::HexNumber("8'hDE".into())
         ]
     );
     check_preprocessor!(
@@ -303,9 +309,9 @@ fn trailing_tokens() {
         `define VALUE FA
         `DEPTH'h`VALUE+8'hDE",
         vec![
-            Token::HexNumber("13'hFA"),
+            Token::HexNumber("13'hFA".into()),
             Token::Plus,
-            Token::HexNumber("8'hDE")
+            Token::HexNumber("8'hDE".into())
         ]
     )
 }

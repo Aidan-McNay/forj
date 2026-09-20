@@ -363,23 +363,34 @@ fn time_unit_parser<'s>(
 ) -> ModalResult<TimeUnit<'s>, VerboseError<'s>> {
     (
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
-            Token::SimpleIdentifier("s") => {
-                Some(TimeUnit::S(Metadata::new(s.1.clone(), Vec::new())))
-            }
-            Token::SimpleIdentifier("ms") => {
-                Some(TimeUnit::S(Metadata::new(s.1.clone(), Vec::new())))
-            }
-            Token::SimpleIdentifier("us") => {
-                Some(TimeUnit::S(Metadata::new(s.1.clone(), Vec::new())))
-            }
-            Token::SimpleIdentifier("ns") => {
-                Some(TimeUnit::S(Metadata::new(s.1.clone(), Vec::new())))
-            }
-            Token::SimpleIdentifier("ps") => {
-                Some(TimeUnit::S(Metadata::new(s.1.clone(), Vec::new())))
-            }
-            Token::SimpleIdentifier("fs") => {
-                Some(TimeUnit::S(Metadata::new(s.1.clone(), Vec::new())))
+            Token::SimpleIdentifier(id_text) => {
+                match Into::<&[u8]>::into(id_text) {
+                    b"s" => Some(TimeUnit::S(Metadata::new(
+                        s.1.clone(),
+                        Vec::new(),
+                    ))),
+                    b"ms" => Some(TimeUnit::S(Metadata::new(
+                        s.1.clone(),
+                        Vec::new(),
+                    ))),
+                    b"us" => Some(TimeUnit::S(Metadata::new(
+                        s.1.clone(),
+                        Vec::new(),
+                    ))),
+                    b"ns" => Some(TimeUnit::S(Metadata::new(
+                        s.1.clone(),
+                        Vec::new(),
+                    ))),
+                    b"ps" => Some(TimeUnit::S(Metadata::new(
+                        s.1.clone(),
+                        Vec::new(),
+                    ))),
+                    b"fs" => Some(TimeUnit::S(Metadata::new(
+                        s.1.clone(),
+                        Vec::new(),
+                    ))),
+                    _ => None,
+                }
             }
             _ => None,
         }),

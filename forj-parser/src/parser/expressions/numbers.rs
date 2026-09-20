@@ -48,7 +48,7 @@ pub fn decimal_number_parser<'s>(
     )
         .map(|((num, metadata), non_trivia)| {
             DecimalNumber::Sized(Box::new((
-                num,
+                unsafe { std::str::from_utf8_unchecked(num) },
                 replace_non_trivia(metadata, non_trivia),
             )))
         });
@@ -73,7 +73,10 @@ pub fn binary_number_parser<'s>(
         non_trivia_parser,
     )
         .map(|((num, metadata), non_trivia)| {
-            BinaryNumber(num, replace_non_trivia(metadata, non_trivia))
+            BinaryNumber(
+                unsafe { std::str::from_utf8_unchecked(num) },
+                replace_non_trivia(metadata, non_trivia),
+            )
         })
         .context("a binary number")
         .parse_next(input)
@@ -92,7 +95,10 @@ pub fn octal_number_parser<'s>(
         non_trivia_parser,
     )
         .map(|((num, metadata), non_trivia)| {
-            OctalNumber(num, replace_non_trivia(metadata, non_trivia))
+            OctalNumber(
+                unsafe { std::str::from_utf8_unchecked(num) },
+                replace_non_trivia(metadata, non_trivia),
+            )
         })
         .context("an octal number")
         .parse_next(input)
@@ -111,7 +117,10 @@ pub fn hex_number_parser<'s>(
         non_trivia_parser,
     )
         .map(|((num, metadata), non_trivia)| {
-            HexNumber(num, replace_non_trivia(metadata, non_trivia))
+            HexNumber(
+                unsafe { std::str::from_utf8_unchecked(num) },
+                replace_non_trivia(metadata, non_trivia),
+            )
         })
         .context("a hex number")
         .parse_next(input)
@@ -141,7 +150,10 @@ pub fn fixed_point_number_parser<'s>(
         non_trivia_parser,
     )
         .map(|((num, metadata), non_trivia)| {
-            FixedPointNumber(num, replace_non_trivia(metadata, non_trivia))
+            FixedPointNumber(
+                unsafe { std::str::from_utf8_unchecked(num) },
+                replace_non_trivia(metadata, non_trivia),
+            )
         })
         .context("a fixed-point number")
         .parse_next(input)
@@ -160,7 +172,10 @@ pub fn scientific_number_parser<'s>(
         non_trivia_parser,
     )
         .map(|((num, metadata), non_trivia)| {
-            ScientificNumber(num, replace_non_trivia(metadata, non_trivia))
+            ScientificNumber(
+                unsafe { std::str::from_utf8_unchecked(num) },
+                replace_non_trivia(metadata, non_trivia),
+            )
         })
         .context("a scientific-notation number")
         .parse_next(input)
@@ -179,7 +194,10 @@ pub fn unsigned_number_parser<'s>(
         non_trivia_parser,
     )
         .map(|((num, metadata), non_trivia)| {
-            UnsignedNumber(num, replace_non_trivia(metadata, non_trivia))
+            UnsignedNumber(
+                unsafe { std::str::from_utf8_unchecked(num) },
+                replace_non_trivia(metadata, non_trivia),
+            )
         })
         .context("an unsigned number")
         .parse_next(input)
@@ -198,7 +216,10 @@ pub fn unbased_unsized_literal_parser<'s>(
         non_trivia_parser,
     )
         .map(|((num, metadata), non_trivia)| {
-            UnbasedUnsizedLiteral(num, replace_non_trivia(metadata, non_trivia))
+            UnbasedUnsizedLiteral(
+                unsafe { std::str::from_utf8_unchecked(num) },
+                replace_non_trivia(metadata, non_trivia),
+            )
         })
         .context("an unsized literal")
         .parse_next(input)

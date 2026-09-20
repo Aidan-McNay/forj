@@ -25,9 +25,12 @@ fn get_include_path<'s>(
         });
     };
     match spanned_token.0 {
-        Token::StringLiteral(id_str) => {
-            Ok((IncludePath::ProjectRelative(id_str), spanned_token.1))
-        }
+        Token::StringLiteral(id_str) => Ok((
+            IncludePath::ProjectRelative(unsafe {
+                std::str::from_utf8_unchecked(id_str)
+            }),
+            spanned_token.1,
+        )),
         Token::Lt => loop {
             let Some(next_token) = preprocess_single(src, state, cache)? else {
                 break Err(PreprocessorError::VerboseError {
@@ -57,7 +60,12 @@ fn get_include_path<'s>(
                     let path = state.get_slice(&path_span).unwrap();
                     let mut overall_span = next_token.1;
                     overall_span.bytes.start = spanned_token.1.bytes.start;
-                    break Ok((IncludePath::ToolRelative(path), overall_span));
+                    break Ok((
+                        IncludePath::ToolRelative(unsafe {
+                            std::str::from_utf8_unchecked(path)
+                        }),
+                        overall_span,
+                    ));
                 }
                 _ => (),
             }
@@ -111,14 +119,15 @@ fn basic_include() {
     let cache = PreprocessorCache::new();
     let _ = state.retain_file(
         "included.sv".to_string(),
-        "1 + 2".to_string(),
+        "1 + 2".as_bytes().to_vec(),
         &cache,
     );
     let (_, src) = state.retain_file(
         "<test>".to_string(),
         "`include \"included.sv\"
         + 3"
-        .to_string(),
+        .as_bytes()
+        .to_vec(),
         &cache,
     );
     let input = lex(src, "<test>").tokens().collect::<Vec<_>>();
@@ -132,11 +141,11 @@ fn basic_include() {
             assert_eq!(
                 result,
                 vec![
-                    Token::UnsignedNumber("1"),
+                    Token::UnsignedNumber("1".into()),
                     Token::Plus,
-                    Token::UnsignedNumber("2"),
+                    Token::UnsignedNumber("2".into()),
                     Token::Plus,
-                    Token::UnsignedNumber("3")
+                    Token::UnsignedNumber("3".into())
                 ]
             );
             if let Some(err) = state.errors.first() {

@@ -71,12 +71,14 @@ fn get_define_name<'s>(
         });
     };
     match spanned_token.0 {
-        Token::SimpleIdentifier(id_str) => {
-            Ok(SpannedString(id_str, spanned_token.1))
-        }
-        Token::EscapedIdentifier(id_str) => {
-            Ok(SpannedString(id_str, spanned_token.1))
-        }
+        Token::SimpleIdentifier(id_str) => Ok(SpannedString(
+            unsafe { std::str::from_utf8_unchecked(id_str) },
+            spanned_token.1,
+        )),
+        Token::EscapedIdentifier(id_str) => Ok(SpannedString(
+            unsafe { std::str::from_utf8_unchecked(id_str) },
+            spanned_token.1,
+        )),
         _ => Err(PreprocessorError::VerboseError {
             err: VerboseError {
                 span: spanned_token.1,
@@ -210,7 +212,10 @@ fn get_define_function_arg<'s>(
     let arg_id = loop {
         match get_define_token(src, paren_span.clone())? {
             (SpannedToken(Token::SimpleIdentifier(id_str), id_span), _) => {
-                break SpannedString(id_str, id_span);
+                break SpannedString(
+                    unsafe { std::str::from_utf8_unchecked(id_str) },
+                    id_span,
+                );
             }
             (SpannedToken(Token::Newline, _), _) => {
                 continue;
@@ -353,7 +358,7 @@ fn basic() {
     check_preprocessor!(
         "`define TEST 1
         `TEST",
-        vec![Token::UnsignedNumber("1")]
+        vec![Token::UnsignedNumber("1".into())]
     )
 }
 
@@ -363,11 +368,11 @@ fn multi_token() {
         "`define TEST 1 + 1 = 2
         `TEST",
         vec![
-            Token::UnsignedNumber("1"),
+            Token::UnsignedNumber("1".into()),
             Token::Plus,
-            Token::UnsignedNumber("1"),
+            Token::UnsignedNumber("1".into()),
             Token::Eq,
-            Token::UnsignedNumber("2")
+            Token::UnsignedNumber("2".into())
         ]
     )
 }
@@ -380,7 +385,7 @@ fn empty() {
         `TEST
         `TEST
         `TEST",
-        vec![Token::UnsignedNumber("2"),]
+        vec![Token::UnsignedNumber("2".into()),]
     )
 }
 
@@ -396,12 +401,12 @@ fn escaped_newlines() {
         3
         `TEST",
         vec![
-            Token::UnsignedNumber("2"),
-            Token::UnsignedNumber("3"),
+            Token::UnsignedNumber("2".into()),
+            Token::UnsignedNumber("3".into()),
             Token::Assign,
-            Token::SimpleIdentifier("test_signal"),
+            Token::SimpleIdentifier("test_signal".into()),
             Token::Eq,
-            Token::UnsignedNumber("1"),
+            Token::UnsignedNumber("1".into()),
         ]
     )
 }
@@ -442,7 +447,7 @@ fn undefine_redefine() {
         `undef TEST
         `define TEST 2
         `TEST",
-        vec![Token::UnsignedNumber("2")]
+        vec![Token::UnsignedNumber("2".into())]
     )
 }
 
@@ -470,10 +475,10 @@ fn coverage_constants() {
         `SV_COV_TOGGLE
         `SV_COV_OK",
         vec![
-            Token::UnsignedNumber("0"),
-            Token::UnsignedNumber("11"),
-            Token::UnsignedNumber("23"),
-            Token::UnsignedNumber("1")
+            Token::UnsignedNumber("0".into()),
+            Token::UnsignedNumber("11".into()),
+            Token::UnsignedNumber("23".into()),
+            Token::UnsignedNumber("1".into())
         ]
     )
 }

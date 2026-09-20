@@ -19,6 +19,7 @@ use elsa::FrozenVec;
 pub struct PreprocessorCache<'a> {
     spans: FrozenVec<Box<Span<'a>>>,
     strings: FrozenVec<Box<str>>,
+    bytes: FrozenVec<Vec<u8>>,
 }
 
 impl<'a> PreprocessorCache<'a> {
@@ -30,11 +31,16 @@ impl<'a> PreprocessorCache<'a> {
     pub fn retain_string(&self, string: String) -> &str {
         self.strings.push_get(string.into_boxed_str())
     }
+    /// Store a [`Vec<u8>`] for the cache's lifetime
+    pub fn retain_bytes(&self, bytes: Vec<u8>) -> &[u8] {
+        self.bytes.push_get(bytes)
+    }
     /// Create a new cache for storing preprocessor results
     pub fn new() -> Self {
         Self {
             spans: FrozenVec::new(),
             strings: FrozenVec::new(),
+            bytes: FrozenVec::new(),
         }
     }
 }

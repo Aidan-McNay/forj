@@ -291,7 +291,8 @@ pub(crate) fn preprocess_helper<'s>(
                 }
                 Token::BlockComment(_) => (),
                 Token::OnelineComment(comment_text) => {
-                    if comment_text.ends_with('\\') & !state.in_text_macro_arg()
+                    if comment_text.ends_with(b"\\")
+                        & !state.in_text_macro_arg()
                     {
                         // Counts as escaping a newline
                         //
@@ -306,7 +307,12 @@ pub(crate) fn preprocess_helper<'s>(
                         src,
                         state,
                         cache,
-                        (macro_name, spanned_token.1),
+                        (
+                            unsafe {
+                                std::str::from_utf8_unchecked(macro_name)
+                            },
+                            spanned_token.1,
+                        ),
                     ) {
                         recover(src, state, err)?;
                     }
@@ -438,7 +444,12 @@ pub(crate) fn preprocess_helper<'s>(
                         src,
                         state,
                         cache,
-                        (macro_name, spanned_token.1),
+                        (
+                            unsafe {
+                                std::str::from_utf8_unchecked(macro_name)
+                            },
+                            spanned_token.1,
+                        ),
                     ) {
                         recover(src, state, err)?;
                     }
@@ -509,13 +520,15 @@ pub(crate) fn preprocess_helper<'s>(
                 }
                 Token::DirUnderscoreFile => dest.push(SpannedToken(
                     Token::StringLiteral(
-                        state.get_line_directive_file(&spanned_token.1),
+                        state.get_line_directive_file(&spanned_token.1).into(),
                     ),
                     spanned_token.1,
                 )),
                 Token::DirUnderscoreLine => dest.push(SpannedToken(
                     Token::UnsignedNumber(
-                        state.get_line_directive_line(&spanned_token.1, cache),
+                        state
+                            .get_line_directive_line(&spanned_token.1, cache)
+                            .into(),
                     ),
                     spanned_token.1,
                 )),
@@ -531,7 +544,7 @@ pub(crate) fn preprocess_helper<'s>(
                     if token.keyword_replace(state.get_keyword_standard()) =>
                 {
                     let new_token = SpannedToken(
-                        Token::SimpleIdentifier(token.as_str()),
+                        Token::SimpleIdentifier(token.as_str().into()),
                         spanned_token.1,
                     );
                     dest.push(new_token)
@@ -575,7 +588,15 @@ pub(crate) fn preprocess_single<'s>(
             }
             Some(SpannedToken(Token::BlockComment(_), _)) => (),
             Some(SpannedToken(Token::TextMacro(macro_name), macro_span)) => {
-                preprocess_macro(src, state, cache, (macro_name, macro_span))?;
+                preprocess_macro(
+                    src,
+                    state,
+                    cache,
+                    (
+                        unsafe { std::str::from_utf8_unchecked(macro_name) },
+                        macro_span,
+                    ),
+                )?;
             }
             Some(spanned_token) => {
                 if spanned_token
@@ -583,7 +604,9 @@ pub(crate) fn preprocess_single<'s>(
                     .keyword_replace(state.get_keyword_standard())
                 {
                     let new_token = SpannedToken(
-                        Token::SimpleIdentifier(spanned_token.0.as_str()),
+                        Token::SimpleIdentifier(
+                            spanned_token.0.as_str().into(),
+                        ),
                         spanned_token.1,
                     );
                     break Ok(Some(new_token));
@@ -624,13 +647,13 @@ pub(crate) fn preprocess_cleanup<'s>(state: &mut PreprocessorState<'s>) {
 /// let file_contents = "
 /// `define TEST(a, b) a + b
 /// `TEST(1, 2)
-/// ";
-/// state.retain_file("test_file.v".to_string(), file_contents.to_string(), &cache);
+/// ".as_bytes();
+/// state.retain_file("test_file.v".to_string(), file_contents.to_vec(), &cache);
 /// let tokens = lex(file_contents, "test_file.v").tokens();
 /// let mut pp_tokens = preprocess(tokens, &mut state, &cache).unwrap().into_iter();
-/// assert_eq!(pp_tokens.next().unwrap().0, Token::UnsignedNumber("1"));
+/// assert_eq!(pp_tokens.next().unwrap().0, Token::UnsignedNumber("1".into()));
 /// assert_eq!(pp_tokens.next().unwrap().0, Token::Plus);
-/// assert_eq!(pp_tokens.next().unwrap().0, Token::UnsignedNumber("2"));
+/// assert_eq!(pp_tokens.next().unwrap().0, Token::UnsignedNumber("2".into()));
 /// assert_eq!(pp_tokens.next(), None)
 /// ```
 pub fn preprocess<'s>(

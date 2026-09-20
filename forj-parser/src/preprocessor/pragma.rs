@@ -48,7 +48,10 @@ pub(crate) fn get_pragma_name<'s>(
         });
     };
     match spanned_token.0 {
-        Token::SimpleIdentifier(text) => Ok((text, spanned_token.1)),
+        Token::SimpleIdentifier(text) => Ok((
+            unsafe { std::str::from_utf8_unchecked(text) },
+            spanned_token.1,
+        )),
         _ => Err(PreprocessorError::VerboseError {
             err: VerboseError {
                 span: spanned_token.1,
@@ -98,11 +101,17 @@ pub(crate) fn get_pragma_value<'s>(
         | Token::OctalNumber(text)
         | Token::DecimalNumber(text)
         | Token::HexNumber(text)
-        | Token::ScientificNumber(text) => Ok(PragmaValue::Number(text)),
+        | Token::ScientificNumber(text) => Ok(PragmaValue::Number(unsafe {
+            std::str::from_utf8_unchecked(text)
+        })),
         Token::SimpleIdentifier(text) | Token::EscapedIdentifier(text) => {
-            Ok(PragmaValue::Identifier(text))
+            Ok(PragmaValue::Identifier(unsafe {
+                std::str::from_utf8_unchecked(text)
+            }))
         }
-        Token::StringLiteral(text) => Ok(PragmaValue::String(text)),
+        Token::StringLiteral(text) => Ok(PragmaValue::String(unsafe {
+            std::str::from_utf8_unchecked(text)
+        })),
         _ => Err(PreprocessorError::VerboseError {
             err: VerboseError {
                 span: curr_token.1,
@@ -187,9 +196,14 @@ pub(crate) fn get_pragma_expressions<'s>(
                         false,
                         pragma_span,
                     )?;
-                    PragmaExpression::KeywordValue(text, value)
+                    PragmaExpression::KeywordValue(
+                        unsafe { std::str::from_utf8_unchecked(text) },
+                        value,
+                    )
                 } else {
-                    PragmaExpression::Keyword(text)
+                    PragmaExpression::Keyword(unsafe {
+                        std::str::from_utf8_unchecked(text)
+                    })
                 }
             }
             _ => {
@@ -307,8 +321,11 @@ fn test_pragma(
 ) {
     let mut state = PreprocessorState::new(vec![], vec![]);
     let cache = PreprocessorCache::new();
-    let (_, src) =
-        state.retain_file("<test>".to_string(), input.to_string(), &cache);
+    let (_, src) = state.retain_file(
+        "<test>".to_string(),
+        input.to_string().into_bytes(),
+        &cache,
+    );
     let mut handler = BasicHandler::new();
     state.set_pragma_handler(name, &mut handler);
     let input = lex(src, "<test>").tokens().collect::<Vec<_>>();

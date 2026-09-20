@@ -4,9 +4,11 @@
 // The callbacks used to lex a SystemVerilog source
 
 use crate::*;
+use bstr::BStr;
 use logos::{Lexer, Logos};
 
 #[derive(Logos)]
+#[logos(utf8 = false)]
 enum StringToken {
     #[token(r#"""#)]
     Delimeter,
@@ -33,6 +35,7 @@ enum StringToken {
 }
 
 #[derive(Logos)]
+#[logos(utf8 = false)]
 enum MultilineStringToken {
     #[token(r#"""""#)]
     Delimeter,
@@ -42,7 +45,8 @@ enum MultilineStringToken {
     Other,
 }
 
-#[derive(Logos, Debug)]
+#[derive(Logos)]
+#[logos(utf8 = false)]
 enum PreprocessorStringToken {
     #[token(r#"`""#)]
     Delimeter,
@@ -69,6 +73,7 @@ enum PreprocessorStringToken {
 }
 
 #[derive(Logos)]
+#[logos(utf8 = false)]
 enum PreprocessorMultilineStringToken {
     #[token(r#"`""""#)]
     Delimeter,
@@ -95,6 +100,7 @@ enum PreprocessorMultilineStringToken {
 }
 
 #[derive(Logos)]
+#[logos(utf8 = false)]
 enum BlockCommentToken {
     #[token("*/")]
     Delimeter,
@@ -102,13 +108,13 @@ enum BlockCommentToken {
     Other,
 }
 
-pub fn oneline_comment<'a>(lex: &mut Lexer<'a, Token<'a>>) -> Option<&'a str> {
-    lex.slice().strip_prefix("//")
+pub fn oneline_comment<'a>(lex: &mut Lexer<'a, Token<'a>>) -> Option<&'a BStr> {
+    lex.slice().strip_prefix(b"//").map(Into::into)
 }
 
 pub fn block_comment<'a>(
     lex: &mut Lexer<'a, Token<'a>>,
-) -> Result<&'a str, String> {
+) -> Result<&'a BStr, String> {
     let start_span = lex.span();
     let mut block_comment_lexer = lex.clone().morph::<BlockCommentToken>();
     while let Some(string_token) = block_comment_lexer.next() {
@@ -117,7 +123,7 @@ pub fn block_comment<'a>(
                 let end_span = block_comment_lexer.span();
                 let string = &lex.source()[start_span.end..end_span.start];
                 lex.bump(end_span.end - start_span.end);
-                return Ok(string);
+                return Ok(string.into());
             }
             Ok(_) => (),
             Err(_) => {
@@ -134,7 +140,7 @@ pub fn block_comment<'a>(
 
 pub fn string_literal<'a>(
     lex: &mut Lexer<'a, Token<'a>>,
-) -> Result<&'a str, String> {
+) -> Result<&'a BStr, String> {
     let start_span = lex.span();
     let mut string_lexer = lex.clone().morph::<StringToken>();
     while let Some(string_token) = string_lexer.next() {
@@ -143,7 +149,7 @@ pub fn string_literal<'a>(
                 let end_span = string_lexer.span();
                 let string = &lex.source()[start_span.end..end_span.start];
                 lex.bump(end_span.end - start_span.end);
-                return Ok(string);
+                return Ok(string.into());
             }
             Ok(StringToken::Newline) => {
                 let end_span = string_lexer.span();
@@ -165,7 +171,7 @@ pub fn string_literal<'a>(
 
 pub fn multiline_string_literal<'a>(
     lex: &mut Lexer<'a, Token<'a>>,
-) -> Result<&'a str, String> {
+) -> Result<&'a BStr, String> {
     let start_span = lex.span();
     let mut multiline_string_lexer =
         lex.clone().morph::<MultilineStringToken>();
@@ -175,7 +181,7 @@ pub fn multiline_string_literal<'a>(
                 let end_span = multiline_string_lexer.span();
                 let string = &lex.source()[start_span.end..end_span.start];
                 lex.bump(end_span.end - start_span.end);
-                return Ok(string);
+                return Ok(string.into());
             }
             Ok(_) => (),
             Err(_) => {
@@ -192,7 +198,7 @@ pub fn multiline_string_literal<'a>(
 
 pub fn preprocessor_string_literal<'a>(
     lex: &mut Lexer<'a, Token<'a>>,
-) -> Result<&'a str, String> {
+) -> Result<&'a BStr, String> {
     let start_span = lex.span();
     let mut preprocessor_string_lexer =
         lex.clone().morph::<PreprocessorStringToken>();
@@ -202,7 +208,7 @@ pub fn preprocessor_string_literal<'a>(
                 let end_span = preprocessor_string_lexer.span();
                 let string = &lex.source()[start_span.end..end_span.start];
                 lex.bump(end_span.end - start_span.end);
-                return Ok(string);
+                return Ok(string.into());
             }
             Ok(PreprocessorStringToken::Newline) => {
                 let end_span = preprocessor_string_lexer.span();
@@ -228,7 +234,7 @@ pub fn preprocessor_string_literal<'a>(
 
 pub fn preprocessor_multiline_string_literal<'a>(
     lex: &mut Lexer<'a, Token<'a>>,
-) -> Result<&'a str, String> {
+) -> Result<&'a BStr, String> {
     let start_span = lex.span();
     let mut preprocessor_string_lexer =
         lex.clone().morph::<PreprocessorMultilineStringToken>();
@@ -238,7 +244,7 @@ pub fn preprocessor_multiline_string_literal<'a>(
                 let end_span = preprocessor_string_lexer.span();
                 let string = &lex.source()[start_span.end..end_span.start];
                 lex.bump(end_span.end - start_span.end);
-                return Ok(string);
+                return Ok(string.into());
             }
             Ok(PreprocessorMultilineStringToken::Newline) => {
                 let end_span = preprocessor_string_lexer.span();
@@ -264,8 +270,8 @@ pub fn preprocessor_multiline_string_literal<'a>(
     Err("Unterminated preprocessor multiline string literal".to_string())
 }
 
-pub fn text_macro<'a>(lex: &mut Lexer<'a, Token<'a>>) -> Option<&'a str> {
-    lex.slice().strip_prefix("`")
+pub fn text_macro<'a>(lex: &mut Lexer<'a, Token<'a>>) -> Option<&'a BStr> {
+    lex.slice().strip_prefix(b"`").map(Into::into)
 }
 
 #[test]
@@ -278,15 +284,16 @@ fn comments() {
         on multiple
         lines */",
         vec![
-            Token::OnelineComment(" This is a single-line comment"),
+            Token::OnelineComment(b" This is a single-line comment".into()),
             Token::Newline,
-            Token::BlockComment(" This is a block comment "),
+            Token::BlockComment(b" This is a block comment ".into()),
             Token::Newline,
             Token::BlockComment(
-                " Block comments
+                b" Block comments
         can be
         on multiple
         lines "
+                    .into()
             )
         ]
     )
@@ -296,11 +303,13 @@ fn comments() {
 fn string() {
     check_lexer!(
         "\" This is a string \"",
-        vec![Token::StringLiteral(" This is a string ")]
+        vec![Token::StringLiteral(b" This is a string ".into())]
     );
     check_lexer!(
         "\" This is a \\\n multiline string \"",
-        vec![Token::StringLiteral(" This is a \\\n multiline string ")]
+        vec![Token::StringLiteral(
+            b" This is a \\\n multiline string ".into()
+        )]
     )
 }
 
@@ -311,9 +320,10 @@ fn multiline_string() {
         spans multiple
         lines!\"\"\"",
         vec![Token::TripleQuoteStringLiteral(
-            "This string
+            b"This string
         spans multiple
         lines!"
+                .into()
         )]
     )
 }
@@ -323,13 +333,13 @@ fn preprocessor_string() {
     check_lexer!(
         "`\" This is a preprocessor string `\"",
         vec![Token::PreprocessorStringLiteral(
-            " This is a preprocessor string "
+            b" This is a preprocessor string ".into()
         )]
     );
     check_lexer!(
         "`\" This is a \\\n multiline preprocessor string `\"",
         vec![Token::PreprocessorStringLiteral(
-            " This is a \\\n multiline preprocessor string "
+            b" This is a \\\n multiline preprocessor string ".into()
         )]
     )
 }
@@ -339,7 +349,7 @@ fn preprocessor_multiline_string() {
     check_lexer!(
         "`\"\"\"This string \\\n spans multiple \\\n lines!`\"\"\"",
         vec![Token::PreprocessorTripleQuoteStringLiteral(
-            "This string \\\n spans multiple \\\n lines!"
+            b"This string \\\n spans multiple \\\n lines!".into()
         )]
     )
 }
@@ -350,13 +360,13 @@ fn text_macros() {
         "`TEST_MACRO
         `TEST_FUNCTION(ARGA, ARGB)",
         vec![
-            Token::TextMacro("TEST_MACRO"),
+            Token::TextMacro(b"TEST_MACRO".into()),
             Token::Newline,
-            Token::TextMacro("TEST_FUNCTION"),
+            Token::TextMacro(b"TEST_FUNCTION".into()),
             Token::Paren,
-            Token::SimpleIdentifier("ARGA"),
+            Token::SimpleIdentifier(b"ARGA".into()),
             Token::Comma,
-            Token::SimpleIdentifier("ARGB"),
+            Token::SimpleIdentifier(b"ARGB".into()),
             Token::EParen
         ]
     )

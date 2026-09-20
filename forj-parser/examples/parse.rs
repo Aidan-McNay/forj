@@ -51,7 +51,7 @@ fn main() -> ExitCode {
         .collect::<Vec<_>>();
     let mut state = preprocessor::PreprocessorState::new(includes, vec![]);
     for path in &args.paths {
-        let src = std::fs::read_to_string(&path).unwrap();
+        let src = std::fs::read(&path).unwrap();
         state.make_fresh(defines.clone());
         let (_, src) = state.retain_file(
             path.clone().into_os_string().into_string().unwrap(),

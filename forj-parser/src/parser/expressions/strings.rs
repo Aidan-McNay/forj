@@ -16,14 +16,14 @@ pub fn string_literal_parser<'s>(
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
             Token::StringLiteral(text) => {
                 Some(StringLiteral::QuotedString(Box::new(QuotedString(
-                    text,
+                    unsafe { std::str::from_utf8_unchecked(text) },
                     Metadata::new(s.1.clone(), Vec::new()),
                 ))))
             }
             Token::TripleQuoteStringLiteral(text) => {
                 Some(StringLiteral::TripleQuotedString(Box::new(
                     TripleQuotedString(
-                        text,
+                        unsafe { std::str::from_utf8_unchecked(text) },
                         Metadata::new(s.1.clone(), Vec::new()),
                     ),
                 )))

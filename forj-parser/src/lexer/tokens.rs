@@ -4,6 +4,7 @@
 // The tokens that a SystemVerilog source file is parsed into
 
 use crate::callbacks::*;
+use bstr::BStr;
 use logos::Logos;
 use std::fmt;
 
@@ -16,6 +17,7 @@ use std::fmt;
 #[derive(Logos, Debug, Clone, PartialEq, Eq, Copy)]
 #[logos(skip r"[ \t\f]+")]
 #[logos(error = String)]
+#[logos(utf8 = false)]
 pub enum Token<'a> {
     /// A lexer error
     Error,
@@ -773,52 +775,52 @@ pub enum Token<'a> {
     DollarInfo,
     // Comments
     #[regex(r"//[^\r\n]*", oneline_comment, allow_greedy = true)]
-    OnelineComment(&'a str),
+    OnelineComment(&'a BStr),
     #[token(r"/*", block_comment)]
-    BlockComment(&'a str),
+    BlockComment(&'a BStr),
     // Numbers
-    #[regex(r"[0-9][0-9_]*", |lex| lex.slice())]
-    UnsignedNumber(&'a str),
-    #[regex(r"[0-9][0-9_]*\.[0-9][0-9_]*", |lex| lex.slice())]
-    FixedPointNumber(&'a str),
-    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(b|B)[^\S\r\n]*[0-1xXzZ\?][0-1xXzZ\?_]*", |lex| lex.slice())]
-    BinaryNumber(&'a str),
-    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(o|O)[^\S\r\n]*[0-7xXzZ\?][0-7xXzZ\?_]*", |lex| lex.slice())]
-    OctalNumber(&'a str),
-    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(d|D)[^\S\r\n]*[0-9][0-9_]*", |lex| lex.slice())]
-    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(d|D)[^\S\r\n]*(x|X|z|Z|\?)_*", |lex| lex.slice())]
-    DecimalNumber(&'a str),
-    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(h|H)[^\S\r\n]*[0-9a-fA-FxXzZ\?][0-9a-fA-FxXzZ\?_]*", |lex| lex.slice())]
-    HexNumber(&'a str),
-    #[regex(r"[0-9][0-9_]*(\.[0-9][0-9_]*)?(e|E)(\+|-)?[0-9][0-9_]*", |lex| lex.slice())]
-    ScientificNumber(&'a str),
-    #[regex(r"('0|'1|'x|'X|'z|'Z|'\?)", |lex| lex.slice())]
-    UnbasedUnsizedLiteral(&'a str),
+    #[regex(r"[0-9][0-9_]*", |lex| Into::<&BStr>::into(lex.slice()))]
+    UnsignedNumber(&'a BStr),
+    #[regex(r"[0-9][0-9_]*\.[0-9][0-9_]*", |lex| Into::<&BStr>::into(lex.slice()))]
+    FixedPointNumber(&'a BStr),
+    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(b|B)[^\S\r\n]*[0-1xXzZ\?][0-1xXzZ\?_]*", |lex| Into::<&BStr>::into(lex.slice()))]
+    BinaryNumber(&'a BStr),
+    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(o|O)[^\S\r\n]*[0-7xXzZ\?][0-7xXzZ\?_]*", |lex| Into::<&BStr>::into(lex.slice()))]
+    OctalNumber(&'a BStr),
+    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(d|D)[^\S\r\n]*[0-9][0-9_]*", |lex| Into::<&BStr>::into(lex.slice()))]
+    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(d|D)[^\S\r\n]*(x|X|z|Z|\?)_*", |lex| Into::<&BStr>::into(lex.slice()))]
+    DecimalNumber(&'a BStr),
+    #[regex(r"([0-9][0-9_]*)?[^\S\r\n]*'[s|S]?(h|H)[^\S\r\n]*[0-9a-fA-FxXzZ\?][0-9a-fA-FxXzZ\?_]*", |lex| Into::<&BStr>::into(lex.slice()))]
+    HexNumber(&'a BStr),
+    #[regex(r"[0-9][0-9_]*(\.[0-9][0-9_]*)?(e|E)(\+|-)?[0-9][0-9_]*", |lex| Into::<&BStr>::into(lex.slice()))]
+    ScientificNumber(&'a BStr),
+    #[regex(r"('0|'1|'x|'X|'z|'Z|'\?)", |lex| Into::<&BStr>::into(lex.slice()))]
+    UnbasedUnsizedLiteral(&'a BStr),
     // Literals
-    #[regex(r"\$[a-zA-Z0-9_\$]+", |lex| lex.slice())]
-    SystemTfIdentifier(&'a str),
-    #[regex(r"[a-zA-Z_][a-zA-Z0-9_\$]*", |lex| lex.slice())]
-    SimpleIdentifier(&'a str),
-    #[regex(r"\\[!-~]+(\s|$)", |lex| lex.slice())]
-    EscapedIdentifier(&'a str),
-    #[regex(r"([a-zA-Z_][a-zA-Z0-9_\$]*)?(``([a-zA-Z_][a-zA-Z0-9_\$]*)?)+", |lex| lex.slice())]
-    PreprocessorIdentifier(&'a str),
+    #[regex(r"\$[a-zA-Z0-9_\$]+", |lex| Into::<&BStr>::into(lex.slice()))]
+    SystemTfIdentifier(&'a BStr),
+    #[regex(r"[a-zA-Z_][a-zA-Z0-9_\$]*", |lex| Into::<&BStr>::into(lex.slice()))]
+    SimpleIdentifier(&'a BStr),
+    #[regex(r"\\[!-~]+(\s|$)", |lex| Into::<&BStr>::into(lex.slice()))]
+    EscapedIdentifier(&'a BStr),
+    #[regex(r"([a-zA-Z_][a-zA-Z0-9_\$]*)?(``([a-zA-Z_][a-zA-Z0-9_\$]*)?)+", |lex| Into::<&BStr>::into(lex.slice()))]
+    PreprocessorIdentifier(&'a BStr),
     #[regex(r"`[a-zA-Z_][a-zA-Z0-9_\$]*", text_macro)]
     #[regex(r"`\\[!-~]+", text_macro)]
-    TextMacro(&'a str),
+    TextMacro(&'a BStr),
     #[regex(
         r"`([a-zA-Z_][a-zA-Z0-9_\$]*)?(``([a-zA-Z_][a-zA-Z0-9_\$]*)?)+",
         text_macro
     )]
-    ConcatenatedTextMacro(&'a str),
+    ConcatenatedTextMacro(&'a BStr),
     #[token(r#"""#, string_literal)]
-    StringLiteral(&'a str),
+    StringLiteral(&'a BStr),
     #[token(r#"`""#, preprocessor_string_literal)]
-    PreprocessorStringLiteral(&'a str),
+    PreprocessorStringLiteral(&'a BStr),
     #[token(r#"""""#, multiline_string_literal)]
-    TripleQuoteStringLiteral(&'a str),
+    TripleQuoteStringLiteral(&'a BStr),
     #[token(r#"`""""#, preprocessor_multiline_string_literal)]
-    PreprocessorTripleQuoteStringLiteral(&'a str),
+    PreprocessorTripleQuoteStringLiteral(&'a BStr),
     #[token("\n")]
     #[token("\r")]
     #[token("\r\n")]

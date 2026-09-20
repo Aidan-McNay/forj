@@ -8,7 +8,7 @@ use forj_syntax::*;
 #[macro_export]
 macro_rules! check_lexer {
     ($input:expr, $expected:expr) => {{
-        let input = lex($input, "<test>")
+        let input = lex($input.as_bytes(), "<test>")
             .map(|a| a.0.unwrap())
             .collect::<Vec<_>>();
         assert_eq!(input, $expected)
@@ -20,8 +20,11 @@ macro_rules! check_preprocessor {
     ($input:expr, $expected:expr) => {{
         let mut state = PreprocessorState::new(vec![], vec![]);
         let cache = PreprocessorCache::new();
-        let (_, src) =
-            state.retain_file("<test>".to_string(), $input.to_string(), &cache);
+        let (_, src) = state.retain_file(
+            "<test>".to_string(),
+            $input.to_string().into_bytes(),
+            &cache,
+        );
         let input = lex(src, "<test>").tokens().collect::<Vec<_>>();
         let preprocess_result = preprocess(
             &mut TokenIterator::new(input.into_iter()),

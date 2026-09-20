@@ -19,7 +19,7 @@ fn get_line_number<'s>(
     };
     match spanned_token {
         SpannedToken(Token::UnsignedNumber(num_text), num_span) => {
-            Ok((num_text, num_span))
+            Ok((unsafe { std::str::from_utf8_unchecked(num_text) }, num_span))
         }
         _ => Err(PreprocessorError::VerboseError {
             err: VerboseError {
@@ -43,9 +43,10 @@ fn get_line_file<'s>(
         });
     };
     match spanned_token {
-        SpannedToken(Token::StringLiteral(file_name), file_name_span) => {
-            Ok((file_name, file_name_span))
-        }
+        SpannedToken(Token::StringLiteral(file_name), file_name_span) => Ok((
+            unsafe { std::str::from_utf8_unchecked(file_name) },
+            file_name_span,
+        )),
         _ => Err(PreprocessorError::VerboseError {
             err: VerboseError {
                 span: spanned_token.1,
@@ -74,14 +75,21 @@ fn get_line_level<'s>(
         });
     };
     match spanned_token {
-        SpannedToken(Token::UnsignedNumber("0"), num_span) => {
-            Ok((LineDirectiveLevel::Other, num_span))
-        }
-        SpannedToken(Token::UnsignedNumber("1"), num_span) => {
-            Ok((LineDirectiveLevel::EnterInclude, num_span))
-        }
-        SpannedToken(Token::UnsignedNumber("2"), num_span) => {
-            Ok((LineDirectiveLevel::ExitInclude, num_span))
+        SpannedToken(Token::UnsignedNumber(num_bytes), num_span) => {
+            match Into::<&[u8]>::into(num_bytes) {
+                b"0" => Ok((LineDirectiveLevel::Other, num_span)),
+                b"1" => Ok((LineDirectiveLevel::EnterInclude, num_span)),
+                b"2" => Ok((LineDirectiveLevel::ExitInclude, num_span)),
+                _ => Err(PreprocessorError::VerboseError {
+                    err: VerboseError {
+                        span: num_span,
+                        found: Some(spanned_token.0),
+                        expected: vec![Expectation::Label(
+                            "a line level (0, 1, or 2)",
+                        )],
+                    },
+                }),
+            }
         }
         _ => Err(PreprocessorError::VerboseError {
             err: VerboseError {

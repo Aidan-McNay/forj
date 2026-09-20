@@ -19,10 +19,10 @@ use std::path::PathBuf;
 
 pub use define::*;
 pub use error::*;
+use forj_parser::{LexedSource, PreprocessorCache};
 pub use node::*;
 use pyo3::prelude::*;
 pub use report::*;
-use forj_parser::{LexedSource, PreprocessorCache};
 pub use token::*;
 
 /// The top-level Python module
@@ -52,7 +52,7 @@ pub mod forj_python {
 /// Separate a source file into syntactic tokens
 #[pyfunction]
 pub fn lex(src: String, file_name: String) -> Vec<SpannedToken> {
-    forj_parser::lex(&src, &file_name)
+    forj_parser::lex(&src.into_bytes(), &file_name)
         .tokens()
         .map(|rust_spanned_token| rust_spanned_token.into())
         .collect()
@@ -117,7 +117,8 @@ pub fn preprocess(
     defines: Vec<crate::Define>,
 ) -> PreprocessorResult {
     let cache = PreprocessorCache::new();
-    let tokens = forj_parser::lex(&src, &file_name).tokens();
+    let src_bytes = src.into_bytes();
+    let tokens = forj_parser::lex(&src_bytes, &file_name).tokens();
     let mut state = forj_parser::PreprocessorState::new(
         include_paths
             .iter()
@@ -184,7 +185,8 @@ pub fn parse(
     defines: Vec<crate::Define>,
 ) -> ParserResult {
     let cache = PreprocessorCache::new();
-    let tokens = forj_parser::lex(&src, &file_name).tokens();
+    let src_bytes = src.into_bytes();
+    let tokens = forj_parser::lex(&src_bytes, &file_name).tokens();
     let mut state = forj_parser::PreprocessorState::new(
         include_paths
             .iter()

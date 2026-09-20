@@ -43,7 +43,11 @@ fn get_nettype<'s>(
         Token::Trior => Ok(DefaultNettype::Trior),
         Token::Trireg => Ok(DefaultNettype::Trireg),
         Token::Uwire => Ok(DefaultNettype::Uwire),
-        Token::SimpleIdentifier("none") => Ok(DefaultNettype::None),
+        Token::SimpleIdentifier(id_text)
+            if Into::<&[u8]>::into(id_text) == b"none" =>
+        {
+            Ok(DefaultNettype::None)
+        }
         _ => Err(PreprocessorError::VerboseError {
             err: VerboseError {
                 span: spanned_token.1,

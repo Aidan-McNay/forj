@@ -4,6 +4,7 @@
 //! The state and setup of the preprocessor
 
 use crate::*;
+use bstr::{BStr, ByteSlice};
 use forj_syntax::SpanRelation;
 use pragma::PragmaHandler;
 use std::collections::HashMap;
@@ -44,7 +45,9 @@ impl<'a> From<&'a str> for Define<'a> {
         let mut components = value.splitn(2, "=");
         let name = SpannedString(components.next().unwrap(), Span::default());
         let body = match components.next() {
-            Some(text) => DefineBody::Text(lex(text, "").tokens().collect()),
+            Some(text) => {
+                DefineBody::Text(lex(text.as_bytes(), "").tokens().collect())
+            }
             None => DefineBody::Empty,
         };
         Self { name, body }
@@ -129,36 +132,42 @@ fn add_default_defines<'a>(
 ) -> Vec<Define<'a>> {
     let default_defines: &[Define<'static>] = &[
         // Coverage control
-        default_define("SV_COV_START", Token::UnsignedNumber("0")),
-        default_define("SV_COV_STOP", Token::UnsignedNumber("1")),
-        default_define("SV_COV_RESET", Token::UnsignedNumber("2")),
-        default_define("SV_COV_CHECK", Token::UnsignedNumber("3")),
+        default_define("SV_COV_START", Token::UnsignedNumber("0".into())),
+        default_define("SV_COV_STOP", Token::UnsignedNumber("1".into())),
+        default_define("SV_COV_RESET", Token::UnsignedNumber("2".into())),
+        default_define("SV_COV_CHECK", Token::UnsignedNumber("3".into())),
         // Scope definition
-        default_define("SV_COV_MODULE", Token::UnsignedNumber("10")),
-        default_define("SV_COV_HIER", Token::UnsignedNumber("11")),
+        default_define("SV_COV_MODULE", Token::UnsignedNumber("10".into())),
+        default_define("SV_COV_HIER", Token::UnsignedNumber("11".into())),
         // Coverage type identification
-        default_define("SV_COV_ASSERTION", Token::UnsignedNumber("20")),
-        default_define("SV_COV_FSM_STATE", Token::UnsignedNumber("21")),
-        default_define("SV_COV_STATEMENT", Token::UnsignedNumber("22")),
-        default_define("SV_COV_TOGGLE", Token::UnsignedNumber("23")),
+        default_define("SV_COV_ASSERTION", Token::UnsignedNumber("20".into())),
+        default_define("SV_COV_FSM_STATE", Token::UnsignedNumber("21".into())),
+        default_define("SV_COV_STATEMENT", Token::UnsignedNumber("22".into())),
+        default_define("SV_COV_TOGGLE", Token::UnsignedNumber("23".into())),
         // Status results
         Define {
             name: SpannedString("SV_COV_OVERFLOW", Span::default()),
             body: DefineBody::Text(vec![
                 SpannedToken(Token::Minus, Span::default()),
-                SpannedToken(Token::UnsignedNumber("2"), Span::default()),
+                SpannedToken(
+                    Token::UnsignedNumber("2".into()),
+                    Span::default(),
+                ),
             ]),
         },
         Define {
             name: SpannedString("SV_COV_ERROR", Span::default()),
             body: DefineBody::Text(vec![
                 SpannedToken(Token::Minus, Span::default()),
-                SpannedToken(Token::UnsignedNumber("1"), Span::default()),
+                SpannedToken(
+                    Token::UnsignedNumber("1".into()),
+                    Span::default(),
+                ),
             ]),
         },
-        default_define("SV_COV_NOCOV", Token::UnsignedNumber("0")),
-        default_define("SV_COV_OK", Token::UnsignedNumber("1")),
-        default_define("SV_COV_PARTIAL", Token::UnsignedNumber("2")),
+        default_define("SV_COV_NOCOV", Token::UnsignedNumber("0".into())),
+        default_define("SV_COV_OK", Token::UnsignedNumber("1".into())),
+        default_define("SV_COV_PARTIAL", Token::UnsignedNumber("2".into())),
     ];
     for default_define in default_defines.into_iter() {
         if !existing_defines
@@ -210,7 +219,7 @@ pub struct PreprocessorState<'a> {
     /// Line directives declared with `` `line ``
     pub line_directives: Vec<LineDirective<'a>>,
     /// The contents of included files (`file_name` -> `content`)
-    pub included_files: HashMap<&'a str, &'a str>,
+    pub included_files: HashMap<&'a str, &'a [u8]>,
     /// The current standard for reserved keywords, as a LIFO stack
     pub curr_standard: Vec<(StandardVersion, Span<'a>)>,
     /// Any errors encountered so far
@@ -544,7 +553,7 @@ impl<'a> PreprocessorState<'a> {
         include_path: &'a str,
         include_path_span: Span<'a>,
         cache: &'a PreprocessorCache<'a>,
-    ) -> Result<(&'a str, &'a str), PreprocessorError<'a>> {
+    ) -> Result<(&'a str, &'a [u8]), PreprocessorError<'a>> {
         let include_path_buf =
             self.get_file_path(include_path).ok_or_else(|| {
                 PreprocessorError::Include {
@@ -562,13 +571,15 @@ impl<'a> PreprocessorState<'a> {
                 let cached_path = cache.retain_string(
                     include_path_buf.to_str().unwrap().to_owned(),
                 );
-                let file_contents = std::fs::read_to_string(&cached_path)
-                    .map_err(|err| PreprocessorError::Include {
-                        include_path,
-                        include_path_span,
-                        read_err: err.kind(),
+                let file_contents =
+                    std::fs::read(&cached_path).map_err(|err| {
+                        PreprocessorError::Include {
+                            include_path,
+                            include_path_span,
+                            read_err: err.kind(),
+                        }
                     })?;
-                let cached_contents = cache.retain_string(file_contents);
+                let cached_contents = cache.retain_bytes(file_contents);
                 self.included_files.insert(cached_path, cached_contents);
                 Ok((cached_path, cached_contents))
             }
@@ -582,14 +593,14 @@ impl<'a> PreprocessorState<'a> {
     pub fn retain_file(
         &mut self,
         file_path: String,
-        file_contents: String,
+        file_contents: Vec<u8>,
         cache: &'a PreprocessorCache<'a>,
-    ) -> (&'a str, &'a str) {
+    ) -> (&'a str, &'a [u8]) {
         match self.included_files.get_key_value::<str>(file_path.as_ref()) {
             Some((path, contents)) => (*path, *contents),
             None => {
                 let path = cache.retain_string(file_path);
-                let contents = cache.retain_string(file_contents);
+                let contents = cache.retain_bytes(file_contents);
                 self.included_files.insert(path, contents);
                 (path, contents)
             }
@@ -600,7 +611,12 @@ impl<'a> PreprocessorState<'a> {
     pub fn included_files(&self) -> Vec<(String, String)> {
         self.included_files
             .iter()
-            .map(|(a, b)| (a.to_string(), b.to_string()))
+            .map(|(a, b)| {
+                (
+                    a.to_string(),
+                    Into::<&BStr>::into(*b).to_str_lossy().into_owned(),
+                )
+            })
             .collect()
     }
 
@@ -657,8 +673,8 @@ impl<'a> PreprocessorState<'a> {
         dir_span: Span<'a>,
     ) {
         let offset = dir_span.bytes.end;
-        let file_contents: &str =
-            self.included_files.get(dir_span.file).unwrap();
+        let file_contents: &BStr =
+            (*self.included_files.get(dir_span.file).unwrap()).into();
         let line_num = file_contents[..offset].lines().count();
         let new_line_directive = LineDirective {
             directive_file_name: file_name,
@@ -694,7 +710,8 @@ impl<'a> PreprocessorState<'a> {
         cache: &'a PreprocessorCache<'a>,
     ) -> &'a str {
         let offset = span.bytes.end;
-        let file_contents: &str = self.included_files.get(span.file).unwrap();
+        let file_contents: &BStr =
+            (*self.included_files.get(span.file).unwrap()).into();
         let line_num = file_contents[..offset].lines().count();
         let Some(line_directive) = self
             .line_directives
@@ -715,8 +732,9 @@ impl<'a> PreprocessorState<'a> {
     }
 
     /// Get the text referenced by a [`Span`]
-    pub(crate) fn get_slice(&self, span: &Span<'a>) -> Option<&'a str> {
-        let file_contents: &str = self.included_files.get(span.file)?;
+    pub(crate) fn get_slice(&self, span: &Span<'a>) -> Option<&'a BStr> {
+        let file_contents: &BStr =
+            (*self.included_files.get(span.file)?).into();
         Some(&file_contents[span.bytes.start..span.bytes.end])
     }
 

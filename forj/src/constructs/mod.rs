@@ -157,7 +157,7 @@ pub fn constructs(args: &ConstructsArgs) {
         }
     };
     for path in &args.paths {
-        let src = match std::fs::read_to_string(&path) {
+        let src = match std::fs::read(&path) {
             Ok(content) => content,
             Err(err) => {
                 println! {"Error reading {}: {}", path.to_string_lossy(), err};

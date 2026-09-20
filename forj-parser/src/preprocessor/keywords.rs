@@ -18,21 +18,25 @@ fn get_keyword_standard<'s>(
         });
     };
     match spanned_token.0 {
-        Token::StringLiteral(version_spec) => match version_spec {
-            "1800-2023" => Ok(StandardVersion::IEEE1800_2023),
-            "1800-2017" => Ok(StandardVersion::IEEE1800_2017),
-            "1800-2012" => Ok(StandardVersion::IEEE1800_2012),
-            "1800-2009" => Ok(StandardVersion::IEEE1800_2009),
-            "1800-2005" => Ok(StandardVersion::IEEE1800_2005),
-            "1364-2005" => Ok(StandardVersion::IEEE1364_2005),
-            "1364-2001-noconfig" => Ok(StandardVersion::IEEE1364_2001Noconfig),
-            "1364-2001" => Ok(StandardVersion::IEEE1364_2001),
-            "1364-1995" => Ok(StandardVersion::IEEE1364_1995),
-            _ => Err(PreprocessorError::InvalidVersionSpecifier {
-                invalid_version: Token::StringLiteral(version_spec),
-                invalid_version_span: spanned_token.1,
-            }),
-        },
+        Token::StringLiteral(version_spec) => {
+            match Into::<&[u8]>::into(version_spec) {
+                b"1800-2023" => Ok(StandardVersion::IEEE1800_2023),
+                b"1800-2017" => Ok(StandardVersion::IEEE1800_2017),
+                b"1800-2012" => Ok(StandardVersion::IEEE1800_2012),
+                b"1800-2009" => Ok(StandardVersion::IEEE1800_2009),
+                b"1800-2005" => Ok(StandardVersion::IEEE1800_2005),
+                b"1364-2005" => Ok(StandardVersion::IEEE1364_2005),
+                b"1364-2001-noconfig" => {
+                    Ok(StandardVersion::IEEE1364_2001Noconfig)
+                }
+                b"1364-2001" => Ok(StandardVersion::IEEE1364_2001),
+                b"1364-1995" => Ok(StandardVersion::IEEE1364_1995),
+                _ => Err(PreprocessorError::InvalidVersionSpecifier {
+                    invalid_version: Token::StringLiteral(version_spec),
+                    invalid_version_span: spanned_token.1,
+                }),
+            }
+        }
         _ => Err(PreprocessorError::InvalidVersionSpecifier {
             invalid_version: spanned_token.0,
             invalid_version_span: spanned_token.1,
@@ -84,14 +88,14 @@ fn standard_1364_1995() {
     check_preprocessor!(
         input.as_str(),
         vec![
-            Token::SimpleIdentifier("an_identifier"),
+            Token::SimpleIdentifier("an_identifier".into()),
             Token::Integer,
-            Token::SimpleIdentifier("automatic"),
-            Token::SimpleIdentifier("design"),
-            Token::SimpleIdentifier("uwire"),
-            Token::SimpleIdentifier("illegal_bins"),
-            Token::SimpleIdentifier("eventually"),
-            Token::SimpleIdentifier("implements")
+            Token::SimpleIdentifier("automatic".into()),
+            Token::SimpleIdentifier("design".into()),
+            Token::SimpleIdentifier("uwire".into()),
+            Token::SimpleIdentifier("illegal_bins".into()),
+            Token::SimpleIdentifier("eventually".into()),
+            Token::SimpleIdentifier("implements".into())
         ]
     )
 }
@@ -104,14 +108,14 @@ fn standard_1364_2001() {
     check_preprocessor!(
         input.as_str(),
         vec![
-            Token::SimpleIdentifier("an_identifier"),
+            Token::SimpleIdentifier("an_identifier".into()),
             Token::Integer,
             Token::Automatic,
             Token::Design,
-            Token::SimpleIdentifier("uwire"),
-            Token::SimpleIdentifier("illegal_bins"),
-            Token::SimpleIdentifier("eventually"),
-            Token::SimpleIdentifier("implements")
+            Token::SimpleIdentifier("uwire".into()),
+            Token::SimpleIdentifier("illegal_bins".into()),
+            Token::SimpleIdentifier("eventually".into()),
+            Token::SimpleIdentifier("implements".into())
         ]
     )
 }
@@ -124,14 +128,14 @@ fn standard_1364_2001_noconfig() {
     check_preprocessor!(
         input.as_str(),
         vec![
-            Token::SimpleIdentifier("an_identifier"),
+            Token::SimpleIdentifier("an_identifier".into()),
             Token::Integer,
             Token::Automatic,
-            Token::SimpleIdentifier("design"),
-            Token::SimpleIdentifier("uwire"),
-            Token::SimpleIdentifier("illegal_bins"),
-            Token::SimpleIdentifier("eventually"),
-            Token::SimpleIdentifier("implements")
+            Token::SimpleIdentifier("design".into()),
+            Token::SimpleIdentifier("uwire".into()),
+            Token::SimpleIdentifier("illegal_bins".into()),
+            Token::SimpleIdentifier("eventually".into()),
+            Token::SimpleIdentifier("implements".into())
         ]
     )
 }
@@ -144,14 +148,14 @@ fn standard_1364_2005() {
     check_preprocessor!(
         input.as_str(),
         vec![
-            Token::SimpleIdentifier("an_identifier"),
+            Token::SimpleIdentifier("an_identifier".into()),
             Token::Integer,
             Token::Automatic,
             Token::Design,
             Token::Uwire,
-            Token::SimpleIdentifier("illegal_bins"),
-            Token::SimpleIdentifier("eventually"),
-            Token::SimpleIdentifier("implements")
+            Token::SimpleIdentifier("illegal_bins".into()),
+            Token::SimpleIdentifier("eventually".into()),
+            Token::SimpleIdentifier("implements".into())
         ]
     )
 }
@@ -164,14 +168,14 @@ fn standard_1800_2005() {
     check_preprocessor!(
         input.as_str(),
         vec![
-            Token::SimpleIdentifier("an_identifier"),
+            Token::SimpleIdentifier("an_identifier".into()),
             Token::Integer,
             Token::Automatic,
             Token::Design,
             Token::Uwire,
             Token::IllegalBins,
-            Token::SimpleIdentifier("eventually"),
-            Token::SimpleIdentifier("implements")
+            Token::SimpleIdentifier("eventually".into()),
+            Token::SimpleIdentifier("implements".into())
         ]
     )
 }
@@ -184,14 +188,14 @@ fn standard_1800_2009() {
     check_preprocessor!(
         input.as_str(),
         vec![
-            Token::SimpleIdentifier("an_identifier"),
+            Token::SimpleIdentifier("an_identifier".into()),
             Token::Integer,
             Token::Automatic,
             Token::Design,
             Token::Uwire,
             Token::IllegalBins,
             Token::Eventually,
-            Token::SimpleIdentifier("implements")
+            Token::SimpleIdentifier("implements".into())
         ]
     )
 }
@@ -204,7 +208,7 @@ fn standard_1800_2012() {
     check_preprocessor!(
         input.as_str(),
         vec![
-            Token::SimpleIdentifier("an_identifier"),
+            Token::SimpleIdentifier("an_identifier".into()),
             Token::Integer,
             Token::Automatic,
             Token::Design,
@@ -224,7 +228,7 @@ fn standard_1800_2017() {
     check_preprocessor!(
         input.as_str(),
         vec![
-            Token::SimpleIdentifier("an_identifier"),
+            Token::SimpleIdentifier("an_identifier".into()),
             Token::Integer,
             Token::Automatic,
             Token::Design,
@@ -244,7 +248,7 @@ fn standard_1800_2023() {
     check_preprocessor!(
         input.as_str(),
         vec![
-            Token::SimpleIdentifier("an_identifier"),
+            Token::SimpleIdentifier("an_identifier".into()),
             Token::Integer,
             Token::Automatic,
             Token::Design,
@@ -300,25 +304,25 @@ fn nested() {
         input.as_str(),
         vec![
             // 1800-2005
-            Token::SimpleIdentifier("an_identifier"),
+            Token::SimpleIdentifier("an_identifier".into()),
             Token::Integer,
             Token::Automatic,
             Token::Design,
             Token::Uwire,
             Token::IllegalBins,
-            Token::SimpleIdentifier("eventually"),
-            Token::SimpleIdentifier("implements"),
+            Token::SimpleIdentifier("eventually".into()),
+            Token::SimpleIdentifier("implements".into()),
             // 1364-1995
-            Token::SimpleIdentifier("an_identifier"),
+            Token::SimpleIdentifier("an_identifier".into()),
             Token::Integer,
-            Token::SimpleIdentifier("automatic"),
-            Token::SimpleIdentifier("design"),
-            Token::SimpleIdentifier("uwire"),
-            Token::SimpleIdentifier("illegal_bins"),
-            Token::SimpleIdentifier("eventually"),
-            Token::SimpleIdentifier("implements"),
+            Token::SimpleIdentifier("automatic".into()),
+            Token::SimpleIdentifier("design".into()),
+            Token::SimpleIdentifier("uwire".into()),
+            Token::SimpleIdentifier("illegal_bins".into()),
+            Token::SimpleIdentifier("eventually".into()),
+            Token::SimpleIdentifier("implements".into()),
             // 1800-2023
-            Token::SimpleIdentifier("an_identifier"),
+            Token::SimpleIdentifier("an_identifier".into()),
             Token::Integer,
             Token::Automatic,
             Token::Design,
