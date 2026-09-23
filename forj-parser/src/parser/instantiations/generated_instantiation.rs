@@ -14,7 +14,7 @@ pub fn generate_region_parser<'s>(
 ) -> ModalResult<GenerateRegion<'s>, VerboseError<'s>> {
     (
         token(Token::Generate),
-        repeat_note(generate_item_parser),
+        repeat_note(generate_block_parser),
         token(Token::Endgenerate),
     )
         .map(|(a, b, c)| GenerateRegion(a, b, c))
@@ -142,7 +142,7 @@ pub fn generate_block_parser<'s>(
         opt_note((generate_block_identifier_parser, token(Token::Colon))),
         token(Token::Begin),
         opt_note((token(Token::Colon), generate_block_identifier_parser)),
-        repeat_note(generate_item_parser),
+        repeat_note(generate_block_parser),
         token(Token::End),
         opt_note((token(Token::Colon), generate_block_identifier_parser)),
     )
@@ -150,8 +150,8 @@ pub fn generate_block_parser<'s>(
             GenerateBlock::Block(Box::new((a, b, c, d, e, f)))
         });
     alt((
-        _block_parser,
         generate_item_parser.map(|a| GenerateBlock::Item(Box::new(a))),
+        _block_parser,
     ))
     .parse_next(input)
 }

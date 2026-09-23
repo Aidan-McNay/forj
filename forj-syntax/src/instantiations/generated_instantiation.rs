@@ -7,7 +7,7 @@ use crate::*;
 #[derive(Clone, Debug, PartialEq)]
 pub struct GenerateRegion<'a>(
     pub Metadata<'a>, // generate
-    pub Vec<GenerateItem<'a>>,
+    pub Vec<GenerateBlock<'a>>,
     pub Metadata<'a>, // endgenerate
 );
 
@@ -111,7 +111,7 @@ pub enum GenerateBlock<'a> {
                 Metadata<'a>, // :
                 GenerateBlockIdentifier<'a>,
             )>,
-            Vec<GenerateItem<'a>>,
+            Vec<GenerateBlock<'a>>,
             Metadata<'a>, // end
             Option<(
                 Metadata<'a>, // :
