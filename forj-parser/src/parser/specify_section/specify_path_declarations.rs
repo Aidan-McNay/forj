@@ -102,6 +102,35 @@ pub fn edge_sensitive_path_declaration_parser<'s>(
     .parse_next(input)
 }
 
+fn edge_sensitive_plus_polarity_operator<'s>(
+    input: &mut Tokens<'s>,
+) -> ModalResult<(Option<PolarityOperator<'s>>, Metadata<'s>), VerboseError<'s>>
+{
+    // Split apart metadata for `+:` into `+` and `:`
+    let plus_colon_metadata = token(Token::PlusColon).parse_next(input)?;
+    let mut plus_metadata = plus_colon_metadata.clone();
+    let mut colon_metadata = plus_colon_metadata;
+    plus_metadata.span.bytes.end = plus_metadata.span.bytes.start + 1;
+    colon_metadata.span.bytes.start += 1;
+    Ok((Some(PolarityOperator::Plus(plus_metadata)), colon_metadata))
+}
+
+fn edge_sensitive_minus_polarity_operator<'s>(
+    input: &mut Tokens<'s>,
+) -> ModalResult<(Option<PolarityOperator<'s>>, Metadata<'s>), VerboseError<'s>>
+{
+    // Split apart metadata for `-:` into `-` and `:`
+    let minus_colon_metadata = token(Token::MinusColon).parse_next(input)?;
+    let mut minus_metadata = minus_colon_metadata.clone();
+    let mut colon_metadata = minus_colon_metadata;
+    minus_metadata.span.bytes.end = minus_metadata.span.bytes.start + 1;
+    colon_metadata.span.bytes.start += 1;
+    Ok((
+        Some(PolarityOperator::Minus(minus_metadata)),
+        colon_metadata,
+    ))
+}
+
 pub fn parallel_edge_sensitive_path_description_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ParallelEdgeSensitivePathDescription<'s>, VerboseError<'s>> {
@@ -113,13 +142,16 @@ pub fn parallel_edge_sensitive_path_description_parser<'s>(
         token(Token::EqGt),
         token(Token::Paren),
         specify_output_terminal_descriptor_parser,
-        opt_note(polarity_operator_parser),
-        token(Token::Colon),
+        alt((
+            edge_sensitive_plus_polarity_operator,
+            edge_sensitive_minus_polarity_operator,
+            (opt_note(polarity_operator_parser), token(Token::Colon)),
+        )),
         data_source_expression_parser,
         token(Token::EParen),
         token(Token::EParen),
     )
-        .map(|(a, b, c, d, e, f, g, h, i, j, k, l)| {
+        .map(|(a, b, c, d, e, f, g, (h, i), j, k, l)| {
             ParallelEdgeSensitivePathDescription::DataSource(Box::new((
                 a, b, c, d, e, f, g, h, i, j, k, l,
             )))
@@ -152,13 +184,16 @@ pub fn full_edge_sensitive_path_description_parser<'s>(
         token(Token::StarGt),
         token(Token::Paren),
         list_of_path_outputs_parser,
-        opt_note(polarity_operator_parser),
-        token(Token::Colon),
+        alt((
+            edge_sensitive_plus_polarity_operator,
+            edge_sensitive_minus_polarity_operator,
+            (opt_note(polarity_operator_parser), token(Token::Colon)),
+        )),
         data_source_expression_parser,
         token(Token::EParen),
         token(Token::EParen),
     )
-        .map(|(a, b, c, d, e, f, g, h, i, j, k, l)| {
+        .map(|(a, b, c, d, e, f, g, (h, i), j, k, l)| {
             FullEdgeSensitivePathDescription::DataSource(Box::new((
                 a, b, c, d, e, f, g, h, i, j, k, l,
             )))

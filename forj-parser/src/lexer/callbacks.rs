@@ -28,9 +28,9 @@ enum StringToken {
     #[token("\\\u{2028}")]
     #[token("\\\u{2029}")]
     EscapedNewline,
-    #[regex(r#"[^"\r\n\\]"#)]
-    #[regex(r#"\\([ -~]|[0-7]{1,3})"#, priority = 2)]
-    #[regex(r#"\\x[0-9a-fA-F]{1,2}"#)]
+    #[regex(br#"[^"\r\n\\]"#)]
+    #[regex(br#"\\([ -~]|[0-7]{1,3})"#, priority = 2)]
+    #[regex(br#"\\x[0-9a-fA-F]{1,2}"#)]
     Other,
 }
 
@@ -39,9 +39,9 @@ enum StringToken {
 enum MultilineStringToken {
     #[token(r#"""""#)]
     Delimeter,
-    #[regex(r#"[^\\]"#)]
-    #[regex(r#"\\([ -~]|[0-7]{1,3})"#)]
-    #[regex(r#"\\x[0-9a-fA-F]{1,2}"#)]
+    #[regex(br#"[^\\]"#)]
+    #[regex(br#"\\([ -~]|[0-7]{1,3})"#)]
+    #[regex(br#"\\x[0-9a-fA-F]{1,2}"#)]
     Other,
 }
 
@@ -66,9 +66,9 @@ enum PreprocessorStringToken {
     #[token("\\\u{2028}")]
     #[token("\\\u{2029}")]
     EscapedNewline,
-    #[regex(r#"[^\r\n\\]"#)]
-    #[regex(r#"\\([ -~]|[0-7]{1,3})"#)]
-    #[regex(r#"\\x[0-9a-fA-F]{1,2}"#)]
+    #[regex(br#"[^\r\n\\]"#)]
+    #[regex(br#"\\([ -~]|[0-7]{1,3})"#)]
+    #[regex(br#"\\x[0-9a-fA-F]{1,2}"#)]
     Other,
 }
 
@@ -93,9 +93,9 @@ enum PreprocessorMultilineStringToken {
     #[token("\\\u{2028}")]
     #[token("\\\u{2029}")]
     EscapedNewline,
-    #[regex(r#"[^\n\r\\]"#)]
-    #[regex(r#"\\([ -~]|[0-7]{1,3})"#)]
-    #[regex(r#"\\x[0-9a-fA-F]{1,2}"#)]
+    #[regex(br#"[^\n\r\\]"#)]
+    #[regex(br#"\\([ -~]|[0-7]{1,3})"#)]
+    #[regex(br#"\\x[0-9a-fA-F]{1,2}"#)]
     Other,
 }
 
@@ -104,7 +104,7 @@ enum PreprocessorMultilineStringToken {
 enum BlockCommentToken {
     #[token("*/")]
     Delimeter,
-    #[regex(r"[\s\S]")]
+    #[regex(br"[\s\S]")]
     Other,
 }
 

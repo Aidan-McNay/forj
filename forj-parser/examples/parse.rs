@@ -49,10 +49,11 @@ fn main() -> ExitCode {
         .iter()
         .map(|def| <std::string::String as AsRef<str>>::as_ref(def).into())
         .collect::<Vec<_>>();
-    let mut state = preprocessor::PreprocessorState::new(includes, vec![]);
+    let mut state = preprocessor::PreprocessorState::new(includes, defines);
     for path in &args.paths {
         let src = std::fs::read(&path).unwrap();
-        state.make_fresh(defines.clone());
+        // Currently process as the same compilation unit
+        // state.make_fresh(defines.clone());
         let (_, src) = state.retain_file(
             path.clone().into_os_string().into_string().unwrap(),
             src,
@@ -64,6 +65,27 @@ fn main() -> ExitCode {
             preprocess(token_stream, &mut state, &string_cache);
         let mut sources = state.included_files().sources();
         if !state.errors.is_empty() {
+            for define in state.defines.clone() {
+                println! {"Define {:?}", define.name.0};
+                match define.body {
+                    preprocessor::DefineBody::Empty => println!(" - Empty"),
+                    preprocessor::DefineBody::Text(tokens) => {
+                        for token in tokens {
+                            println!(" - {:?}", token.0);
+                        }
+                    }
+                    preprocessor::DefineBody::Function(function) => {
+                        match function.body {
+                            None => println!(" - Empty"),
+                            Some(tokens) => {
+                                for token in tokens {
+                                    println!(" - {:?}", token.0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             for err in &state.errors {
                 let report: report::Report = err.into();
                 report.print(&mut sources).unwrap();

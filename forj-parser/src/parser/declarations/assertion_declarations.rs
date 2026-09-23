@@ -7,7 +7,7 @@ use crate::*;
 use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::Parser;
-use winnow::combinator::{alt, peek, terminated};
+use winnow::combinator::{alt, not, peek, terminated};
 use winnow::stream::Stream;
 
 pub fn concurrent_assertion_item_parser<'s>(
@@ -360,7 +360,10 @@ fn basic_property_expr_parser<'s>(
     min_bp: u8,
 ) -> ModalResult<PropertyExpr<'s>, VerboseError<'s>> {
     let mut _sequence_parser = (
-        gen_sequence_expr_parser(min_bp, false),
+        terminated(
+            gen_sequence_expr_parser(min_bp, false),
+            not(peek(token(Token::Paren))),
+        ),
         opt_note((
             alt((
                 token(Token::PipeMinusGt)

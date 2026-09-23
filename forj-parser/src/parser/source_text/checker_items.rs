@@ -84,6 +84,8 @@ pub fn checker_or_generate_item_declaration_parser<'s>(
             .map(|a| CheckerOrGenerateItemDeclaration::Covergroup(Box::new(a))),
         genvar_declaration_parser
             .map(|a| CheckerOrGenerateItemDeclaration::Genvar(Box::new(a))),
+        clocking_declaration_parser
+            .map(|a| CheckerOrGenerateItemDeclaration::Clocking(Box::new(a))),
         (
             token(Token::Default),
             token(Token::Clocking),

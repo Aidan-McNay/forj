@@ -71,16 +71,16 @@ pub fn input_identifier_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<InputIdentifier<'s>, VerboseError<'s>> {
     alt((
-        input_port_identifier_parser
-            .map(|a| InputIdentifier::Input(Box::new(a))),
-        inout_port_identifier_parser
-            .map(|a| InputIdentifier::Inout(Box::new(a))),
         (
             interface_identifier_parser,
             token(Token::Period),
             port_identifier_parser,
         )
             .map(|(a, b, c)| InputIdentifier::Interface(Box::new((a, b, c)))),
+        input_port_identifier_parser
+            .map(|a| InputIdentifier::Input(Box::new(a))),
+        inout_port_identifier_parser
+            .map(|a| InputIdentifier::Inout(Box::new(a))),
     ))
     .parse_next(input)
 }
@@ -89,16 +89,16 @@ pub fn output_identifier_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<OutputIdentifier<'s>, VerboseError<'s>> {
     alt((
-        output_port_identifier_parser
-            .map(|a| OutputIdentifier::Output(Box::new(a))),
-        inout_port_identifier_parser
-            .map(|a| OutputIdentifier::Inout(Box::new(a))),
         (
             interface_identifier_parser,
             token(Token::Period),
             port_identifier_parser,
         )
             .map(|(a, b, c)| OutputIdentifier::Interface(Box::new((a, b, c)))),
+        output_port_identifier_parser
+            .map(|a| OutputIdentifier::Output(Box::new(a))),
+        inout_port_identifier_parser
+            .map(|a| OutputIdentifier::Inout(Box::new(a))),
     ))
     .parse_next(input)
 }

@@ -97,11 +97,11 @@ pub fn list_of_path_delay_expressions_parser<'s>(
     )
         .map(|(a, b)| ListOfPathDelayExpressions::EdgeZX(Box::new((a, b))));
     alt((
-        _path_parser,
-        _rise_fall_parser,
-        _rise_fall_z_parser,
-        _edge_z_parser,
         _edge_z_x_parser,
+        _edge_z_parser,
+        _rise_fall_z_parser,
+        _rise_fall_parser,
+        _path_parser,
     ))
     .parse_next(input)
 }

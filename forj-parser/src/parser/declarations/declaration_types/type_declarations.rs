@@ -71,8 +71,8 @@ pub fn package_import_declaration_parser<'s>(
 pub fn package_export_declaration_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<PackageExportDeclaration<'s>, VerboseError<'s>> {
-    let _import_parser = (
-        token(Token::Import),
+    let _item_parser = (
+        token(Token::Export),
         package_import_item_parser,
         repeat_note((token(Token::Comma), package_import_item_parser)),
         token(Token::SColon),
@@ -81,7 +81,6 @@ pub fn package_export_declaration_parser<'s>(
             PackageExportDeclaration::Import(Box::new((a, b, c, d)))
         });
     alt((
-        _import_parser,
         (
             token(Token::Export),
             token(Token::Star),
@@ -92,6 +91,7 @@ pub fn package_export_declaration_parser<'s>(
             .map(|(a, b, c, d, e)| {
                 PackageExportDeclaration::Wildcard(Box::new((a, b, c, d, e)))
             }),
+        _item_parser,
     ))
     .parse_next(input)
 }

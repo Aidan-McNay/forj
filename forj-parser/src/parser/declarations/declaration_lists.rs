@@ -7,6 +7,7 @@ use crate::*;
 use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::Parser;
+use winnow::combinator::{alt, peek, terminated};
 
 pub fn list_of_defparam_assignments_parser<'s>(
     input: &mut Tokens<'s>,
@@ -128,8 +129,25 @@ pub fn list_of_type_assignments_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ListOfTypeAssignments<'s>, VerboseError<'s>> {
     (
-        type_assignment_parser,
-        repeat_note((token(Token::Comma), type_assignment_parser)),
+        terminated(
+            type_assignment_parser,
+            peek(alt((
+                token(Token::Comma),
+                token(Token::EParen),
+                token(Token::SColon),
+            ))),
+        ),
+        repeat_note((
+            token(Token::Comma),
+            terminated(
+                type_assignment_parser,
+                peek(alt((
+                    token(Token::Comma),
+                    token(Token::EParen),
+                    token(Token::SColon),
+                ))),
+            ),
+        )),
     )
         .map(|(a, b)| ListOfTypeAssignments(a, b))
         .parse_next(input)

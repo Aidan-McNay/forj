@@ -5,8 +5,8 @@
 
 use crate::Span;
 use crate::*;
-use logos::Span as ByteSpan;
 use forj_syntax::*;
+use logos::Span as ByteSpan;
 use winnow::ModalResult;
 use winnow::combinator::alt;
 
@@ -118,8 +118,8 @@ pub fn seq_input_list_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<SeqInputList<'s>, VerboseError<'s>> {
     alt((
-        level_input_list_parser.map(|a| SeqInputList::Level(Box::new(a))),
         edge_input_list_parser.map(|a| SeqInputList::Edge(Box::new(a))),
+        level_input_list_parser.map(|a| SeqInputList::Level(Box::new(a))),
     ))
     .parse_next(input)
 }
