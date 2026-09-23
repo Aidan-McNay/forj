@@ -186,10 +186,7 @@ pub(crate) fn preprocess_helper<'s>(
                     match src.next() {
                         None => dest.push(spanned_token),
                         Some(next_token) => match next_token.0 {
-                            Token::Newline => (),
-                            Token::Bslash => {
-                                dest.push(spanned_token);
-                            }
+                            Token::Newline => dest.push(next_token),
                             _ => {
                                 dest.push(spanned_token);
                                 dest.push(next_token)

@@ -65,27 +65,6 @@ fn main() -> ExitCode {
             preprocess(token_stream, &mut state, &string_cache);
         let mut sources = state.included_files().sources();
         if !state.errors.is_empty() {
-            for define in state.defines.clone() {
-                println! {"Define {:?}", define.name.0};
-                match define.body {
-                    preprocessor::DefineBody::Empty => println!(" - Empty"),
-                    preprocessor::DefineBody::Text(tokens) => {
-                        for token in tokens {
-                            println!(" - {:?}", token.0);
-                        }
-                    }
-                    preprocessor::DefineBody::Function(function) => {
-                        match function.body {
-                            None => println!(" - Empty"),
-                            Some(tokens) => {
-                                for token in tokens {
-                                    println!(" - {:?}", token.0);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
             for err in &state.errors {
                 let report: report::Report = err.into();
                 report.print(&mut sources).unwrap();
