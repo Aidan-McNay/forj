@@ -104,7 +104,9 @@ fn get_timescale<'s>(
                         err: VerboseError {
                             span: spanned_token.1,
                             found: Some(spanned_token.0),
-                            expected: vec![Expectation::Label("1, 10, or 100")],
+                            reason: VerboseErrorReason::Expected(vec![
+                                Expectation::Label("1, 10, or 100"),
+                            ]),
                         },
                     });
                 }
@@ -115,7 +117,9 @@ fn get_timescale<'s>(
                 err: VerboseError {
                     span: spanned_token.1,
                     found: Some(spanned_token.0),
-                    expected: vec![Expectation::Label("1, 10, or 100")],
+                    reason: VerboseErrorReason::Expected(vec![
+                        Expectation::Label("1, 10, or 100"),
+                    ]),
                 },
             });
         }
@@ -139,9 +143,9 @@ fn get_timescale<'s>(
                         err: VerboseError {
                             span: spanned_token.1,
                             found: Some(spanned_token.0),
-                            expected: vec![Expectation::Label(
-                                "a recognized unit of time",
-                            )],
+                            reason: VerboseErrorReason::Expected(vec![
+                                Expectation::Label("a recognized unit of time"),
+                            ]),
                         },
                     });
                 }
@@ -152,9 +156,9 @@ fn get_timescale<'s>(
                 err: VerboseError {
                     span: spanned_token.1,
                     found: Some(spanned_token.0),
-                    expected: vec![Expectation::Label(
-                        "a recognized unit of time",
-                    )],
+                    reason: VerboseErrorReason::Expected(vec![
+                        Expectation::Label("a recognized unit of time"),
+                    ]),
                 },
             });
         }
@@ -179,7 +183,9 @@ fn get_divider<'s>(
             err: VerboseError {
                 span: spanned_token.1,
                 found: Some(spanned_token.0),
-                expected: vec![Expectation::Token(Token::Slash)],
+                reason: VerboseErrorReason::Expected(vec![Expectation::Token(
+                    Token::Slash,
+                )]),
             },
         }),
     }

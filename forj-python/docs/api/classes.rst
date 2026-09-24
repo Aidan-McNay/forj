@@ -1040,16 +1040,41 @@ General
 
       What token was found - ``None`` if the end of the file was reached
    
-   .. py:attribute:: expected
-      :type: list[Expectation]
+   .. py:attribute:: reason
+      :type: VerboseErrorReason
 
-      What was expected instead (listing all possibilities)
+      The reason for the :py:class:`VerboseError`
 
    .. py:attribute:: span
       :type: Span
 
       The :py:class:`Span` that the error occurred at (where the
       ``found`` token is)
+
+.. py:class:: VerboseErrorReason
+   :final:
+
+   The reason behind a :py:class:`VerboseError`
+
+   .. dropdown:: Child Variants
+
+      .. py:class:: VerboseErrorReason.Expected(VerboseErrorReason)
+
+         A list of possibilities that were expected instead
+
+         .. py:property:: expectations
+            :type: list[Expectation]
+
+            What was expected to be found instead
+
+      .. py:class:: VerboseErrorReason.Diagnostic(VerboseErrorReason)
+
+         A verbose diagnostic message detailing what went wrong
+
+         .. py:property:: message
+            :type: str
+
+            The diagnostic message
 
 Preprocessing
 --------------------------------------------------------------------------

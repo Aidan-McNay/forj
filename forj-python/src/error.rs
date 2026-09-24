@@ -49,6 +49,69 @@ impl<'a> std::fmt::Display for Expectation {
     }
 }
 
+/// A wrapper around [`forj_parser::VerboseErrorReason`]
+#[pyclass(eq, from_py_object, module = "forj_python")]
+#[derive(Clone, PartialEq, Eq)]
+pub enum VerboseErrorReason {
+    /// What was expected instead (listing all possibilities)
+    Expected { expectations: Vec<Expectation> },
+    /// A verbose diagnostic message
+    Diagnostic { message: String },
+}
+
+impl<'a> From<forj_parser::VerboseErrorReason<'a>> for VerboseErrorReason {
+    fn from(value: forj_parser::VerboseErrorReason<'a>) -> Self {
+        match value {
+            forj_parser::VerboseErrorReason::Expected(expected) => {
+                VerboseErrorReason::Expected {
+                    expectations: expected
+                        .into_iter()
+                        .map(|rust_expectation| rust_expectation.into())
+                        .collect(),
+                }
+            }
+            forj_parser::VerboseErrorReason::Diagnostic(diag_message) => {
+                VerboseErrorReason::Diagnostic {
+                    message: diag_message.to_string(),
+                }
+            }
+        }
+    }
+}
+
+impl<'a> std::fmt::Display for VerboseErrorReason {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            VerboseErrorReason::Diagnostic { message } => {
+                write!(f, "{}", message)
+            }
+            VerboseErrorReason::Expected { expectations } => {
+                write!(f, "expected ")?;
+                let mut dedup_expected: Vec<Expectation> = vec![];
+                for expected in expectations.iter() {
+                    if !dedup_expected.contains(expected) {
+                        dedup_expected.push(expected.clone());
+                    }
+                }
+                match &dedup_expected[..] {
+                    [] => write!(f, "something else"),
+                    [expected] => expected.fmt(f),
+                    _ => {
+                        for expected in
+                            &dedup_expected[..dedup_expected.len() - 1]
+                        {
+                            expected.fmt(f)?;
+                            write!(f, ", ")?;
+                        }
+                        write!(f, "or ")?;
+                        dedup_expected.last().unwrap().fmt(f)
+                    }
+                }
+            }
+        }
+    }
+}
+
 /// A wrapper around [`forj_parser::VerboseError`]
 #[pyclass(eq, from_py_object, module = "forj_python")]
 #[derive(Clone, PartialEq, Eq)]
@@ -59,9 +122,9 @@ pub struct VerboseError {
     /// What token was found - [`None`] if the end of the file was reached
     #[pyo3(get, set)]
     pub found: Option<Token>,
-    /// What was expected instead (listing all possibilities)
+    /// The reason for the error
     #[pyo3(get, set)]
-    pub expected: Vec<Expectation>,
+    pub reason: VerboseErrorReason,
 }
 
 impl<'a> From<forj_parser::VerboseError<'a>> for VerboseError {
@@ -72,11 +135,7 @@ impl<'a> From<forj_parser::VerboseError<'a>> for VerboseError {
                 Some(rust_token) => Some(rust_token.into()),
                 None => None,
             },
-            expected: value
-                .expected
-                .into_iter()
-                .map(|rust_expectation| rust_expectation.into())
-                .collect(),
+            reason: value.reason.into(),
         }
     }
 }
@@ -88,25 +147,8 @@ impl<'a> std::fmt::Display for VerboseError {
             Some(tok) => tok.fmt(f)?,
             None => write!(f, "end of input")?,
         };
-        write!(f, ", expected ")?;
-        let mut dedup_expected: Vec<Expectation> = vec![];
-        for expected in self.expected.iter() {
-            if !dedup_expected.contains(expected) {
-                dedup_expected.push(expected.clone());
-            }
-        }
-        match &dedup_expected[..] {
-            [] => write!(f, "something else"),
-            [expected] => expected.fmt(f),
-            _ => {
-                for expected in &dedup_expected[..dedup_expected.len() - 1] {
-                    expected.fmt(f)?;
-                    write!(f, ", ")?;
-                }
-                write!(f, "or ")?;
-                dedup_expected.last().unwrap().fmt(f)
-            }
-        }
+        write!(f, ", ")?;
+        self.reason.fmt(f)
     }
 }
 

@@ -120,7 +120,9 @@ fn get_ifdef_condition<'s>(
                     err: VerboseError {
                         span: spanned_token.1,
                         found: None,
-                        expected: vec![Expectation::Token(Token::EParen)],
+                        reason: VerboseErrorReason::Expected(vec![
+                            Expectation::Token(Token::EParen),
+                        ]),
                     },
                 });
             };
@@ -135,9 +137,9 @@ fn get_ifdef_condition<'s>(
                 err: VerboseError {
                     span: spanned_token.1,
                     found: Some(spanned_token.0),
-                    expected: vec![Expectation::Label(
-                        "a preprocessor macro expression",
-                    )],
+                    reason: VerboseErrorReason::Expected(vec![
+                        Expectation::Label("a preprocessor macro expression"),
+                    ]),
                 },
             });
         }
@@ -196,9 +198,9 @@ fn get_ifdef_macro_expression<'s>(
                     err: VerboseError {
                         span: spanned_token.1,
                         found: Some(Token::Paren),
-                        expected: vec![Expectation::Label(
-                            "a closing parenthesis",
-                        )],
+                        reason: VerboseErrorReason::Expected(vec![
+                            Expectation::Label("a closing parenthesis"),
+                        ]),
                     },
                 });
             };
@@ -218,9 +220,9 @@ fn get_ifdef_macro_expression<'s>(
                 err: VerboseError {
                     span: spanned_token.1,
                     found: Some(spanned_token.0),
-                    expected: vec![Expectation::Label(
-                        "a preprocessor macro expression",
-                    )],
+                    reason: VerboseErrorReason::Expected(vec![
+                        Expectation::Label("a preprocessor macro expression"),
+                    ]),
                 },
             });
         }

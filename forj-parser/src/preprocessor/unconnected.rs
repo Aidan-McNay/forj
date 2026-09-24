@@ -29,7 +29,9 @@ fn get_unconnected_drive<'s>(
             err: VerboseError {
                 span: spanned_token.1,
                 found: Some(spanned_token.0),
-                expected: vec![Expectation::Label("a valid unconnected drive")],
+                reason: VerboseErrorReason::Expected(vec![Expectation::Label(
+                    "a valid unconnected drive",
+                )]),
             },
         }),
     }

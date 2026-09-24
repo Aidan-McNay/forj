@@ -36,263 +36,6 @@ pub trait PragmaHandler<'a> {
     );
 }
 
-/// Convert a [`Token`] into an identifier when possible
-fn into_identifier<'a>(token: &Token<'a>) -> Option<&'static str> {
-    match token {
-        Token::Always
-        | Token::And
-        | Token::Assign
-        | Token::Begin
-        | Token::Buf
-        | Token::Bufif0
-        | Token::Bufif1
-        | Token::Case
-        | Token::Casex
-        | Token::Casez
-        | Token::Cmos
-        | Token::Deassign
-        | Token::Default
-        | Token::Defparam
-        | Token::Disable
-        | Token::Edge
-        | Token::Else
-        | Token::End
-        | Token::Endcase
-        | Token::Endfunction
-        | Token::Endmodule
-        | Token::Endprimitive
-        | Token::Endspecify
-        | Token::Endtable
-        | Token::Endtask
-        | Token::Event
-        | Token::For
-        | Token::Force
-        | Token::Forever
-        | Token::Fork
-        | Token::Function
-        | Token::Highz0
-        | Token::Highz1
-        | Token::If
-        | Token::Ifnone
-        | Token::Initial
-        | Token::Inout
-        | Token::Input
-        | Token::Integer
-        | Token::Join
-        | Token::Large
-        | Token::Macromodule
-        | Token::Medium
-        | Token::Module
-        | Token::Nand
-        | Token::Negedge
-        | Token::Nmos
-        | Token::Nor
-        | Token::Not
-        | Token::Notif0
-        | Token::Notif1
-        | Token::Or
-        | Token::Output
-        | Token::Parameter
-        | Token::Pmos
-        | Token::Posedge
-        | Token::Primitive
-        | Token::Pull0
-        | Token::Pull1
-        | Token::Pulldown
-        | Token::Pullup
-        | Token::Rcmos
-        | Token::Real
-        | Token::Realtime
-        | Token::Reg
-        | Token::Release
-        | Token::Repeat
-        | Token::Rnmos
-        | Token::Rpmos
-        | Token::Rtran
-        | Token::Rtranif0
-        | Token::Rtranif1
-        | Token::Scalared
-        | Token::Small
-        | Token::Specify
-        | Token::Specparam
-        | Token::Strong0
-        | Token::Strong1
-        | Token::Supply0
-        | Token::Supply1
-        | Token::Table
-        | Token::Task
-        | Token::Time
-        | Token::Tran
-        | Token::Tranif0
-        | Token::Tranif1
-        | Token::Tri
-        | Token::Tri0
-        | Token::Tri1
-        | Token::Triand
-        | Token::Trior
-        | Token::Trireg
-        | Token::Vectored
-        | Token::Wait
-        | Token::Wand
-        | Token::Weak0
-        | Token::Weak1
-        | Token::While
-        | Token::Wire
-        | Token::Wor
-        | Token::Xnor
-        | Token::Xor
-        | Token::Automatic
-        | Token::Cell
-        | Token::Config
-        | Token::Design
-        | Token::Endconfig
-        | Token::Endgenerate
-        | Token::Generate
-        | Token::Genvar
-        | Token::Incdir
-        | Token::Include
-        | Token::Instance
-        | Token::Liblist
-        | Token::Library
-        | Token::Localparam
-        | Token::Noshowcancelled
-        | Token::PulsestyleOndetect
-        | Token::PulsestyleOnevent
-        | Token::Showcancelled
-        | Token::Signed
-        | Token::Unsigned
-        | Token::Use
-        | Token::Uwire
-        | Token::Alias
-        | Token::AlwaysComb
-        | Token::AlwaysFf
-        | Token::AlwaysLatch
-        | Token::Assert
-        | Token::Assume
-        | Token::Before
-        | Token::Bind
-        | Token::Bins
-        | Token::Binsof
-        | Token::Bit
-        | Token::Break
-        | Token::Byte
-        | Token::Chandle
-        | Token::Class
-        | Token::Clocking
-        | Token::Const
-        | Token::Constraint
-        | Token::Context
-        | Token::Continue
-        | Token::Cover
-        | Token::Covergroup
-        | Token::Coverpoint
-        | Token::Cross
-        | Token::Dist
-        | Token::Do
-        | Token::Endclass
-        | Token::Endclocking
-        | Token::Endgroup
-        | Token::Endinterface
-        | Token::Endpackage
-        | Token::Endprogram
-        | Token::Endproperty
-        | Token::Endsequence
-        | Token::Enum
-        | Token::Expect
-        | Token::Export
-        | Token::Extends
-        | Token::Extern
-        | Token::Final
-        | Token::FirstMatch
-        | Token::Foreach
-        | Token::Forkjoin
-        | Token::Iff
-        | Token::IgnoreBins
-        | Token::IllegalBins
-        | Token::Import
-        | Token::Inside
-        | Token::Int
-        | Token::Interface
-        | Token::Intersect
-        | Token::JoinAny
-        | Token::JoinNone
-        | Token::Local
-        | Token::Logic
-        | Token::Longint
-        | Token::Matches
-        | Token::Modport
-        | Token::New
-        | Token::Null
-        | Token::Package
-        | Token::Packed
-        | Token::Priority
-        | Token::Program
-        | Token::Property
-        | Token::Protected
-        | Token::Pure
-        | Token::Rand
-        | Token::Randc
-        | Token::Randcase
-        | Token::Randsequence
-        | Token::Ref
-        | Token::Return
-        | Token::Sequence
-        | Token::Shortint
-        | Token::Shortreal
-        | Token::Solve
-        | Token::Static
-        | Token::String
-        | Token::Struct
-        | Token::Super
-        | Token::Tagged
-        | Token::This
-        | Token::Throughout
-        | Token::Timeprecision
-        | Token::Timeunit
-        | Token::Type
-        | Token::Typedef
-        | Token::Union
-        | Token::Unique
-        | Token::Var
-        | Token::Virtual
-        | Token::Void
-        | Token::WaitOrder
-        | Token::Wildcard
-        | Token::With
-        | Token::Within
-        | Token::AcceptOn
-        | Token::Checker
-        | Token::Endchecker
-        | Token::Eventually
-        | Token::Global
-        | Token::Implies
-        | Token::Let
-        | Token::Nexttime
-        | Token::RejectOn
-        | Token::Restrict
-        | Token::SAlways
-        | Token::SEventually
-        | Token::SNexttime
-        | Token::SUntil
-        | Token::SUntilWith
-        | Token::Strong
-        | Token::SyncAcceptOn
-        | Token::SyncRejectOn
-        | Token::Unique0
-        | Token::Until
-        | Token::UntilWith
-        | Token::Untyped
-        | Token::Weak
-        | Token::Implements
-        | Token::Interconnect
-        | Token::Nettype
-        | Token::Soft
-        | Token::PathpulseDollar
-        | Token::OneStep => Some(token.as_str()),
-        _ => None,
-    }
-}
-
 pub(crate) fn get_pragma_name<'s>(
     src: &mut TokenIterator<'s, impl Iterator<Item = SpannedToken<'s>>>,
     state: &mut PreprocessorState<'s>,
@@ -313,7 +56,9 @@ pub(crate) fn get_pragma_name<'s>(
             err: VerboseError {
                 span: spanned_token.1,
                 found: Some(spanned_token.0),
-                expected: vec![Expectation::Label("a pragma name")],
+                reason: VerboseErrorReason::Expected(vec![Expectation::Label(
+                    "a pragma name",
+                )]),
             },
         }),
     }
@@ -337,7 +82,9 @@ pub(crate) fn get_pragma_value<'s>(
                     err: VerboseError {
                         span: curr_token.1,
                         found: None,
-                        expected: vec![Expectation::Label("a corresponding )")],
+                        reason: VerboseErrorReason::Expected(vec![
+                            Expectation::Label("a corresponding )"),
+                        ]),
                     },
                 });
             };
@@ -346,7 +93,9 @@ pub(crate) fn get_pragma_value<'s>(
                     err: VerboseError {
                         span: spanned_token.1,
                         found: Some(spanned_token.0),
-                        expected: vec![Expectation::Token(Token::EParen)],
+                        reason: VerboseErrorReason::Expected(vec![
+                            Expectation::Token(Token::EParen),
+                        ]),
                     },
                 });
             }
@@ -376,11 +125,11 @@ pub(crate) fn get_pragma_value<'s>(
             err: VerboseError {
                 span: curr_token.1,
                 found: Some(curr_token.0),
-                expected: if keyword_possible {
+                reason: VerboseErrorReason::Expected(if keyword_possible {
                     vec![Expectation::Label("a pragma expression")]
                 } else {
                     vec![Expectation::Label("a pragma value")]
-                },
+                }),
             },
         }),
     }
@@ -428,7 +177,9 @@ pub(crate) fn get_pragma_expressions<'s>(
                 err: VerboseError {
                     span: pragma_span.clone(),
                     found: None,
-                    expected: vec![Expectation::Label("a pragma expression")],
+                    reason: VerboseErrorReason::Expected(vec![
+                        Expectation::Label("a pragma expression"),
+                    ]),
                 },
             });
         };
@@ -443,9 +194,9 @@ pub(crate) fn get_pragma_expressions<'s>(
                             err: VerboseError {
                                 span: pragma_span.clone(),
                                 found: None,
-                                expected: vec![Expectation::Label(
-                                    "a pragma value",
-                                )],
+                                reason: VerboseErrorReason::Expected(vec![
+                                    Expectation::Label("a pragma value"),
+                                ]),
                             },
                         });
                     };
@@ -663,7 +414,7 @@ fn no_name() {
 #[test]
 #[should_panic(expected = "a pragma value")]
 fn no_value() {
-    test_pragma("`pragma no_value item = module", "no_value", 1, vec![])
+    test_pragma("`pragma no_value item = +", "no_value", 1, vec![])
 }
 
 #[test]
@@ -676,7 +427,7 @@ fn no_value_eof() {
 #[should_panic(expected = "a pragma expression")]
 fn no_expression() {
     test_pragma(
-        "`pragma no_expression first_item, class",
+        "`pragma no_expression first_item, <<",
         "no_expression",
         1,
         vec![],

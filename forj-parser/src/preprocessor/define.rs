@@ -83,7 +83,9 @@ fn get_define_name<'s>(
             err: VerboseError {
                 span: spanned_token.1,
                 found: Some(spanned_token.0),
-                expected: vec![Expectation::Label("a preprocessor macro name")],
+                reason: VerboseErrorReason::Expected(vec![Expectation::Label(
+                    "a preprocessor macro name",
+                )]),
             },
         }),
     }

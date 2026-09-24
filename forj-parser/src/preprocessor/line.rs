@@ -25,7 +25,9 @@ fn get_line_number<'s>(
             err: VerboseError {
                 span: spanned_token.1,
                 found: Some(spanned_token.0),
-                expected: vec![Expectation::Label("a line number")],
+                reason: VerboseErrorReason::Expected(vec![Expectation::Label(
+                    "a line number",
+                )]),
             },
         }),
     }
@@ -51,7 +53,9 @@ fn get_line_file<'s>(
             err: VerboseError {
                 span: spanned_token.1,
                 found: Some(spanned_token.0),
-                expected: vec![Expectation::Label("a file name (as a string)")],
+                reason: VerboseErrorReason::Expected(vec![Expectation::Label(
+                    "a file name (as a string)",
+                )]),
             },
         }),
     }
@@ -84,9 +88,9 @@ fn get_line_level<'s>(
                     err: VerboseError {
                         span: num_span,
                         found: Some(spanned_token.0),
-                        expected: vec![Expectation::Label(
-                            "a line level (0, 1, or 2)",
-                        )],
+                        reason: VerboseErrorReason::Expected(vec![
+                            Expectation::Label("a line level (0, 1, or 2)"),
+                        ]),
                     },
                 }),
             }
@@ -95,7 +99,9 @@ fn get_line_level<'s>(
             err: VerboseError {
                 span: spanned_token.1,
                 found: Some(spanned_token.0),
-                expected: vec![Expectation::Label("a line level (0, 1, or 2)")],
+                reason: VerboseErrorReason::Expected(vec![Expectation::Label(
+                    "a line level (0, 1, or 2)",
+                )]),
             },
         }),
     }

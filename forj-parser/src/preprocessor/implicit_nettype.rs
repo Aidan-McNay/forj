@@ -52,7 +52,7 @@ fn get_nettype<'s>(
             err: VerboseError {
                 span: spanned_token.1,
                 found: Some(spanned_token.0),
-                expected: vec![
+                reason: VerboseErrorReason::Expected(vec![
                     Expectation::Token(Token::Wire),
                     Expectation::Token(Token::Tri),
                     Expectation::Token(Token::Tri0),
@@ -64,7 +64,7 @@ fn get_nettype<'s>(
                     Expectation::Token(Token::Trireg),
                     Expectation::Token(Token::Uwire),
                     Expectation::Label("'none'"),
-                ],
+                ]),
             },
         }),
     }

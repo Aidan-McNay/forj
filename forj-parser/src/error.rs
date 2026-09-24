@@ -42,6 +42,48 @@ impl<'a> std::fmt::Display for Expectation<'a> {
     }
 }
 
+/// The reasoning behind why a [`VerboseError`] occurred
+#[derive(Debug, Clone, PartialEq)]
+pub enum VerboseErrorReason<'s> {
+    /// A list of what was expected instead of what was found
+    Expected(Vec<Expectation<'s>>),
+    /// A general diagnostic message
+    Diagnostic(&'s str),
+}
+
+impl<'a> fmt::Display for VerboseErrorReason<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            VerboseErrorReason::Diagnostic(diag_message) => {
+                write!(f, "{}", diag_message)
+            }
+            VerboseErrorReason::Expected(expectations) => {
+                write!(f, "expected ")?;
+                let mut dedup_expected: Vec<Expectation<'a>> = vec![];
+                for expected in expectations.iter() {
+                    if !dedup_expected.contains(expected) {
+                        dedup_expected.push(expected.clone());
+                    }
+                }
+                match &dedup_expected[..] {
+                    [] => write!(f, "something else"),
+                    [expected] => expected.fmt(f),
+                    _ => {
+                        for expected in
+                            &dedup_expected[..dedup_expected.len() - 1]
+                        {
+                            expected.fmt(f)?;
+                            write!(f, ", ")?;
+                        }
+                        write!(f, "or ")?;
+                        dedup_expected.last().unwrap().fmt(f)
+                    }
+                }
+            }
+        }
+    }
+}
+
 /// A verbose error message describing the error location, what was
 /// found, and what was expected instead
 #[derive(Debug, Clone, PartialEq)]
@@ -50,8 +92,8 @@ pub struct VerboseError<'s> {
     pub span: Span<'s>,
     /// What token was found (if any - [`None`] indicates the end of a file)
     pub found: Option<Token<'s>>,
-    /// What was expected instead of what was found
-    pub expected: Vec<Expectation<'s>>,
+    /// The reason for the error
+    pub reason: VerboseErrorReason<'s>,
 }
 
 impl<'s> ParserError<Tokens<'s>> for VerboseError<'s> {
@@ -61,7 +103,7 @@ impl<'s> ParserError<Tokens<'s>> for VerboseError<'s> {
             Some(token) => VerboseError {
                 span: token.1.clone(),
                 found: Some(token.0),
-                expected: vec![],
+                reason: VerboseErrorReason::Expected(vec![]),
             },
             None => {
                 // Use the last token instead, indicate EOF
@@ -88,7 +130,7 @@ impl<'s> ParserError<Tokens<'s>> for VerboseError<'s> {
                                 included_from: None,
                             },
                             found: None,
-                            expected: vec![],
+                            reason: VerboseErrorReason::Expected(vec![]),
                         }
                     }
                     None => {
@@ -96,7 +138,7 @@ impl<'s> ParserError<Tokens<'s>> for VerboseError<'s> {
                         VerboseError {
                             span: Span::default(),
                             found: None,
-                            expected: vec![],
+                            reason: VerboseErrorReason::Expected(vec![]),
                         }
                     }
                 }
@@ -106,13 +148,14 @@ impl<'s> ParserError<Tokens<'s>> for VerboseError<'s> {
     fn into_inner(self) -> winnow::Result<Self::Inner, Self> {
         Ok(self)
     }
-    fn or(mut self, mut other: Self) -> Self {
+    fn or(mut self, other: Self) -> Self {
         // Prefer errors that got to the end of the input
+        // Prefer expected lists over diagnostic messages
         match (self.found, other.found) {
             (None, Some(_)) => self,
             (Some(_), None) => other,
             (None, None) => {
-                self.expected.append(&mut other.expected);
+                self.merge_reason(other);
                 self
             }
             (Some(_), Some(_)) => {
@@ -121,7 +164,7 @@ impl<'s> ParserError<Tokens<'s>> for VerboseError<'s> {
                     SpanRelation::Later => self,
                     SpanRelation::Earlier => other,
                     SpanRelation::Same => {
-                        self.expected.append(&mut other.expected);
+                        self.merge_reason(other);
                         self
                     }
                 }
@@ -133,24 +176,39 @@ impl<'s> ParserError<Tokens<'s>> for VerboseError<'s> {
 impl<'s> VerboseError<'s> {
     /// Similar to [`VerboseError::or`], but modifies an existing
     /// error instead of creating a new one
-    pub(crate) fn or_in_place(&mut self, mut other: Self) {
+    pub(crate) fn or_in_place(&mut self, other: Self) {
         // Prefer errors that got to the end of the input
         match (self.found, other.found) {
             (None, Some(_)) => (),
             (Some(_), None) => *self = other,
-            (None, None) => {
-                self.expected.append(&mut other.expected);
-            }
+            (None, None) => self.merge_reason(other),
             (Some(_), Some(_)) => {
                 // Prefer the one with a later span (a.k.a. got farther)
                 match self.span.compare(&other.span) {
                     SpanRelation::Later => (),
                     SpanRelation::Earlier => *self = other,
                     SpanRelation::Same => {
-                        self.expected.append(&mut other.expected);
+                        self.merge_reason(other);
                     }
                 }
             }
+        }
+    }
+    fn merge_reason(&mut self, mut other: Self) {
+        match (&mut self.reason, &mut other.reason) {
+            (
+                VerboseErrorReason::Expected(self_expected),
+                VerboseErrorReason::Expected(other_expected),
+            ) => {
+                self_expected.append(other_expected);
+            }
+            (
+                VerboseErrorReason::Diagnostic(_),
+                VerboseErrorReason::Expected(_),
+            ) => {
+                self.reason = other.reason;
+            }
+            (_, VerboseErrorReason::Diagnostic(_)) => (),
         }
     }
 }
@@ -162,7 +220,17 @@ impl<'s> AddContext<Tokens<'s>, Token<'s>> for VerboseError<'s> {
         _token_start: &<Tokens<'s> as Stream>::Checkpoint,
         _context: Token<'s>,
     ) -> Self {
-        self.expected.push(Expectation::Token(_context));
+        match &mut self.reason {
+            VerboseErrorReason::Diagnostic(_) => {
+                self.reason =
+                    VerboseErrorReason::Expected(vec![Expectation::Token(
+                        _context,
+                    )]);
+            }
+            VerboseErrorReason::Expected(expected_list) => {
+                expected_list.push(Expectation::Token(_context))
+            }
+        }
         self
     }
 }
@@ -173,7 +241,17 @@ impl<'s> AddContext<Tokens<'s>, &'s str> for VerboseError<'s> {
         _token_start: &<Tokens<'s> as Stream>::Checkpoint,
         _context: &'s str,
     ) -> Self {
-        self.expected.push(Expectation::Label(_context));
+        match &mut self.reason {
+            VerboseErrorReason::Diagnostic(_) => {
+                self.reason =
+                    VerboseErrorReason::Expected(vec![Expectation::Label(
+                        _context,
+                    )]);
+            }
+            VerboseErrorReason::Expected(expected_list) => {
+                expected_list.push(Expectation::Label(_context))
+            }
+        }
         self
     }
 }
@@ -185,25 +263,8 @@ impl<'a> fmt::Display for VerboseError<'a> {
             Some(tok) => tok.fmt(f)?,
             None => write!(f, "end of input")?,
         };
-        write!(f, ", expected ")?;
-        let mut dedup_expected: Vec<Expectation<'a>> = vec![];
-        for expected in self.expected.iter() {
-            if !dedup_expected.contains(expected) {
-                dedup_expected.push(expected.clone());
-            }
-        }
-        match &dedup_expected[..] {
-            [] => write!(f, "something else"),
-            [expected] => expected.fmt(f),
-            _ => {
-                for expected in &dedup_expected[..dedup_expected.len() - 1] {
-                    expected.fmt(f)?;
-                    write!(f, ", ")?;
-                }
-                write!(f, "or ")?;
-                dedup_expected.last().unwrap().fmt(f)
-            }
-        }
+        write!(f, ", ")?;
+        self.reason.fmt(f)
     }
 }
 
