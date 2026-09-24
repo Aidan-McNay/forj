@@ -14,7 +14,7 @@ use std::fmt;
 /// keyword, directive, or other literal token of the language.
 /// Those that can vary in content (such as identifiers, strings,
 /// etc.) contain a reference to that content in the source file.
-#[derive(Logos, Debug, Clone, PartialEq, Eq, Copy)]
+#[derive(Logos, Debug, Clone, PartialEq, Eq, Copy, Hash)]
 #[logos(skip r"[ \t\f]+")]
 #[logos(error = String)]
 #[logos(utf8 = false)]

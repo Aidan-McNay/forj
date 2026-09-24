@@ -219,6 +219,34 @@ pub enum PreprocessorError<'a> {
         /// The [`Span`] of the token found instead
         other_span: Span<'a>,
     },
+    /// Using a keyword as a `` `define `` parameter
+    ///
+    /// ```rust
+    /// # use forj_parser::*;
+    /// # let mut state = PreprocessorState::new(vec![], vec![]);
+    /// # let cache = PreprocessorCache::new();
+    /// let source = "
+    /// `define TEST(type, name) type name;
+    /// ".as_bytes();
+    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
+    /// let input = lex(source, "test.v").tokens();
+    /// let preprocess_result = preprocess(
+    ///     input,
+    ///     &mut state,
+    ///     &cache,
+    /// );
+    /// assert!(preprocess_result.is_ok());
+    /// assert!(matches!(state.errors.first(), Some(PreprocessorError::KeywordDefineParameter{
+    ///     keyword_token: Token::Type,
+    ///     ..
+    /// })));
+    /// ```
+    KeywordDefineParameter {
+        /// The keyword [`Token`] used as a `` `define `` parameter
+        keyword_token: Token<'a>,
+        /// The [`Span`] of the keyword token
+        keyword_span: Span<'a>,
+    },
     /// A missing or invalid argument specification in a `` `define `` function
     ///
     /// ```rust
@@ -768,7 +796,8 @@ impl<'a> PreprocessorError<'a> {
     /// still well-defined and allow preprocessing to continue
     pub fn is_warning(&self) -> bool {
         match self {
-            PreprocessorError::NotPreviouslyDefinedMacro { .. }
+            PreprocessorError::KeywordDefineParameter { .. }
+            | PreprocessorError::NotPreviouslyDefinedMacro { .. }
             | PreprocessorError::RedefinedMacro { .. } => true,
             _ => false,
         }
@@ -888,13 +917,33 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
                 report::ReportKind::Error,
                 format!("Unexpected {}", other_token),
             ),
+            PreprocessorError::KeywordDefineParameter {
+                keyword_token,
+                keyword_span,
+            } => Report::new(
+                report::ReportKind::Warning,
+                &keyword_span,
+                "PP9",
+                format!(
+                    concat!(
+                        "Using keyword {} as a preprocessor ",
+                        "macro parameter/identifier"
+                    ),
+                    keyword_token
+                ),
+            )
+            .with_label(
+                &keyword_span,
+                report::ReportKind::Warning,
+                "Prefer using non-keyword identifiers".to_string(),
+            ),
             PreprocessorError::InvalidDefineArgument {
                 other_token,
                 other_span,
             } => Report::new(
                 report::ReportKind::Error,
                 &other_span,
-                "PP9",
+                "PP10",
                 format!(
                     concat!(
                         "Found {}, expected a comma, ), ",
@@ -914,7 +963,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &invalid_version_span,
-                "PP10",
+                "PP11",
                 match invalid_version {
                     Token::StringLiteral(invalid_version_str) => format!(
                         "{} is not a valid version specifier",
@@ -934,7 +983,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
                 Report::new(
                     report::ReportKind::Error,
                     &directive_span,
-                    "PP11",
+                    "PP12",
                     "Incomplete directive",
                 )
                 .with_label(
@@ -949,7 +998,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &other_span,
-                "PP12",
+                "PP13",
                 format!(
                     "Found {}, expected more in the preprocessor definition",
                     other_token
@@ -966,7 +1015,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &undefined_span,
-                "PP13",
+                "PP14",
                 format!("{undefined_name} has not been previously defined"),
             )
             .with_label(
@@ -982,7 +1031,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
                 let mut report = Report::new(
                     report::ReportKind::Warning,
                     &redef_span,
-                    "PP14",
+                    "PP15",
                     format!("Redefining {macro_name}"),
                 );
                 if prev_def_span.from_source() {
@@ -1004,7 +1053,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Warning,
                 &macro_span,
-                "PP15",
+                "PP16",
                 format!(
                     "Undefining {}, which has not been previously defined",
                     macro_name
@@ -1023,7 +1072,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &dup_span,
-                "PP16",
+                "PP17",
                 format!(
                     "'{}' was already declared as a macro parameter for {}",
                     param_name, define_name
@@ -1042,7 +1091,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &use_span,
-                "PP17",
+                "PP18",
                 format!("Expected arguments when using {macro_name}"),
             )
             .with_label(&define_span, NOTE_KIND, "Macro defined here")
@@ -1060,7 +1109,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &use_span,
-                "PP18",
+                "PP19",
                 format!(
                     "{} expected {} arguments, but {} were provided",
                     macro_name, expected, found
@@ -1083,7 +1132,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &use_span,
-                "PP19",
+                "PP20",
                 format!("'{param_name}' wasn't specified and has no default"),
             )
             .with_label(&define_span, NOTE_KIND, "Macro defined here")
@@ -1098,7 +1147,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &arg_span,
-                "PP20",
+                "PP21",
                 format!(
                     concat!(
                         "The argument for '{}' cannot be ",
@@ -1116,7 +1165,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
                 Report::new(
                     report::ReportKind::Error,
                     &timescale_span,
-                    "PP21",
+                    "PP22",
                     "Time precision is larger than the time unit",
                 )
                 .with_label(
@@ -1131,7 +1180,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &error_span,
-                "PP22",
+                "PP23",
                 format!(
                     "Usage of {} resulted in an incomplete macro",
                     error_token
@@ -1149,7 +1198,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &include_path_span,
-                "PP23",
+                "PP24",
                 format!("Error when reading {}", include_path),
             )
             .with_label(
@@ -1160,7 +1209,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             PreprocessorError::IncludeDepth { include_span } => Report::new(
                 report::ReportKind::Error,
                 &include_span,
-                "PP24",
+                "PP25",
                 format!("Max include depth of {} reached", MAX_INCLUDE_DEPTH),
             )
             .with_label(
@@ -1174,7 +1223,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &directive_span,
-                "PP25",
+                "PP26",
                 format!("Tried to use {} inside a design element", directive),
             )
             .with_label(
@@ -1182,7 +1231,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
                 report::ReportKind::Error,
                 "Illegal inside a design element",
             ),
-            PreprocessorError::VerboseError { err } => err.report("PP26"),
+            PreprocessorError::VerboseError { err } => err.report("PP27"),
             PreprocessorError::NewlineInDefine(newline_span) => Report::new(
                 report::ReportKind::Error,
                 &newline_span,

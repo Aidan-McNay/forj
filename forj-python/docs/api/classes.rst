@@ -1200,18 +1200,6 @@ Preprocessing
    
                The error-causing :py:class:`Token` (either :py:class:`Token::EParen`\ ,
                :py:class:`Token::EBracket`\ , or :py:class:`Token::EBrace`\ )
-   
-      .. py:class:: PreprocessorError.RedefinedDirective(PreprocessorError)
-         
-         .. py:property:: directive_name
-            :type: str
-   
-               The name of the compiler directive being redefined
-         
-         .. py:property:: directive_span
-            :type: Span
-   
-               The :py:class:`Span` of the compiler directive name
       
       .. py:class:: PreprocessorError.InvalidDefineArgument(PreprocessorError)
          
@@ -1270,6 +1258,18 @@ Preprocessing
             :type: Span
    
                The :py:class:`Span` of the invalid version specifier
+
+      .. py:class:: PreprocessorError.KeywordDefineParameter(PreprocessorError)
+         
+         .. py:property:: keyword_span
+            :type: Span
+   
+               The :py:class:`Span` of the keyword token
+         
+         .. py:property:: keyword_token
+            :type: Token
+   
+               The keyword :py:class:`Token` used as a ``define`` parameter
    
       .. py:class:: PreprocessorError.MissingMacroArgument(PreprocessorError)
          
@@ -1336,6 +1336,18 @@ Preprocessing
             :type: Span
    
                The :py:class:`Span` where the not-previously-defined name was specified
+
+      .. py:class:: PreprocessorError.RedefinedDirective(PreprocessorError)
+         
+         .. py:property:: directive_name
+            :type: str
+   
+               The name of the compiler directive being redefined
+         
+         .. py:property:: directive_span
+            :type: Span
+   
+               The :py:class:`Span` of the compiler directive name
    
       .. py:class:: PreprocessorError.RedefinedMacro(PreprocessorError)
          

@@ -411,7 +411,8 @@ pub(crate) fn recover<'s>(
         PreprocessorError::IncludeDepth { .. } => true,
         PreprocessorError::VerboseError { .. } => recover_newline(src),
         PreprocessorError::IllegalInDesignUnit { .. } => true,
-        PreprocessorError::NotPreviouslyDefinedMacro { .. }
+        PreprocessorError::KeywordDefineParameter { .. }
+        | PreprocessorError::NotPreviouslyDefinedMacro { .. }
         | PreprocessorError::RedefinedMacro { .. } => {
             panic!("Shouldn't need to recover from warnings")
         }

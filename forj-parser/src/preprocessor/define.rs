@@ -3,6 +3,8 @@
 // =======================================================================
 // Preprocessing for preprocessor definitions
 
+use std::collections::HashMap;
+
 use crate::Span;
 use crate::*;
 
@@ -97,6 +99,7 @@ fn get_define_function_args<'s>(
     define_name_span: &Span<'s>,
     state: &mut PreprocessorState<'s>,
     cache: &'s PreprocessorCache<'s>,
+    keyword_mapping: &mut HashMap<Token<'s>, &'s str>,
 ) -> Result<
     Option<(
         Span<'s>,
@@ -130,6 +133,7 @@ fn get_define_function_args<'s>(
                     &mut function_args,
                     state,
                     cache,
+                    keyword_mapping,
                     define_name,
                     paren_span.clone(),
                 ) {
@@ -208,6 +212,7 @@ fn get_define_function_arg<'s>(
     )>,
     state: &mut PreprocessorState<'s>,
     cache: &'s PreprocessorCache<'s>,
+    keyword_mapping: &mut HashMap<Token<'s>, &'s str>,
     define_name: &'s str,
     paren_span: Span<'s>,
 ) -> Result<(), PreprocessorError<'s>> {
@@ -218,6 +223,16 @@ fn get_define_function_arg<'s>(
                     unsafe { std::str::from_utf8_unchecked(id_str) },
                     id_span,
                 );
+            }
+            (SpannedToken(param_token, param_span), _)
+                if let Some(id_text) = into_identifier(&param_token) =>
+            {
+                keyword_mapping.insert(param_token.clone(), id_text);
+                state.err(PreprocessorError::KeywordDefineParameter {
+                    keyword_token: param_token,
+                    keyword_span: param_span.clone(),
+                });
+                break SpannedString(id_text, param_span);
             }
             (SpannedToken(Token::Newline, _), _) => {
                 continue;
@@ -274,18 +289,49 @@ fn get_define_function_arg<'s>(
     }
 }
 
+/// Replace any keyword that are parameters with identifiers, so they'll get
+/// replaced during macro expansion
+fn replace_keyword_mapping<'s>(
+    define_body: Vec<SpannedToken<'s>>,
+    keyword_mapping: &HashMap<Token<'s>, &'s str>,
+) -> Vec<SpannedToken<'s>> {
+    if keyword_mapping.is_empty() {
+        // Don't need to map keywords
+        define_body
+    } else {
+        // Need to map the define_body
+        define_body
+            .into_iter()
+            .map(|SpannedToken(token, span)| {
+                match keyword_mapping.get(&token) {
+                    Some(id_text) => SpannedToken(
+                        Token::SimpleIdentifier((*id_text).into()),
+                        span,
+                    ),
+                    None => SpannedToken(token, span),
+                }
+            })
+            .collect()
+    }
+}
+
 fn get_define_body<'s>(
     src: &mut TokenIterator<'s, impl Iterator<Item = SpannedToken<'s>>>,
     state: &mut PreprocessorState<'s>,
     cache: &'s PreprocessorCache<'s>,
+    keyword_mapping: &HashMap<Token<'s>, &'s str>,
 ) -> Result<Option<Vec<SpannedToken<'s>>>, PreprocessorError<'s>> {
     let mut define_body: Vec<SpannedToken<'s>> = vec![];
     let prev_in_define = state.enter_define();
     let result = preprocess_helper(src, &mut define_body, state, cache);
     state.exit_define(prev_in_define);
     match result {
-        Ok(()) => Ok(Some(define_body)),
-        Err(PreprocessorError::NewlineInDefine(_)) => Ok(Some(define_body)),
+        Ok(()) => {
+            Ok(Some(replace_keyword_mapping(define_body, keyword_mapping)))
+        }
+        Err(PreprocessorError::NewlineInDefine(_)) => {
+            Ok(Some(replace_keyword_mapping(define_body, keyword_mapping)))
+        }
         Err(err) => Err(err),
     }
 }
@@ -305,14 +351,16 @@ pub fn preprocess_define<'s>(
         });
         state.undefine(define_name.0);
     }
+    let mut keyword_mapping = HashMap::new();
     let function_args = get_define_function_args(
         src,
         define_name.0,
         &define_name.1,
         state,
         cache,
+        &mut keyword_mapping,
     )?;
-    let define_text = get_define_body(src, state, cache)?;
+    let define_text = get_define_body(src, state, cache, &keyword_mapping)?;
     if is_compiler_directive(define_name.0) {
         return Err(PreprocessorError::RedefinedDirective {
             directive_name: define_name.0,
@@ -498,8 +546,17 @@ fn empty_function() {
 
 #[test]
 #[should_panic(expected = "InvalidDefineParameter")]
-fn missing_arg_function() {
+fn missing_param_function() {
     check_preprocessor!("`define TEST(a,)", Vec::<Token<'_>>::new())
+}
+
+#[test]
+#[should_panic(expected = "KeywordDefineParameter")]
+fn keyword_param_function() {
+    check_preprocessor!(
+        "`define TEST(type, name) type name;",
+        Vec::<Token<'_>>::new()
+    )
 }
 
 #[test]

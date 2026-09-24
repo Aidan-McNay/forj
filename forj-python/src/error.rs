@@ -201,6 +201,12 @@ pub enum PreprocessorError {
         /// The [`Span`] of the token found instead
         other_span: Span,
     },
+    KeywordDefineParameter {
+        /// The keyword [`Token`] used as a `` `define `` parameter
+        keyword_token: Token,
+        /// The [`Span`] of the keyword token
+        keyword_span: Span,
+    },
     InvalidDefineArgument {
         /// The [`Token`] found instead of the valid `` `define `` argument
         other_token: Token,
@@ -379,6 +385,13 @@ impl<'a> From<forj_parser::PreprocessorError<'a>> for PreprocessorError {
             } => PreprocessorError::InvalidDefineParameter {
                 other_token: other_token.into(),
                 other_span: other_span.into(),
+            },
+            forj_parser::PreprocessorError::KeywordDefineParameter {
+                keyword_token,
+                keyword_span,
+            } => PreprocessorError::KeywordDefineParameter {
+                keyword_token: keyword_token.into(),
+                keyword_span: keyword_span.into(),
             },
             forj_parser::PreprocessorError::InvalidDefineArgument {
                 other_token,
