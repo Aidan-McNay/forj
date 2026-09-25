@@ -142,7 +142,7 @@ pub fn class_method_parser<'s>(
         .map(|(a, b, c)| {
             ClassMethod::ConstructorPrototype(Box::new((a, b, c)))
         });
-    alt((
+    let result = alt((
         _task_parser,
         _pure_virtual_method_parser,
         _extern_method_parser,
@@ -150,7 +150,34 @@ pub fn class_method_parser<'s>(
         _constructor_prototype_parser,
         _function_parser,
     ))
-    .parse_next(input)
+    .parse_next(input)?;
+    match &result {
+        ClassMethod::Task(class_task)
+            if let Some(Lifetime::Static(static_metadata)) =
+                &class_task.1.2 =>
+        {
+            Err(winnow::error::ErrMode::Backtrack(VerboseError {
+                span: static_metadata.span.clone(),
+                found: Some(Token::Static),
+                reason: VerboseErrorReason::Diagnostic(
+                    "class methods cannot be static",
+                ),
+            }))
+        }
+        ClassMethod::Function(class_function)
+            if let Some(Lifetime::Static(static_metadata)) =
+                &class_function.1.2 =>
+        {
+            Err(winnow::error::ErrMode::Backtrack(VerboseError {
+                span: static_metadata.span.clone(),
+                found: Some(Token::Static),
+                reason: VerboseErrorReason::Diagnostic(
+                    "class methods cannot be static",
+                ),
+            }))
+        }
+        _ => Ok(result),
+    }
 }
 
 pub fn list_of_arguments_or_default_parser<'s>(
