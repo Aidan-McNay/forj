@@ -11,7 +11,7 @@ use winnow::combinator::alt;
 pub fn config_declaration_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ConfigDeclaration<'s>, VerboseError<'s>> {
-    (
+    let result = (
         token(Token::Config),
         config_identifier_parser,
         token(Token::SColon),
@@ -24,7 +24,12 @@ pub fn config_declaration_parser<'s>(
         .map(|(a, b, c, d, e, f, g, h)| {
             ConfigDeclaration(a, b, c, d, e, f, g, h)
         })
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.1.0),
+        result.7.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn design_statement_parser<'s>(

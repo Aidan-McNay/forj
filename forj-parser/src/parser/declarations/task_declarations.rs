@@ -67,7 +67,22 @@ pub fn task_body_declaration_parser<'s>(
         .map(|(a, b, c, d, e, f, g, h, i, j)| {
             TaskBodyDeclaration::Block(Box::new((a, b, c, d, e, f, g, h, i, j)))
         });
-    alt((_tf_parser, _block_parser)).parse_next(input)
+    let result = alt((_tf_parser, _block_parser)).parse_next(input)?;
+    match &result {
+        TaskBodyDeclaration::Tf(tf_task_body) => {
+            check_block_identifiers(
+                Some(&tf_task_body.1.0),
+                tf_task_body.6.as_ref().map(|a| &a.1.0),
+            )?;
+        }
+        TaskBodyDeclaration::Block(block_task_body) => {
+            check_block_identifiers(
+                Some(&block_task_body.1.0),
+                block_task_body.9.as_ref().map(|a| &a.1.0),
+            )?;
+        }
+    };
+    Ok(result)
 }
 
 pub fn tf_item_declaration_parser<'s>(

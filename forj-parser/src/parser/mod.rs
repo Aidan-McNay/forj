@@ -56,11 +56,12 @@ pub fn parse<'s>(
     };
     match source_text_parser.parse_next(&mut stateful_input) {
         Ok(source_text) => Ok(source_text),
-        Err(ErrMode::Backtrack(err)) => Err(match stateful_input.state.0 {
-            None => err,
-            Some(prev_err) => err.or(prev_err),
-        }),
-        Err(ErrMode::Cut(err)) => Err(err),
+        Err(ErrMode::Backtrack(err)) | Err(ErrMode::Cut(err)) => {
+            Err(match stateful_input.state.0 {
+                None => err,
+                Some(prev_err) => err.or(prev_err),
+            })
+        }
         Err(ErrMode::Incomplete(_)) => {
             panic!("Produced 'incomplete', an unsupported error")
         }

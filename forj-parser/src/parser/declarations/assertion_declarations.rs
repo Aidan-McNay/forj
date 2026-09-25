@@ -225,7 +225,7 @@ pub fn assertion_item_declaration_parser<'s>(
 pub fn property_declaration_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<PropertyDeclaration<'s>, VerboseError<'s>> {
-    (
+    let result = (
         token(Token::Property),
         property_identifier_parser,
         opt_note((
@@ -243,7 +243,12 @@ pub fn property_declaration_parser<'s>(
         .map(|(a, b, c, d, e, f, g, h, i)| {
             PropertyDeclaration(a, b, c, d, e, f, g, h, i)
         })
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.1.0),
+        result.8.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn property_port_list_parser<'s>(
@@ -750,7 +755,7 @@ pub fn property_case_item_parser<'s>(
 pub fn sequence_declaration_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<SequenceDeclaration<'s>, VerboseError<'s>> {
-    (
+    let result = (
         token(Token::Sequence),
         sequence_identifier_parser,
         opt_note((
@@ -768,7 +773,12 @@ pub fn sequence_declaration_parser<'s>(
         .map(|(a, b, c, d, e, f, g, h, i)| {
             SequenceDeclaration(a, b, c, d, e, f, g, h, i)
         })
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.1.0),
+        result.8.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn sequence_port_list_parser<'s>(

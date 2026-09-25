@@ -8,7 +8,7 @@ use forj_syntax::*;
 use winnow::Parser;
 #[cfg(feature = "parse_lossless")]
 use winnow::combinator::alt;
-use winnow::error::ModalResult;
+use winnow::error::{ErrMode, ModalResult};
 use winnow::token::any;
 
 // A parser for matching extra nodes
@@ -120,5 +120,116 @@ pub fn name<'s>(
             _ => None,
         })
         .parse_next(input)
+    }
+}
+
+/// Check that the end identifier for a block matches the beginning
+pub(crate) fn check_block_identifiers<'s>(
+    begin_id: Option<&Identifier<'s>>,
+    end_id: Option<&Identifier<'s>>,
+) -> ModalResult<(), VerboseError<'s>> {
+    match (begin_id, end_id) {
+        (_, None) => Ok(()),
+        (Some(begin_block_id), Some(end_block_id)) => {
+            match (begin_block_id, end_block_id) {
+                (
+                    Identifier::SimpleIdentifier((begin_block_id_text, _)),
+                    Identifier::SimpleIdentifier((
+                        end_block_id_text,
+                        end_block_id_metadata,
+                    )),
+                ) => {
+                    if begin_block_id_text != end_block_id_text {
+                        Err(ErrMode::Backtrack(VerboseError {
+                            span: end_block_id_metadata.span.clone(),
+                            found: Some(Token::SimpleIdentifier(
+                                (*end_block_id_text).into(),
+                            )),
+                            reason: VerboseErrorReason::Expected(vec![
+                                Expectation::Token(Token::SimpleIdentifier(
+                                    (*begin_block_id_text).into(),
+                                )),
+                            ]),
+                        }))
+                    } else {
+                        Ok(())
+                    }
+                }
+                (
+                    Identifier::EscapedIdentifier((begin_block_id_text, _)),
+                    Identifier::EscapedIdentifier((
+                        end_block_id_text,
+                        end_block_id_metadata,
+                    )),
+                ) => {
+                    if begin_block_id_text != end_block_id_text {
+                        Err(ErrMode::Backtrack(VerboseError {
+                            span: end_block_id_metadata.span.clone(),
+                            found: Some(Token::EscapedIdentifier(
+                                (*end_block_id_text).into(),
+                            )),
+                            reason: VerboseErrorReason::Expected(vec![
+                                Expectation::Token(Token::EscapedIdentifier(
+                                    (*begin_block_id_text).into(),
+                                )),
+                            ]),
+                        }))
+                    } else {
+                        Ok(())
+                    }
+                }
+                (
+                    Identifier::SimpleIdentifier((begin_block_id_text, _)),
+                    Identifier::EscapedIdentifier((
+                        end_block_id_text,
+                        end_block_id_metadata,
+                    )),
+                ) => Err(ErrMode::Backtrack(VerboseError {
+                    span: end_block_id_metadata.span.clone(),
+                    found: Some(Token::EscapedIdentifier(
+                        (*end_block_id_text).into(),
+                    )),
+                    reason: VerboseErrorReason::Expected(vec![
+                        Expectation::Token(Token::SimpleIdentifier(
+                            (*begin_block_id_text).into(),
+                        )),
+                    ]),
+                })),
+                (
+                    Identifier::EscapedIdentifier((begin_block_id_text, _)),
+                    Identifier::SimpleIdentifier((
+                        end_block_id_text,
+                        end_block_id_metadata,
+                    )),
+                ) => Err(ErrMode::Backtrack(VerboseError {
+                    span: end_block_id_metadata.span.clone(),
+                    found: Some(Token::SimpleIdentifier(
+                        (*end_block_id_text).into(),
+                    )),
+                    reason: VerboseErrorReason::Expected(vec![
+                        Expectation::Token(Token::EscapedIdentifier(
+                            (*begin_block_id_text).into(),
+                        )),
+                    ]),
+                })),
+            }
+        }
+        (None, Some(end_block_id)) => {
+            let (err_token, err_span) = match end_block_id {
+                Identifier::SimpleIdentifier((text, Metadata { span })) => {
+                    (Token::SimpleIdentifier((*text).into()), span.clone())
+                }
+                Identifier::EscapedIdentifier((text, Metadata { span })) => {
+                    (Token::EscapedIdentifier((*text).into()), span.clone())
+                }
+            };
+            Err(ErrMode::Backtrack(VerboseError {
+                span: err_span,
+                found: Some(err_token),
+                reason: VerboseErrorReason::Diagnostic(
+                    "no matching beginning block name",
+                ),
+            }))
+        }
     }
 }

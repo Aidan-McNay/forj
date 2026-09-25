@@ -38,7 +38,22 @@ pub fn clocking_declaration_parser<'s>(
         .map(|(a, b, c, d, e, f, g, h)| {
             ClockingDeclaration::Global(Box::new((a, b, c, d, e, f, g, h)))
         });
-    alt((_local_parser, _global_parser)).parse_next(input)
+    let result = alt((_local_parser, _global_parser)).parse_next(input)?;
+    match &result {
+        ClockingDeclaration::Local(local_clocking_declaration) => {
+            check_block_identifiers(
+                local_clocking_declaration.2.as_ref().map(|a| &a.0),
+                local_clocking_declaration.7.as_ref().map(|a| &a.1.0),
+            )?;
+        }
+        ClockingDeclaration::Global(global_clocking_declaration) => {
+            check_block_identifiers(
+                global_clocking_declaration.2.as_ref().map(|a| &a.0),
+                global_clocking_declaration.7.as_ref().map(|a| &a.1.0),
+            )?;
+        }
+    };
+    Ok(result)
 }
 
 pub fn clocking_item_parser<'s>(

@@ -81,7 +81,22 @@ pub fn function_body_declaration_parser<'s>(
                 a, b, c, d, e, f, g, h, i, j, k,
             )))
         });
-    alt((_tf_parser, _block_parser)).parse_next(input)
+    let result = alt((_tf_parser, _block_parser)).parse_next(input)?;
+    match &result {
+        FunctionBodyDeclaration::Block(block_function_body) => {
+            check_block_identifiers(
+                Some(&block_function_body.2.0),
+                block_function_body.10.as_ref().map(|a| &a.1.0),
+            )?;
+        }
+        FunctionBodyDeclaration::Tf(tf_function_body) => {
+            check_block_identifiers(
+                Some(&tf_function_body.2.0),
+                tf_function_body.7.as_ref().map(|a| &a.1.0),
+            )?;
+        }
+    };
+    Ok(result)
 }
 
 pub fn function_prototype_parser<'s>(

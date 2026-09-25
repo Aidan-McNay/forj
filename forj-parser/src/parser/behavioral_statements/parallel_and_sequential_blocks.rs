@@ -27,7 +27,7 @@ pub fn action_block_parser<'s>(
 pub fn seq_block_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<SeqBlock<'s>, VerboseError<'s>> {
-    (
+    let result = (
         token(Token::Begin),
         opt_note((token(Token::Colon), block_identifier_parser)),
         repeat_note(block_item_declaration_parser),
@@ -36,13 +36,18 @@ pub fn seq_block_parser<'s>(
         opt_note((token(Token::Colon), block_identifier_parser)),
     )
         .map(|(a, b, c, d, e, f)| SeqBlock(a, b, c, d, e, f))
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        result.1.as_ref().map(|a| &a.1.0),
+        result.5.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn par_block_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ParBlock<'s>, VerboseError<'s>> {
-    (
+    let result = (
         token(Token::Fork),
         opt_note((token(Token::Colon), block_identifier_parser)),
         repeat_note(block_item_declaration_parser),
@@ -51,7 +56,12 @@ pub fn par_block_parser<'s>(
         opt_note((token(Token::Colon), block_identifier_parser)),
     )
         .map(|(a, b, c, d, e, f)| ParBlock(a, b, c, d, e, f))
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        result.1.as_ref().map(|a| &a.1.0),
+        result.5.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn join_keyword_parser<'s>(

@@ -86,12 +86,34 @@ pub fn udp_declaration_parser<'s>(
                 a, b, c, d, e, f, g, h, i, j, k, l,
             )))
         });
-    alt((
+    let result = alt((
         _nonansi_parser,
         _ansi_parser,
         _extern_nonansi_parser,
         _extern_ansi_parser,
         _widlcard_parser,
     ))
-    .parse_next(input)
+    .parse_next(input)?;
+    match &result {
+        UdpDeclaration::Ansi(udp_ansi_declaration) => {
+            check_block_identifiers(
+                Some(&udp_ansi_declaration.0.2.0),
+                udp_ansi_declaration.3.as_ref().map(|a| &a.1.0),
+            )?;
+        }
+        UdpDeclaration::Nonansi(udp_nonansi_declaration) => {
+            check_block_identifiers(
+                Some(&udp_nonansi_declaration.0.2.0),
+                udp_nonansi_declaration.5.as_ref().map(|a| &a.1.0),
+            )?;
+        }
+        UdpDeclaration::Wildcard(udp_wildcard_declaration) => {
+            check_block_identifiers(
+                Some(&udp_wildcard_declaration.2.0),
+                udp_wildcard_declaration.11.as_ref().map(|a| &a.1.0),
+            )?;
+        }
+        UdpDeclaration::ExternAnsi(_) | UdpDeclaration::ExternNonansi(_) => (),
+    };
+    Ok(result)
 }

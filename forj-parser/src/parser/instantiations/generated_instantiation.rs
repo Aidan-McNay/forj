@@ -149,11 +149,29 @@ pub fn generate_block_parser<'s>(
         .map(|(a, b, c, d, e, f)| {
             GenerateBlock::Block(Box::new((a, b, c, d, e, f)))
         });
-    alt((
+    let result = alt((
         generate_item_parser.map(|a| GenerateBlock::Item(Box::new(a))),
         _block_parser,
     ))
-    .parse_next(input)
+    .parse_next(input)?;
+    if let GenerateBlock::Block(generate_block) = &result {
+        let inner_struct = &**generate_block;
+        check_block_identifiers(
+            inner_struct.0.as_ref().map(|a| &a.0.0),
+            inner_struct.5.as_ref().map(|a| &a.1.0),
+        )?;
+        check_block_identifiers(
+            inner_struct.2.as_ref().map(|a| &a.1.0),
+            inner_struct.5.as_ref().map(|a| &a.1.0),
+        )?;
+        if let (Some(_), Some(_)) = (&inner_struct.0, &inner_struct.2) {
+            check_block_identifiers(
+                inner_struct.0.as_ref().map(|a| &a.0.0),
+                inner_struct.2.as_ref().map(|a| &a.1.0),
+            )?;
+        }
+    };
+    Ok(result)
 }
 
 pub fn generate_item_parser<'s>(

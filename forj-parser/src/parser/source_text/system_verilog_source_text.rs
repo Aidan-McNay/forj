@@ -77,7 +77,7 @@ pub fn module_declaration_parser<'s>(
 pub fn module_declaration_nonansi_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ModuleDeclarationNonansi<'s>, VerboseError<'s>> {
-    (
+    let result = (
         module_nonansi_header_parser,
         opt_note(timeunits_declaration_parser),
         repeat_note(module_item_parser),
@@ -85,13 +85,18 @@ pub fn module_declaration_nonansi_parser<'s>(
         opt_note((token(Token::Colon), module_identifier_parser)),
     )
         .map(|(a, b, c, d, e)| ModuleDeclarationNonansi(a, b, c, d, e))
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.0.3.0),
+        result.4.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn module_declaration_ansi_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ModuleDeclarationAnsi<'s>, VerboseError<'s>> {
-    (
+    let result = (
         module_ansi_header_parser,
         opt_note(timeunits_declaration_parser),
         repeat_note(non_port_module_item_parser),
@@ -99,7 +104,12 @@ pub fn module_declaration_ansi_parser<'s>(
         opt_note((token(Token::Colon), module_identifier_parser)),
     )
         .map(|(a, b, c, d, e)| ModuleDeclarationAnsi(a, b, c, d, e))
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.0.3.0),
+        result.4.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn module_nonansi_header_parser<'s>(
@@ -147,7 +157,7 @@ pub fn module_ansi_header_parser<'s>(
 pub fn module_declaration_wildcard_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ModuleDeclarationWildcard<'s>, VerboseError<'s>> {
-    (
+    let result = (
         attribute_instance_vec_parser,
         module_keyword_parser,
         opt_note(lifetime_parser),
@@ -165,7 +175,12 @@ pub fn module_declaration_wildcard_parser<'s>(
         .map(|(a, b, c, d, e, f, g, h, i, j, k, l, m)| {
             ModuleDeclarationWildcard(a, b, c, d, e, f, g, h, i, j, k, l, m)
         })
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.3.0),
+        result.12.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn module_declaration_extern_nonansi_parser<'s>(
@@ -215,7 +230,7 @@ pub fn interface_declaration_parser<'s>(
 pub fn interface_declaration_nonansi_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<InterfaceDeclarationNonansi<'s>, VerboseError<'s>> {
-    (
+    let result = (
         interface_nonansi_header_parser,
         opt_note(timeunits_declaration_parser),
         repeat_note(interface_item_parser),
@@ -223,13 +238,18 @@ pub fn interface_declaration_nonansi_parser<'s>(
         opt_note((token(Token::Colon), interface_identifier_parser)),
     )
         .map(|(a, b, c, d, e)| InterfaceDeclarationNonansi(a, b, c, d, e))
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.0.3.0),
+        result.4.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn interface_declaration_ansi_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<InterfaceDeclarationAnsi<'s>, VerboseError<'s>> {
-    (
+    let result = (
         interface_ansi_header_parser,
         opt_note(timeunits_declaration_parser),
         repeat_note(non_port_interface_item_parser),
@@ -237,13 +257,18 @@ pub fn interface_declaration_ansi_parser<'s>(
         opt_note((token(Token::Colon), interface_identifier_parser)),
     )
         .map(|(a, b, c, d, e)| InterfaceDeclarationAnsi(a, b, c, d, e))
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.0.3.0),
+        result.4.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn interface_declaration_wildcard_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<InterfaceDeclarationWildcard<'s>, VerboseError<'s>> {
-    (
+    let result = (
         attribute_instance_vec_parser,
         token(Token::Interface),
         interface_identifier_parser,
@@ -260,7 +285,12 @@ pub fn interface_declaration_wildcard_parser<'s>(
         .map(|(a, b, c, d, e, f, g, h, i, j, k, l)| {
             InterfaceDeclarationWildcard(a, b, c, d, e, f, g, h, i, j, k, l)
         })
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.2.0),
+        result.11.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn interface_declaration_extern_nonansi_parser<'s>(
@@ -342,7 +372,7 @@ pub fn program_declaration_parser<'s>(
 pub fn program_declaration_nonansi_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ProgramDeclarationNonansi<'s>, VerboseError<'s>> {
-    (
+    let result = (
         program_nonansi_header_parser,
         opt_note(timeunits_declaration_parser),
         repeat_note(program_item_parser),
@@ -350,13 +380,18 @@ pub fn program_declaration_nonansi_parser<'s>(
         opt_note((token(Token::Colon), program_identifier_parser)),
     )
         .map(|(a, b, c, d, e)| ProgramDeclarationNonansi(a, b, c, d, e))
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.0.3.0),
+        result.4.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn program_declaration_ansi_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ProgramDeclarationAnsi<'s>, VerboseError<'s>> {
-    (
+    let result = (
         program_ansi_header_parser,
         opt_note(timeunits_declaration_parser),
         repeat_note(non_port_program_item_parser),
@@ -364,13 +399,18 @@ pub fn program_declaration_ansi_parser<'s>(
         opt_note((token(Token::Colon), program_identifier_parser)),
     )
         .map(|(a, b, c, d, e)| ProgramDeclarationAnsi(a, b, c, d, e))
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.0.3.0),
+        result.4.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn program_declaration_wildcard_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ProgramDeclarationWildcard<'s>, VerboseError<'s>> {
-    (
+    let result = (
         attribute_instance_vec_parser,
         token(Token::Program),
         program_identifier_parser,
@@ -387,7 +427,12 @@ pub fn program_declaration_wildcard_parser<'s>(
         .map(|(a, b, c, d, e, f, g, h, i, j, k, l)| {
             ProgramDeclarationWildcard(a, b, c, d, e, f, g, h, i, j, k, l)
         })
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.2.0),
+        result.11.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn program_declaration_extern_nonansi_parser<'s>(
@@ -460,7 +505,7 @@ pub fn checker_declaration_parser<'s>(
         attribute_instance_vec_parser,
         checker_or_generate_item_parser,
     ));
-    (
+    let result = (
         token(Token::Checker),
         checker_identifier_parser,
         opt_note(checker_declaration_port_list_parser),
@@ -470,7 +515,12 @@ pub fn checker_declaration_parser<'s>(
         opt_note((token(Token::Colon), checker_identifier_parser)),
     )
         .map(|(a, b, c, d, e, f, g)| CheckerDeclaration(a, b, c, d, e, f, g))
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.1.0),
+        result.6.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn class_declaration_parser<'s>(
@@ -499,7 +549,7 @@ pub fn class_declaration_parser<'s>(
         interface_class_type_parser,
         repeat_note((token(Token::Comma), interface_class_type_parser)),
     );
-    (
+    let result = (
         opt_note(token(Token::Virtual)),
         token(Token::Class),
         opt_note(final_specifier_parser),
@@ -515,7 +565,12 @@ pub fn class_declaration_parser<'s>(
         .map(|(a, b, c, d, e, f, g, h, i, j, k)| {
             ClassDeclaration(a, b, c, d, e, f, g, h, i, j, k)
         })
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.3.0),
+        result.10.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn interface_class_declaration_parser<'s>(
@@ -526,7 +581,7 @@ pub fn interface_class_declaration_parser<'s>(
         interface_class_type_parser,
         repeat_note((token(Token::Comma), interface_class_type_parser)),
     );
-    (
+    let result = (
         token(Token::Interface),
         token(Token::Class),
         class_identifier_parser,
@@ -540,7 +595,12 @@ pub fn interface_class_declaration_parser<'s>(
         .map(|(a, b, c, d, e, f, g, h, i)| {
             InterfaceClassDeclaration(a, b, c, d, e, f, g, h, i)
         })
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.2.0),
+        result.8.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn package_declaration_parser<'s>(
@@ -548,7 +608,7 @@ pub fn package_declaration_parser<'s>(
 ) -> ModalResult<PackageDeclaration<'s>, VerboseError<'s>> {
     let attribute_package_items_parser =
         repeat_note((attribute_instance_vec_parser, package_item_parser));
-    (
+    let result = (
         attribute_instance_vec_parser,
         token(Token::Package),
         opt_note(lifetime_parser),
@@ -562,7 +622,12 @@ pub fn package_declaration_parser<'s>(
         .map(|(a, b, c, d, e, f, g, h, i)| {
             PackageDeclaration(a, b, c, d, e, f, g, h, i)
         })
-        .parse_next(input)
+        .parse_next(input)?;
+    check_block_identifiers(
+        Some(&result.3.0),
+        result.8.as_ref().map(|a| &a.1.0),
+    )?;
+    Ok(result)
 }
 
 pub fn timeunits_declaration_parser<'s>(

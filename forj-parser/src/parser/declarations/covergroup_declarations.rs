@@ -41,7 +41,22 @@ pub fn covergroup_declaration_parser<'s>(
         .map(|(a, b, c, d, e, f, g)| {
             CovergroupDeclaration::Extends(Box::new((a, b, c, d, e, f, g)))
         });
-    alt((_initial_parser, _extends_parser)).parse_next(input)
+    let result = alt((_initial_parser, _extends_parser)).parse_next(input)?;
+    match &result {
+        CovergroupDeclaration::Initial(initial_covergroup) => {
+            check_block_identifiers(
+                Some(&initial_covergroup.1.0),
+                initial_covergroup.7.as_ref().map(|a| &a.1.0),
+            )?;
+        }
+        CovergroupDeclaration::Extends(extend_covergroup) => {
+            check_block_identifiers(
+                Some(&extend_covergroup.2.0),
+                extend_covergroup.6.as_ref().map(|a| &a.1.0),
+            )?;
+        }
+    };
+    Ok(result)
 }
 
 pub fn coverage_spec_or_option_parser<'s>(
