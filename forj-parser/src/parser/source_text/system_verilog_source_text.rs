@@ -60,16 +60,16 @@ pub fn module_declaration_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ModuleDeclaration<'s>, VerboseError<'s>> {
     alt((
-        module_declaration_nonansi_parser
-            .map(|a| ModuleDeclaration::Nonansi(Box::new(a))),
         module_declaration_ansi_parser
             .map(|a| ModuleDeclaration::Ansi(Box::new(a))),
+        module_declaration_nonansi_parser
+            .map(|a| ModuleDeclaration::Nonansi(Box::new(a))),
         module_declaration_wildcard_parser
             .map(|a| ModuleDeclaration::Wildcard(Box::new(a))),
-        module_declaration_extern_nonansi_parser
-            .map(|a| ModuleDeclaration::ExternNonansi(Box::new(a))),
         module_declaration_extern_ansi_parser
             .map(|a| ModuleDeclaration::ExternAnsi(Box::new(a))),
+        module_declaration_extern_nonansi_parser
+            .map(|a| ModuleDeclaration::ExternNonansi(Box::new(a))),
     ))
     .parse_next(input)
 }
@@ -213,16 +213,16 @@ pub fn interface_declaration_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<InterfaceDeclaration<'s>, VerboseError<'s>> {
     alt((
-        interface_declaration_nonansi_parser
-            .map(|a| InterfaceDeclaration::Nonansi(Box::new(a))),
         interface_declaration_ansi_parser
             .map(|a| InterfaceDeclaration::Ansi(Box::new(a))),
+        interface_declaration_nonansi_parser
+            .map(|a| InterfaceDeclaration::Nonansi(Box::new(a))),
         interface_declaration_wildcard_parser
             .map(|a| InterfaceDeclaration::Wildcard(Box::new(a))),
-        interface_declaration_extern_nonansi_parser
-            .map(|a| InterfaceDeclaration::ExternNonansi(Box::new(a))),
         interface_declaration_extern_ansi_parser
             .map(|a| InterfaceDeclaration::ExternAnsi(Box::new(a))),
+        interface_declaration_extern_nonansi_parser
+            .map(|a| InterfaceDeclaration::ExternNonansi(Box::new(a))),
     ))
     .parse_next(input)
 }
@@ -355,16 +355,16 @@ pub fn program_declaration_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ProgramDeclaration<'s>, VerboseError<'s>> {
     alt((
-        program_declaration_nonansi_parser
-            .map(|a| ProgramDeclaration::Nonansi(Box::new(a))),
         program_declaration_ansi_parser
             .map(|a| ProgramDeclaration::Ansi(Box::new(a))),
+        program_declaration_nonansi_parser
+            .map(|a| ProgramDeclaration::Nonansi(Box::new(a))),
         program_declaration_wildcard_parser
             .map(|a| ProgramDeclaration::Wildcard(Box::new(a))),
-        program_declaration_extern_nonansi_parser
-            .map(|a| ProgramDeclaration::ExternNonansi(Box::new(a))),
         program_declaration_extern_ansi_parser
             .map(|a| ProgramDeclaration::ExternAnsi(Box::new(a))),
+        program_declaration_extern_nonansi_parser
+            .map(|a| ProgramDeclaration::ExternNonansi(Box::new(a))),
     ))
     .parse_next(input)
 }
