@@ -423,16 +423,17 @@ fn time_unit_parser<'s>(
 pub fn implicit_class_handle_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ImplicitClassHandle<'s>, VerboseError<'s>> {
-    let _this_parser = token(Token::This).map(|a| ImplicitClassHandle::This(a));
+    let _this_parser = (
+        token(Token::This),
+        opt_note((token(Token::Period), token(Token::Super))),
+    )
+        .map(|(a, b)| match b {
+            None => ImplicitClassHandle::This(a),
+            Some((c, d)) => ImplicitClassHandle::ThisSuper(a, c, d),
+        });
     let _super_parser =
         token(Token::Super).map(|a| ImplicitClassHandle::Super(a));
-    let _this_super_parser = (
-        token(Token::This),
-        token(Token::Period),
-        token(Token::Super),
-    )
-        .map(|(a, b, c)| ImplicitClassHandle::ThisSuper(a, b, c));
-    alt((_this_parser, _super_parser, _this_super_parser)).parse_next(input)
+    alt((_this_parser, _super_parser)).parse_next(input)
 }
 
 pub fn bit_select_parser<'s>(
