@@ -135,7 +135,7 @@ pub fn port_parser<'s>(
         token(Token::EParen),
     )
         .map(|(a, b, c, d, e)| Port::PortIdentifier(Box::new((a, b, c, d, e))));
-    alt((_port_expression_parser, _port_identifier_parser)).parse_next(input)
+    alt((_port_identifier_parser, _port_expression_parser)).parse_next(input)
 }
 
 pub fn port_expression_parser<'s>(

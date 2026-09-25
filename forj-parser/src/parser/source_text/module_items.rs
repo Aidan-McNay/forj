@@ -172,7 +172,6 @@ pub fn module_common_item_parser<'s>(
 pub fn module_item_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ModuleItem<'s>, VerboseError<'s>> {
-    println!("Got here (module item): {:?}", input);
     alt((
         (port_declaration_parser, token(Token::SColon))
             .map(|(a, b)| ModuleItem::Port(Box::new((a, b)))),
@@ -264,7 +263,6 @@ pub fn module_or_generate_item_declaration_parser<'s>(
 pub fn non_port_module_item_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<NonPortModuleItem<'s>, VerboseError<'s>> {
-    println!("Got here (non-port): {:?}", input);
     alt((
         generate_region_parser.map(|a| NonPortModuleItem::Region(Box::new(a))),
         specify_block_parser.map(|a| NonPortModuleItem::Specify(Box::new(a))),
