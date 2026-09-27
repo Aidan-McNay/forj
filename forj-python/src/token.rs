@@ -409,14 +409,14 @@ pub enum Token {
     SystemTfIdentifier { text: String },
     SimpleIdentifier { text: String },
     EscapedIdentifier { text: String },
-    PreprocessorIdentifier { text: String },
     TextMacro { text: String },
-    ConcatenatedTextMacro { text: String },
+    MacroConcatenate(),
     StringLiteral { text: String },
     PreprocessorStringLiteral { text: String },
     TripleQuoteStringLiteral { text: String },
     PreprocessorTripleQuoteStringLiteral { text: String },
     Newline(),
+    InvalidConcatenation { text: String },
 }
 
 impl std::fmt::Display for Token {
@@ -858,19 +858,10 @@ impl<'a> From<forj_parser::Token<'a>> for Token {
                     text: str.to_string(),
                 }
             }
-            forj_parser::Token::PreprocessorIdentifier(str) => {
-                Token::PreprocessorIdentifier {
-                    text: str.to_string(),
-                }
-            }
             forj_parser::Token::TextMacro(str) => Token::TextMacro {
                 text: str.to_string(),
             },
-            forj_parser::Token::ConcatenatedTextMacro(str) => {
-                Token::ConcatenatedTextMacro {
-                    text: str.to_string(),
-                }
-            }
+            forj_parser::Token::MacroConcatenate => Token::MacroConcatenate(),
             forj_parser::Token::StringLiteral(str) => Token::StringLiteral {
                 text: str.to_string(),
             },
@@ -890,6 +881,11 @@ impl<'a> From<forj_parser::Token<'a>> for Token {
                 }
             }
             forj_parser::Token::Newline => Token::Newline(),
+            forj_parser::Token::InvalidConcatenation(str) => {
+                Token::InvalidConcatenation {
+                    text: str.to_string(),
+                }
+            }
         }
     }
 }
@@ -1318,19 +1314,10 @@ impl<'a> From<&'a Token> for forj_parser::Token<'a> {
             Token::EscapedIdentifier { text } => {
                 forj_parser::Token::EscapedIdentifier((*text).as_bytes().into())
             }
-            Token::PreprocessorIdentifier { text } => {
-                forj_parser::Token::PreprocessorIdentifier(
-                    (*text).as_bytes().into(),
-                )
-            }
             Token::TextMacro { text } => {
                 forj_parser::Token::TextMacro((*text).as_bytes().into())
             }
-            Token::ConcatenatedTextMacro { text } => {
-                forj_parser::Token::ConcatenatedTextMacro(
-                    (*text).as_bytes().into(),
-                )
-            }
+            Token::MacroConcatenate() => forj_parser::Token::MacroConcatenate,
             Token::StringLiteral { text } => {
                 forj_parser::Token::StringLiteral((*text).as_bytes().into())
             }
@@ -1350,6 +1337,11 @@ impl<'a> From<&'a Token> for forj_parser::Token<'a> {
                 )
             }
             Token::Newline() => forj_parser::Token::Newline,
+            Token::InvalidConcatenation { text } => {
+                forj_parser::Token::InvalidConcatenation(
+                    (*text).as_bytes().into(),
+                )
+            }
         }
     }
 }

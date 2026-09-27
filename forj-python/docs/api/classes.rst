@@ -550,6 +550,13 @@ General
 
       .. py:class:: Token.Instance(Token)
 
+      .. py:class:: Token.InvalidConcatenation(Token)
+
+         .. py:property:: text
+            :type: str
+
+            The text referenced by the token
+
       .. py:class:: Token.Int(Token)
 
       .. py:class:: Token.Integer(Token)
@@ -595,6 +602,8 @@ General
       .. py:class:: Token.LtLtLtEq(Token)
 
       .. py:class:: Token.LtMinusGt(Token)
+
+      .. py:class:: Token.MacroConcatenate(Token)
 
       .. py:class:: Token.Macromodule(Token)
 
@@ -713,13 +722,6 @@ General
       .. py:class:: Token.PoundMinusPound(Token)
 
       .. py:class:: Token.PoundPound(Token)
-
-      .. py:class:: Token.PreprocessorIdentifier(Token)
-
-         .. py:property:: text
-            :type: str
-
-            The text referenced by the token
 
       .. py:class:: Token.PreprocessorStringLiteral(Token)
 
@@ -902,13 +904,6 @@ General
       .. py:class:: Token.Task(Token)
 
       .. py:class:: Token.TextMacro(Token)
-
-         .. py:property:: text
-            :type: str
-
-            The text referenced by the token
-
-      .. py:class:: Token.ConcatenatedTextMacro(Token)
 
          .. py:property:: text
             :type: str
@@ -1225,17 +1220,17 @@ Preprocessing
    
                The :py:class:`Token` found instead of the ``define`` parameter
    
-      .. py:class:: PreprocessorError.InvalidIdentifierFormation(PreprocessorError)
+      .. py:class:: PreprocessorError.InvalidConcatenation(PreprocessorError)
          
-         .. py:property:: arg_span
+         .. py:property:: concat_span
             :type: Span
    
-               The :py:class:`Span` of the invalid argument
+               The overall :py:class:`Span` of the invalid concatenation
          
-         .. py:property:: param_name
+         .. py:property:: concat_text
             :type: str
    
-               The name of the parameter used in a preprocessor identifier
+               The text that was attempted to be concatenated
    
       .. py:class:: PreprocessorError.InvalidRelativeTimescales(PreprocessorError)
          

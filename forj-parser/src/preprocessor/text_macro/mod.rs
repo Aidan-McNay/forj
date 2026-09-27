@@ -1,12 +1,67 @@
 // =======================================================================
-// text_macro.rs
+// mod.rs
 // =======================================================================
 // Preprocessing for macro instantiations
 
 use crate::*;
-use bstr::{BStr, BString, ByteSlice};
+use bstr::{BStr, BString};
 use std::collections::HashMap;
 use std::vec::IntoIter;
+mod arg_replace;
+use arg_replace::ArgReplace;
+mod stringify;
+use stringify::Stringify;
+mod token_gluer;
+use token_gluer::TokenGluer;
+
+// Turn a token into the corresponding text
+pub(crate) fn into_text<'a>(token: &Token<'a>) -> BString {
+    match token {
+        Token::UnsignedNumber(text)
+        | Token::FixedPointNumber(text)
+        | Token::BinaryNumber(text)
+        | Token::OctalNumber(text)
+        | Token::DecimalNumber(text)
+        | Token::HexNumber(text)
+        | Token::ScientificNumber(text)
+        | Token::UnbasedUnsizedLiteral(text)
+        | Token::SystemTfIdentifier(text)
+        | Token::SimpleIdentifier(text)
+        | Token::EscapedIdentifier(text)
+        | Token::InvalidConcatenation(text) => (*text).to_owned(),
+        Token::StringLiteral(text) => {
+            let mut content: BString = BString::new(b"\"".to_vec());
+            content.extend_from_slice(text);
+            content.extend_from_slice(b"\"");
+            content
+        }
+        Token::TripleQuoteStringLiteral(text) => {
+            let mut content: BString = BString::new(b"\"\"\"".to_vec());
+            content.extend_from_slice(text);
+            content.extend_from_slice(b"\"\"\"");
+            content
+        }
+        Token::BlockComment(text) => {
+            let mut content: BString = BString::new(b"/*".to_vec());
+            content.extend_from_slice(text);
+            content.extend_from_slice(b"*/");
+            content
+        }
+        Token::OnelineComment(text) => {
+            let mut content: BString = BString::new(b"//".to_vec());
+            content.extend_from_slice(text);
+            content
+        }
+        Token::TextMacro(text) => {
+            let mut content: BString = BString::new(b"`".to_vec());
+            content.extend_from_slice(text);
+            content
+        }
+        Token::Newline => BString::new(b"\n".to_vec()),
+        Token::Comma => BString::new(b",".to_vec()),
+        _ => token.as_str().into(),
+    }
+}
 
 fn get_text_macro_args<'s>(
     src: &mut TokenIterator<'s, impl Iterator<Item = SpannedToken<'s>>>,
@@ -132,231 +187,6 @@ fn resolve_text_macro_args<'s>(
     Ok(resolved_args)
 }
 
-fn get_identifier_substitute<'a>(
-    arg_name: &'a str,
-    replacement_tokens: &Vec<SpannedToken<'a>>,
-) -> Result<&'a BStr, PreprocessorError<'a>> {
-    let replacement_tokens_len = replacement_tokens.len();
-    if replacement_tokens_len > 1 {
-        // Only currently support a max of one token
-        let err_span = replacement_tokens.first().unwrap().1.clone();
-        return Err(PreprocessorError::InvalidIdentifierFormation {
-            param_name: arg_name,
-            arg_span: err_span,
-        });
-    } else if replacement_tokens_len == 1 {
-        let replacement_token = replacement_tokens.first().unwrap().clone();
-        match replacement_token.0 {
-            Token::UnsignedNumber(text)
-            | Token::FixedPointNumber(text)
-            | Token::BinaryNumber(text)
-            | Token::OctalNumber(text)
-            | Token::DecimalNumber(text)
-            | Token::HexNumber(text)
-            | Token::ScientificNumber(text)
-            | Token::UnbasedUnsizedLiteral(text)
-            | Token::SystemTfIdentifier(text)
-            | Token::SimpleIdentifier(text)
-            | Token::EscapedIdentifier(text)
-            | Token::StringLiteral(text)
-            | Token::TripleQuoteStringLiteral(text) => Ok(text),
-            Token::OnelineComment(_)
-            | Token::BlockComment(_)
-            | Token::PreprocessorIdentifier(_)
-            | Token::TextMacro(_)
-            | Token::Newline => {
-                return Err(PreprocessorError::InvalidIdentifierFormation {
-                    param_name: arg_name,
-                    arg_span: replacement_token.1,
-                });
-            }
-            other => Ok(other.as_str().into()),
-        }
-    } else {
-        Ok("".into())
-    }
-}
-
-fn get_string_substitute<'a>(
-    replacement_tokens: &Vec<SpannedToken<'a>>,
-    str_to_append: &mut BString,
-    state: &PreprocessorState<'a>,
-) -> Result<(), PreprocessorError<'a>> {
-    if !replacement_tokens.is_empty() {
-        let start_span = &replacement_tokens.first().unwrap().1;
-        let end_span = &replacement_tokens.last().unwrap().1;
-        // Guaranteed to be the same file, otherwise they'd split a preprocessor definition
-        let slice = &state
-            .included_files
-            .get(start_span.file)
-            .expect("Internal Error: File not parsed yet")
-            [start_span.bytes.start..end_span.bytes.end];
-        str_to_append.extend(slice);
-    }
-    Ok(())
-}
-
-fn get_replacement_string<'a>(
-    mut initial_string: BString,
-    state: &PreprocessorState<'a>,
-    arguments: &HashMap<&'a BStr, (Span<'a>, Vec<SpannedToken<'a>>)>,
-) -> Result<BString, PreprocessorError<'a>> {
-    // Replace definitions
-    for define in &state.defines {
-        let define_id = format! {"`{}", define.name.0};
-        if initial_string.contains_str(&define_id) {
-            let replacement_string = match &define.body {
-                DefineBody::Empty => BString::new(vec![]),
-                DefineBody::Text(tokens) => {
-                    let mut token_str = BString::new(vec![]);
-                    get_string_substitute(tokens, &mut token_str, state)?;
-                    token_str
-                }
-                DefineBody::Function(_) => {
-                    todo!("Error for using functions here")
-                }
-            };
-            initial_string = initial_string
-                .replace(&define_id, replacement_string)
-                .into();
-        }
-    }
-    // Replace arguments
-    for argument in arguments.keys() {
-        if initial_string.contains_str(argument) {
-            let mut replacement_string = BString::new(vec![]);
-            get_string_substitute(
-                &arguments.get(argument).unwrap().1,
-                &mut replacement_string,
-                state,
-            )?;
-            initial_string =
-                initial_string.replace(argument, replacement_string).into()
-        }
-    }
-    Ok(initial_string)
-}
-
-fn replace_macro_tokens<'a>(
-    original_stream: IntoIter<SpannedToken<'a>>,
-    arguments: HashMap<&'a BStr, (Span<'a>, Vec<SpannedToken<'a>>)>,
-    state: &mut PreprocessorState<'a>,
-    cache: &'a PreprocessorCache<'a>,
-) -> Result<Vec<SpannedToken<'a>>, PreprocessorError<'a>> {
-    let mut result_vec = vec![];
-    for token in original_stream {
-        match token {
-            SpannedToken(Token::SimpleIdentifier(id), id_span)
-                if arguments.contains_key(id) =>
-            {
-                let (_, replacement_tokens) = arguments.get(id).unwrap();
-                result_vec.extend(replacement_tokens.iter().map(
-                    |spanned_token| {
-                        SpannedToken(spanned_token.0.clone(), id_span.clone())
-                    },
-                ));
-            }
-            SpannedToken(Token::PreprocessorIdentifier(id), span) => {
-                let components = id.split_str("``");
-                let mut resulting_identifier = BString::new(vec![]);
-                for component in components.into_iter() {
-                    match arguments.get(Into::<&BStr>::into(component)) {
-                        Some((_, replacement_tokens)) => {
-                            resulting_identifier.extend_from_slice(
-                                get_identifier_substitute(
-                                    unsafe {
-                                        std::str::from_utf8_unchecked(component)
-                                    },
-                                    replacement_tokens,
-                                )?
-                                .into(),
-                            );
-                        }
-                        None => {
-                            resulting_identifier.extend(component);
-                        }
-                    }
-                }
-                result_vec.push(SpannedToken(
-                    Token::SimpleIdentifier(
-                        cache.retain_bytes(resulting_identifier.into()).into(),
-                    ),
-                    span,
-                ));
-            }
-            SpannedToken(Token::ConcatenatedTextMacro(id), span) => {
-                let components = id.split_str("``");
-                let mut resulting_identifier = BString::new(vec![]);
-                for component in components.into_iter() {
-                    match arguments.get(Into::<&BStr>::into(component)) {
-                        Some((_, replacement_tokens)) => {
-                            resulting_identifier.extend_from_slice(
-                                get_identifier_substitute(
-                                    unsafe {
-                                        std::str::from_utf8_unchecked(component)
-                                    },
-                                    replacement_tokens,
-                                )?
-                                .into(),
-                            );
-                        }
-                        None => {
-                            resulting_identifier.extend(component);
-                        }
-                    }
-                }
-                result_vec.push(SpannedToken(
-                    Token::TextMacro(
-                        cache.retain_bytes(resulting_identifier.into()).into(),
-                    ),
-                    span,
-                ));
-            }
-            SpannedToken(Token::PreprocessorStringLiteral(id), span) => {
-                result_vec.push(SpannedToken(
-                    Token::StringLiteral(
-                        cache
-                            .retain_bytes(
-                                get_replacement_string(
-                                    id.to_owned(),
-                                    state,
-                                    &arguments,
-                                )?
-                                .into(),
-                            )
-                            .into(),
-                    ),
-                    span,
-                ));
-            }
-            SpannedToken(
-                Token::PreprocessorTripleQuoteStringLiteral(id),
-                span,
-            ) => {
-                result_vec.push(SpannedToken(
-                    Token::TripleQuoteStringLiteral(
-                        cache
-                            .retain_bytes(
-                                get_replacement_string(
-                                    id.to_owned(),
-                                    state,
-                                    &arguments,
-                                )?
-                                .replace("\\\n", "\n"),
-                            )
-                            .into(),
-                    ),
-                    span,
-                ));
-            }
-            other_token => {
-                result_vec.push(other_token);
-            }
-        }
-    }
-    Ok(result_vec)
-}
-
 struct SpanReplacer<'a> {
     text_macro_span: Span<'a>,
     tokens: IntoIter<SpannedToken<'a>>,
@@ -382,7 +212,7 @@ impl<'a> DoubleEndedIterator for SpanReplacer<'a> {
     }
 }
 
-/// Create a clone of a span and all is
+/// Create a clone of a span and all its expansions, inserting the new one
 fn insert_base_expansion<'a>(
     cache: &'a PreprocessorCache<'a>,
     span: &'a Span<'a>,
@@ -453,7 +283,7 @@ pub fn preprocess_macro<'s>(
     text_macro: (&'s str, Span<'s>),
 ) -> Result<(), PreprocessorError<'s>> {
     match state.get_macro_tokens(text_macro.0) {
-        Some((define_span, (mut token_vec, define_args))) => {
+        Some((define_span, (token_vec, define_args))) => {
             let mut macro_span = text_macro.1.clone();
             let arguments = if let Some(define_args) = define_args {
                 let (function_args, function_macro_span) = get_text_macro_args(
@@ -473,14 +303,28 @@ pub fn preprocess_macro<'s>(
             } else {
                 HashMap::new()
             };
-            token_vec = replace_macro_tokens(
-                token_vec.into_iter(),
-                arguments,
-                state,
+            let token_result_vec = TokenGluer::new(
+                Stringify::new(
+                    ArgReplace::new(token_vec.into_iter(), &arguments),
+                    &state,
+                    cache,
+                    &arguments,
+                ),
                 cache,
-            )?;
+            )
+            .collect::<Vec<_>>();
+            let new_token_vec = token_result_vec
+                .into_iter()
+                .filter_map(|a| match a {
+                    Ok(spanned_token) => Some(spanned_token),
+                    Err(err) => {
+                        state.err(err);
+                        None
+                    }
+                })
+                .collect::<Vec<_>>();
             let token_iter =
-                SpanReplacer::new(macro_span, token_vec.into_iter(), cache);
+                SpanReplacer::new(macro_span, new_token_vec.into_iter(), cache);
             src.prepend_tokens(token_iter);
             Ok(())
         }
@@ -670,4 +514,48 @@ fn function_more_args() {
         `TEST(42, 97, 33)",
         Vec::<Token<'_>>::new()
     )
+}
+
+#[cfg(test)]
+mod stringify_with_macros {
+    use super::*;
+    #[test]
+    fn basic() {
+        check_preprocessor!(
+            "`define TEST my_test
+            `define STRINGIFY(a) `\"a`\"
+            `STRINGIFY(`TEST)",
+            vec![Token::StringLiteral("my_test".into())]
+        )
+    }
+
+    #[test]
+    fn empty() {
+        check_preprocessor!(
+            "`define TEST
+            `define STRINGIFY(a) `\"a`\"
+            `STRINGIFY(`TEST)",
+            vec![Token::StringLiteral("".into())]
+        )
+    }
+
+    #[test]
+    fn function() {
+        check_preprocessor!(
+            "`define TEST(a, b) b``a
+            `define STRINGIFY(a) `\"a`\"
+            `STRINGIFY(`TEST(literal, my_))",
+            vec![Token::StringLiteral("my_literal".into())]
+        )
+    }
+
+    #[test]
+    fn function_args_in_string() {
+        check_preprocessor!(
+            "`define TEST(a, b) b``a
+            `define STRINGIFY(a) `\"a( _test, in_string )`\"
+            `STRINGIFY(`TEST)",
+            vec![Token::StringLiteral("in_string_test".into())]
+        )
+    }
 }

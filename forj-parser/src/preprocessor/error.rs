@@ -532,7 +532,7 @@ pub enum PreprocessorError<'a> {
     /// # let cache = PreprocessorCache::new();
     /// let source = "
     /// `define TEST(a, b) a``_with_``b
-    /// `TEST(multiple tokens, \"two\")
+    /// `TEST(++, \"two\")
     /// ".as_bytes();
     /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
     /// let input = lex(source, "test.v").tokens();
@@ -542,16 +542,16 @@ pub enum PreprocessorError<'a> {
     ///     &cache,
     /// );
     /// assert!(preprocess_result.is_err());
-    /// assert!(matches!(state.errors.first(), Some(PreprocessorError::InvalidIdentifierFormation{
-    ///     param_name: "a",
+    /// assert!(matches!(state.errors.first(), Some(PreprocessorError::InvalidConcatenation{
+    ///     concat_text: "++_with_\"two\"",
     ///     ..
     /// })));
     /// ```
-    InvalidIdentifierFormation {
-        /// The name of the parameter used in a preprocessor identifier
-        param_name: &'a str,
-        /// The [`Span`] of the invalid argument
-        arg_span: Span<'a>,
+    InvalidConcatenation {
+        /// The text that was attempted to be concatenated
+        concat_text: &'a str,
+        /// The overall [`Span`] of the invalid concatenation
+        concat_span: Span<'a>,
     },
     /// A precision that is less precise than the unit in a `` `timescale `` directive
     ///
@@ -1141,25 +1141,22 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
                 report::ReportKind::Error,
                 "Missing argument",
             ),
-            PreprocessorError::InvalidIdentifierFormation {
-                param_name,
-                arg_span,
+            PreprocessorError::InvalidConcatenation {
+                concat_text,
+                concat_span,
             } => Report::new(
                 report::ReportKind::Error,
-                &arg_span,
+                &concat_span,
                 "PP21",
                 format!(
-                    concat!(
-                        "The argument for '{}' cannot be ",
-                        "concatenated into an identifier"
-                    ),
-                    param_name
+                    "The concatenation '{}' is not a valid token",
+                    concat_text
                 ),
             )
             .with_label(
-                &arg_span,
+                &concat_span,
                 report::ReportKind::Error,
-                "No valid conversion to identifier",
+                "No valid concatenation",
             ),
             PreprocessorError::InvalidRelativeTimescales { timescale_span } => {
                 Report::new(

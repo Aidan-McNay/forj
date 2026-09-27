@@ -638,26 +638,23 @@ impl PreprocessorError {
                 );
                 report
             }
-            PreprocessorError::InvalidIdentifierFormation {
-                param_name,
-                arg_span,
+            PreprocessorError::InvalidConcatenation {
+                concat_text,
+                concat_span,
             } => {
                 let mut report = Report::new(
                     ReportKind::Error(),
-                    arg_span.clone(),
+                    concat_span.clone(),
                     "PP21".to_owned(),
                     format!(
-                        concat!(
-                            "The argument for '{}' cannot be ",
-                            "concatenated into an identifier"
-                        ),
-                        param_name
+                        "The concatenation '{}' is not a valid token",
+                        concat_text
                     ),
                 );
                 report.label(
-                    arg_span.clone(),
+                    concat_span.clone(),
                     ReportKind::Error(),
-                    "No valid conversion to identifier".to_owned(),
+                    "No valid concatenation".to_owned(),
                 );
                 report
             }

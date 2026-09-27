@@ -22,756 +22,756 @@ pub enum Token<'a> {
     /// A lexer error
     Error,
     // 1364-1995
-    #[token("always")]
+    #[token(b"always")]
     Always,
-    #[token("and")]
+    #[token(b"and")]
     And,
-    #[token("assign")]
+    #[token(b"assign")]
     Assign,
-    #[token("begin")]
+    #[token(b"begin")]
     Begin,
-    #[token("buf")]
+    #[token(b"buf")]
     Buf,
-    #[token("bufif0")]
+    #[token(b"bufif0")]
     Bufif0,
-    #[token("bufif1")]
+    #[token(b"bufif1")]
     Bufif1,
-    #[token("case")]
+    #[token(b"case")]
     Case,
-    #[token("casex")]
+    #[token(b"casex")]
     Casex,
-    #[token("casez")]
+    #[token(b"casez")]
     Casez,
-    #[token("cmos")]
+    #[token(b"cmos")]
     Cmos,
-    #[token("deassign")]
+    #[token(b"deassign")]
     Deassign,
-    #[token("default")]
+    #[token(b"default")]
     Default,
-    #[token("defparam")]
+    #[token(b"defparam")]
     Defparam,
-    #[token("disable")]
+    #[token(b"disable")]
     Disable,
-    #[token("edge")]
+    #[token(b"edge")]
     Edge,
-    #[token("else")]
+    #[token(b"else")]
     Else,
-    #[token("end")]
+    #[token(b"end")]
     End,
-    #[token("endcase")]
+    #[token(b"endcase")]
     Endcase,
-    #[token("endfunction")]
+    #[token(b"endfunction")]
     Endfunction,
-    #[token("endmodule")]
+    #[token(b"endmodule")]
     Endmodule,
-    #[token("endprimitive")]
+    #[token(b"endprimitive")]
     Endprimitive,
-    #[token("endspecify")]
+    #[token(b"endspecify")]
     Endspecify,
-    #[token("endtable")]
+    #[token(b"endtable")]
     Endtable,
-    #[token("endtask")]
+    #[token(b"endtask")]
     Endtask,
-    #[token("event")]
+    #[token(b"event")]
     Event,
-    #[token("for")]
+    #[token(b"for")]
     For,
-    #[token("force")]
+    #[token(b"force")]
     Force,
-    #[token("forever")]
+    #[token(b"forever")]
     Forever,
-    #[token("fork")]
+    #[token(b"fork")]
     Fork,
-    #[token("function")]
+    #[token(b"function")]
     Function,
-    #[token("highz0")]
+    #[token(b"highz0")]
     Highz0,
-    #[token("highz1")]
+    #[token(b"highz1")]
     Highz1,
-    #[token("if")]
+    #[token(b"if")]
     If,
-    #[token("ifnone")]
+    #[token(b"ifnone")]
     Ifnone,
-    #[token("initial")]
+    #[token(b"initial")]
     Initial,
-    #[token("inout")]
+    #[token(b"inout")]
     Inout,
-    #[token("input")]
+    #[token(b"input")]
     Input,
-    #[token("integer")]
+    #[token(b"integer")]
     Integer,
-    #[token("join")]
+    #[token(b"join")]
     Join,
-    #[token("large")]
+    #[token(b"large")]
     Large,
-    #[token("macromodule")]
+    #[token(b"macromodule")]
     Macromodule,
-    #[token("medium")]
+    #[token(b"medium")]
     Medium,
-    #[token("module")]
+    #[token(b"module")]
     Module,
-    #[token("nand")]
+    #[token(b"nand")]
     Nand,
-    #[token("negedge")]
+    #[token(b"negedge")]
     Negedge,
-    #[token("nmos")]
+    #[token(b"nmos")]
     Nmos,
-    #[token("nor")]
+    #[token(b"nor")]
     Nor,
-    #[token("not")]
+    #[token(b"not")]
     Not,
-    #[token("notif0")]
+    #[token(b"notif0")]
     Notif0,
-    #[token("notif1")]
+    #[token(b"notif1")]
     Notif1,
-    #[token("or")]
+    #[token(b"or")]
     Or,
-    #[token("output")]
+    #[token(b"output")]
     Output,
-    #[token("parameter")]
+    #[token(b"parameter")]
     Parameter,
-    #[token("pmos")]
+    #[token(b"pmos")]
     Pmos,
-    #[token("posedge")]
+    #[token(b"posedge")]
     Posedge,
-    #[token("primitive")]
+    #[token(b"primitive")]
     Primitive,
-    #[token("pull0")]
+    #[token(b"pull0")]
     Pull0,
-    #[token("pull1")]
+    #[token(b"pull1")]
     Pull1,
-    #[token("pulldown")]
+    #[token(b"pulldown")]
     Pulldown,
-    #[token("pullup")]
+    #[token(b"pullup")]
     Pullup,
-    #[token("rcmos")]
+    #[token(b"rcmos")]
     Rcmos,
-    #[token("real")]
+    #[token(b"real")]
     Real,
-    #[token("realtime")]
+    #[token(b"realtime")]
     Realtime,
-    #[token("reg")]
+    #[token(b"reg")]
     Reg,
-    #[token("release")]
+    #[token(b"release")]
     Release,
-    #[token("repeat")]
+    #[token(b"repeat")]
     Repeat,
-    #[token("rnmos")]
+    #[token(b"rnmos")]
     Rnmos,
-    #[token("rpmos")]
+    #[token(b"rpmos")]
     Rpmos,
-    #[token("rtran")]
+    #[token(b"rtran")]
     Rtran,
-    #[token("rtranif0")]
+    #[token(b"rtranif0")]
     Rtranif0,
-    #[token("rtranif1")]
+    #[token(b"rtranif1")]
     Rtranif1,
-    #[token("scalared")]
+    #[token(b"scalared")]
     Scalared,
-    #[token("small")]
+    #[token(b"small")]
     Small,
-    #[token("specify")]
+    #[token(b"specify")]
     Specify,
-    #[token("specparam")]
+    #[token(b"specparam")]
     Specparam,
-    #[token("strong0")]
+    #[token(b"strong0")]
     Strong0,
-    #[token("strong1")]
+    #[token(b"strong1")]
     Strong1,
-    #[token("supply0")]
+    #[token(b"supply0")]
     Supply0,
-    #[token("supply1")]
+    #[token(b"supply1")]
     Supply1,
-    #[token("table")]
+    #[token(b"table")]
     Table,
-    #[token("task")]
+    #[token(b"task")]
     Task,
-    #[token("time")]
+    #[token(b"time")]
     Time,
-    #[token("tran")]
+    #[token(b"tran")]
     Tran,
-    #[token("tranif0")]
+    #[token(b"tranif0")]
     Tranif0,
-    #[token("tranif1")]
+    #[token(b"tranif1")]
     Tranif1,
-    #[token("tri")]
+    #[token(b"tri")]
     Tri,
-    #[token("tri0")]
+    #[token(b"tri0")]
     Tri0,
-    #[token("tri1")]
+    #[token(b"tri1")]
     Tri1,
-    #[token("triand")]
+    #[token(b"triand")]
     Triand,
-    #[token("trior")]
+    #[token(b"trior")]
     Trior,
-    #[token("trireg")]
+    #[token(b"trireg")]
     Trireg,
-    #[token("vectored")]
+    #[token(b"vectored")]
     Vectored,
-    #[token("wait")]
+    #[token(b"wait")]
     Wait,
-    #[token("wand")]
+    #[token(b"wand")]
     Wand,
-    #[token("weak0")]
+    #[token(b"weak0")]
     Weak0,
-    #[token("weak1")]
+    #[token(b"weak1")]
     Weak1,
-    #[token("while")]
+    #[token(b"while")]
     While,
-    #[token("wire")]
+    #[token(b"wire")]
     Wire,
-    #[token("wor")]
+    #[token(b"wor")]
     Wor,
-    #[token("xnor")]
+    #[token(b"xnor")]
     Xnor,
-    #[token("xor")]
+    #[token(b"xor")]
     Xor,
     // 1364-2001
-    #[token("automatic")]
+    #[token(b"automatic")]
     Automatic,
-    #[token("cell")]
+    #[token(b"cell")]
     Cell,
-    #[token("config")]
+    #[token(b"config")]
     Config,
-    #[token("design")]
+    #[token(b"design")]
     Design,
-    #[token("endconfig")]
+    #[token(b"endconfig")]
     Endconfig,
-    #[token("endgenerate")]
+    #[token(b"endgenerate")]
     Endgenerate,
-    #[token("generate")]
+    #[token(b"generate")]
     Generate,
-    #[token("genvar")]
+    #[token(b"genvar")]
     Genvar,
-    #[token("incdir")]
+    #[token(b"incdir")]
     Incdir,
-    #[token("include")]
+    #[token(b"include")]
     Include,
-    #[token("instance")]
+    #[token(b"instance")]
     Instance,
-    #[token("liblist")]
+    #[token(b"liblist")]
     Liblist,
-    #[token("library")]
+    #[token(b"library")]
     Library,
-    #[token("localparam")]
+    #[token(b"localparam")]
     Localparam,
-    #[token("noshowcancelled")]
+    #[token(b"noshowcancelled")]
     Noshowcancelled,
-    #[token("pulsestyle_ondetect")]
+    #[token(b"pulsestyle_ondetect")]
     PulsestyleOndetect,
-    #[token("pulsestyle_onevent")]
+    #[token(b"pulsestyle_onevent")]
     PulsestyleOnevent,
-    #[token("showcancelled")]
+    #[token(b"showcancelled")]
     Showcancelled,
-    #[token("signed")]
+    #[token(b"signed")]
     Signed,
-    #[token("unsigned")]
+    #[token(b"unsigned")]
     Unsigned,
-    #[token("use")]
+    #[token(b"use")]
     Use,
     // 1364-2005
-    #[token("uwire")]
+    #[token(b"uwire")]
     Uwire,
     // 1800-2005
-    #[token("alias")]
+    #[token(b"alias")]
     Alias,
-    #[token("always_comb")]
+    #[token(b"always_comb")]
     AlwaysComb,
-    #[token("always_ff")]
+    #[token(b"always_ff")]
     AlwaysFf,
-    #[token("always_latch")]
+    #[token(b"always_latch")]
     AlwaysLatch,
-    #[token("assert")]
+    #[token(b"assert")]
     Assert,
-    #[token("assume")]
+    #[token(b"assume")]
     Assume,
-    #[token("before")]
+    #[token(b"before")]
     Before,
-    #[token("bind")]
+    #[token(b"bind")]
     Bind,
-    #[token("bins")]
+    #[token(b"bins")]
     Bins,
-    #[token("binsof")]
+    #[token(b"binsof")]
     Binsof,
-    #[token("bit")]
+    #[token(b"bit")]
     Bit,
-    #[token("break")]
+    #[token(b"break")]
     Break,
-    #[token("byte")]
+    #[token(b"byte")]
     Byte,
-    #[token("chandle")]
+    #[token(b"chandle")]
     Chandle,
-    #[token("class")]
+    #[token(b"class")]
     Class,
-    #[token("clocking")]
+    #[token(b"clocking")]
     Clocking,
-    #[token("const")]
+    #[token(b"const")]
     Const,
-    #[token("constraint")]
+    #[token(b"constraint")]
     Constraint,
-    #[token("context")]
+    #[token(b"context")]
     Context,
-    #[token("continue")]
+    #[token(b"continue")]
     Continue,
-    #[token("cover")]
+    #[token(b"cover")]
     Cover,
-    #[token("covergroup")]
+    #[token(b"covergroup")]
     Covergroup,
-    #[token("coverpoint")]
+    #[token(b"coverpoint")]
     Coverpoint,
-    #[token("cross")]
+    #[token(b"cross")]
     Cross,
-    #[token("dist")]
+    #[token(b"dist")]
     Dist,
-    #[token("do")]
+    #[token(b"do")]
     Do,
-    #[token("endclass")]
+    #[token(b"endclass")]
     Endclass,
-    #[token("endclocking")]
+    #[token(b"endclocking")]
     Endclocking,
-    #[token("endgroup")]
+    #[token(b"endgroup")]
     Endgroup,
-    #[token("endinterface")]
+    #[token(b"endinterface")]
     Endinterface,
-    #[token("endpackage")]
+    #[token(b"endpackage")]
     Endpackage,
-    #[token("endprogram")]
+    #[token(b"endprogram")]
     Endprogram,
-    #[token("endproperty")]
+    #[token(b"endproperty")]
     Endproperty,
-    #[token("endsequence")]
+    #[token(b"endsequence")]
     Endsequence,
-    #[token("enum")]
+    #[token(b"enum")]
     Enum,
-    #[token("expect")]
+    #[token(b"expect")]
     Expect,
-    #[token("export")]
+    #[token(b"export")]
     Export,
-    #[token("extends")]
+    #[token(b"extends")]
     Extends,
-    #[token("extern")]
+    #[token(b"extern")]
     Extern,
-    #[token("final")]
+    #[token(b"final")]
     Final,
-    #[token("first_match")]
+    #[token(b"first_match")]
     FirstMatch,
-    #[token("foreach")]
+    #[token(b"foreach")]
     Foreach,
-    #[token("forkjoin")]
+    #[token(b"forkjoin")]
     Forkjoin,
-    #[token("iff")]
+    #[token(b"iff")]
     Iff,
-    #[token("ignore_bins")]
+    #[token(b"ignore_bins")]
     IgnoreBins,
-    #[token("illegal_bins")]
+    #[token(b"illegal_bins")]
     IllegalBins,
-    #[token("import")]
+    #[token(b"import")]
     Import,
-    #[token("inside")]
+    #[token(b"inside")]
     Inside,
-    #[token("int")]
+    #[token(b"int")]
     Int,
-    #[token("interface")]
+    #[token(b"interface")]
     Interface,
-    #[token("intersect")]
+    #[token(b"intersect")]
     Intersect,
-    #[token("join_any")]
+    #[token(b"join_any")]
     JoinAny,
-    #[token("join_none")]
+    #[token(b"join_none")]
     JoinNone,
-    #[token("local")]
+    #[token(b"local")]
     Local,
-    #[token("logic")]
+    #[token(b"logic")]
     Logic,
-    #[token("longint")]
+    #[token(b"longint")]
     Longint,
-    #[token("matches")]
+    #[token(b"matches")]
     Matches,
-    #[token("modport")]
+    #[token(b"modport")]
     Modport,
-    #[token("new")]
+    #[token(b"new")]
     New,
-    #[token("null")]
+    #[token(b"null")]
     Null,
-    #[token("package")]
+    #[token(b"package")]
     Package,
-    #[token("packed")]
+    #[token(b"packed")]
     Packed,
-    #[token("priority")]
+    #[token(b"priority")]
     Priority,
-    #[token("program")]
+    #[token(b"program")]
     Program,
-    #[token("property")]
+    #[token(b"property")]
     Property,
-    #[token("protected")]
+    #[token(b"protected")]
     Protected,
-    #[token("pure")]
+    #[token(b"pure")]
     Pure,
-    #[token("rand")]
+    #[token(b"rand")]
     Rand,
-    #[token("randc")]
+    #[token(b"randc")]
     Randc,
-    #[token("randcase")]
+    #[token(b"randcase")]
     Randcase,
-    #[token("randsequence")]
+    #[token(b"randsequence")]
     Randsequence,
-    #[token("ref")]
+    #[token(b"ref")]
     Ref,
-    #[token("return")]
+    #[token(b"return")]
     Return,
-    #[token("sequence")]
+    #[token(b"sequence")]
     Sequence,
-    #[token("shortint")]
+    #[token(b"shortint")]
     Shortint,
-    #[token("shortreal")]
+    #[token(b"shortreal")]
     Shortreal,
-    #[token("solve")]
+    #[token(b"solve")]
     Solve,
-    #[token("static")]
+    #[token(b"static")]
     Static,
-    #[token("string")]
+    #[token(b"string")]
     String,
-    #[token("struct")]
+    #[token(b"struct")]
     Struct,
-    #[token("super")]
+    #[token(b"super")]
     Super,
-    #[token("tagged")]
+    #[token(b"tagged")]
     Tagged,
-    #[token("this")]
+    #[token(b"this")]
     This,
-    #[token("throughout")]
+    #[token(b"throughout")]
     Throughout,
-    #[token("timeprecision")]
+    #[token(b"timeprecision")]
     Timeprecision,
-    #[token("timeunit")]
+    #[token(b"timeunit")]
     Timeunit,
-    #[token("type")]
+    #[token(b"type")]
     Type,
-    #[token("typedef")]
+    #[token(b"typedef")]
     Typedef,
-    #[token("union")]
+    #[token(b"union")]
     Union,
-    #[token("unique")]
+    #[token(b"unique")]
     Unique,
-    #[token("var")]
+    #[token(b"var")]
     Var,
-    #[token("virtual")]
+    #[token(b"virtual")]
     Virtual,
-    #[token("void")]
+    #[token(b"void")]
     Void,
-    #[token("wait_order")]
+    #[token(b"wait_order")]
     WaitOrder,
-    #[token("wildcard")]
+    #[token(b"wildcard")]
     Wildcard,
-    #[token("with")]
+    #[token(b"with")]
     With,
-    #[token("within")]
+    #[token(b"within")]
     Within,
     // 1800-2009
-    #[token("accept_on")]
+    #[token(b"accept_on")]
     AcceptOn,
-    #[token("checker")]
+    #[token(b"checker")]
     Checker,
-    #[token("endchecker")]
+    #[token(b"endchecker")]
     Endchecker,
-    #[token("eventually")]
+    #[token(b"eventually")]
     Eventually,
-    #[token("global")]
+    #[token(b"global")]
     Global,
-    #[token("implies")]
+    #[token(b"implies")]
     Implies,
-    #[token("let")]
+    #[token(b"let")]
     Let,
-    #[token("nexttime")]
+    #[token(b"nexttime")]
     Nexttime,
-    #[token("reject_on")]
+    #[token(b"reject_on")]
     RejectOn,
-    #[token("restrict")]
+    #[token(b"restrict")]
     Restrict,
-    #[token("s_always")]
+    #[token(b"s_always")]
     SAlways,
-    #[token("s_eventually")]
+    #[token(b"s_eventually")]
     SEventually,
-    #[token("s_nexttime")]
+    #[token(b"s_nexttime")]
     SNexttime,
-    #[token("s_until")]
+    #[token(b"s_until")]
     SUntil,
-    #[token("s_until_with")]
+    #[token(b"s_until_with")]
     SUntilWith,
-    #[token("strong")]
+    #[token(b"strong")]
     Strong,
-    #[token("sync_accept_on")]
+    #[token(b"sync_accept_on")]
     SyncAcceptOn,
-    #[token("sync_reject_on")]
+    #[token(b"sync_reject_on")]
     SyncRejectOn,
-    #[token("unique0")]
+    #[token(b"unique0")]
     Unique0,
-    #[token("until")]
+    #[token(b"until")]
     Until,
-    #[token("until_with")]
+    #[token(b"until_with")]
     UntilWith,
-    #[token("untyped")]
+    #[token(b"untyped")]
     Untyped,
-    #[token("weak")]
+    #[token(b"weak")]
     Weak,
     // 1800-2012
-    #[token("implements")]
+    #[token(b"implements")]
     Implements,
-    #[token("interconnect")]
+    #[token(b"interconnect")]
     Interconnect,
-    #[token("nettype")]
+    #[token(b"nettype")]
     Nettype,
-    #[token("soft")]
+    #[token(b"soft")]
     Soft,
     // Directives
-    #[token("`__FILE__")]
+    #[token(b"`__FILE__")]
     DirUnderscoreFile,
-    #[token("`__LINE__")]
+    #[token(b"`__LINE__")]
     DirUnderscoreLine,
-    #[token("`begin_keywords")]
+    #[token(b"`begin_keywords")]
     DirBeginKeywords,
-    #[token("`celldefine")]
+    #[token(b"`celldefine")]
     DirCelldefine,
-    #[token("`default_nettype")]
+    #[token(b"`default_nettype")]
     DirDefaultNettype,
-    #[token("`define")]
+    #[token(b"`define")]
     DirDefine,
-    #[token("`else")]
+    #[token(b"`else")]
     DirElse,
-    #[token("`elsif")]
+    #[token(b"`elsif")]
     DirElsif,
-    #[token("`end_keywords")]
+    #[token(b"`end_keywords")]
     DirEndKeywords,
-    #[token("`endcelldefine")]
+    #[token(b"`endcelldefine")]
     DirEndcelldefine,
-    #[token("`endif")]
+    #[token(b"`endif")]
     DirEndif,
-    #[token("`ifdef")]
+    #[token(b"`ifdef")]
     DirIfdef,
-    #[token("`ifndef")]
+    #[token(b"`ifndef")]
     DirIfndef,
-    #[token("`include")]
+    #[token(b"`include")]
     DirInclude,
-    #[token("`line")]
+    #[token(b"`line")]
     DirLine,
-    #[token("`nounconnected_drive")]
+    #[token(b"`nounconnected_drive")]
     DirNounconnectedDrive,
-    #[token("`pragma")]
+    #[token(b"`pragma")]
     DirPragma,
-    #[token("`resetall")]
+    #[token(b"`resetall")]
     DirResetall,
-    #[token("`timescale")]
+    #[token(b"`timescale")]
     DirTimescale,
-    #[token("`unconnected_drive")]
+    #[token(b"`unconnected_drive")]
     DirUnconnectedDrive,
-    #[token("`undef")]
+    #[token(b"`undef")]
     DirUndef,
-    #[token("`undefineall")]
+    #[token(b"`undefineall")]
     DirUndefineall,
     // Operators
-    #[token("+")]
+    #[token(b"+")]
     Plus,
-    #[token("-")]
+    #[token(b"-")]
     Minus,
-    #[token("!")]
+    #[token(b"!")]
     Exclamation,
-    #[token("?")]
+    #[token(b"?")]
     Quest,
-    #[token("~")]
+    #[token(b"~")]
     Tilde,
-    #[token("&")]
+    #[token(b"&")]
     Amp,
-    #[token("~&")]
+    #[token(b"~&")]
     TildeAmp,
-    #[token("|")]
+    #[token(b"|")]
     Pipe,
-    #[token("~|")]
+    #[token(b"~|")]
     TildePipe,
-    #[token("^")]
+    #[token(b"^")]
     Caret,
-    #[token("~^")]
+    #[token(b"~^")]
     TildeCaret,
-    #[token("^~")]
+    #[token(b"^~")]
     CaretTilde,
-    #[token("*")]
+    #[token(b"*")]
     Star,
-    #[token("/")]
+    #[token(b"/")]
     Slash,
-    #[token("%")]
+    #[token(b"%")]
     Percent,
-    #[token("==")]
+    #[token(b"==")]
     EqEq,
-    #[token("!=")]
+    #[token(b"!=")]
     ExclEq,
-    #[token("+=")]
+    #[token(b"+=")]
     PlusEq,
-    #[token("-=")]
+    #[token(b"-=")]
     MinusEq,
-    #[token("*=")]
+    #[token(b"*=")]
     StarEq,
-    #[token("/=")]
+    #[token(b"/=")]
     SlashEq,
-    #[token("%=")]
+    #[token(b"%=")]
     PercentEq,
-    #[token("&=")]
+    #[token(b"&=")]
     AmpEq,
-    #[token("|=")]
+    #[token(b"|=")]
     PipeEq,
-    #[token("^=")]
+    #[token(b"^=")]
     CaretEq,
-    #[token("===")]
+    #[token(b"===")]
     EqEqEq,
-    #[token("!==")]
+    #[token(b"!==")]
     ExclEqEq,
-    #[token("==?")]
+    #[token(b"==?")]
     EqEqQuest,
-    #[token("!=?")]
+    #[token(b"!=?")]
     ExclEqQuest,
-    #[token("&&")]
+    #[token(b"&&")]
     AmpAmp,
-    #[token("&&&")]
+    #[token(b"&&&")]
     AmpAmpAmp,
-    #[token("||")]
+    #[token(b"||")]
     PipePipe,
-    #[token("**")]
+    #[token(b"**")]
     StarStar,
-    #[token("<")]
+    #[token(b"<")]
     Lt,
-    #[token("<=")]
+    #[token(b"<=")]
     LtEq,
-    #[token(">")]
+    #[token(b">")]
     Gt,
-    #[token(">=")]
+    #[token(b">=")]
     GtEq,
-    #[token(">>")]
+    #[token(b">>")]
     GtGt,
-    #[token("<<")]
+    #[token(b"<<")]
     LtLt,
-    #[token(">>=")]
+    #[token(b">>=")]
     GtGtEq,
-    #[token("<<=")]
+    #[token(b"<<=")]
     LtLtEq,
-    #[token(">>>")]
+    #[token(b">>>")]
     GtGtGt,
-    #[token("<<<")]
+    #[token(b"<<<")]
     LtLtLt,
-    #[token(">>>=")]
+    #[token(b">>>=")]
     GtGtGtEq,
-    #[token("<<<=")]
+    #[token(b"<<<=")]
     LtLtLtEq,
-    #[token("->")]
+    #[token(b"->")]
     MinusGt,
-    #[token("->>")]
+    #[token(b"->>")]
     MinusGtGt,
-    #[token("<->")]
+    #[token(b"<->")]
     LtMinusGt,
-    #[token("++")]
+    #[token(b"++")]
     PlusPlus,
-    #[token("--")]
+    #[token(b"--")]
     MinusMinus,
-    #[token("+:")]
+    #[token(b"+:")]
     PlusColon,
-    #[token("-:")]
+    #[token(b"-:")]
     MinusColon,
-    #[token("+/-")]
+    #[token(b"+/-")]
     PlusSlashMinus,
-    #[token("+%-")]
+    #[token(b"+%-")]
     PlusPercentMinus,
     // Symbols
-    #[token("(")]
+    #[token(b"(")]
     Paren,
-    #[token(")")]
+    #[token(b")")]
     EParen,
-    #[token("[")]
+    #[token(b"[")]
     Bracket,
-    #[token("]")]
+    #[token(b"]")]
     EBracket,
-    #[token("{")]
+    #[token(b"{")]
     Brace,
-    #[token("}")]
+    #[token(b"}")]
     EBrace,
-    #[token(":")]
+    #[token(b":")]
     Colon,
-    #[token(";")]
+    #[token(b";")]
     SColon,
-    #[token("'")]
+    #[token(b"'")]
     Apost,
-    #[token(",")]
+    #[token(b",")]
     Comma,
-    #[token(".")]
+    #[token(b".")]
     Period,
-    #[token("#")]
+    #[token(b"#")]
     Pound,
-    #[token("$")]
+    #[token(b"$")]
     Dollar,
-    #[token("@")]
+    #[token(b"@")]
     At,
-    #[token("@@")]
+    #[token(b"@@")]
     AtAt,
-    #[token("=")]
+    #[token(b"=")]
     Eq,
-    #[token("::")]
+    #[token(b"::")]
     ColonColon,
-    #[token(":=")]
+    #[token(b":=")]
     ColonEq,
-    #[token(":/")]
+    #[token(b":/")]
     ColonSlash,
-    #[token("##")]
+    #[token(b"##")]
     PoundPound,
-    #[token("#-#")]
+    #[token(b"#-#")]
     PoundMinusPound,
-    #[token("#=#")]
+    #[token(b"#=#")]
     PoundEqPound,
-    #[token("=>")]
+    #[token(b"=>")]
     EqGt,
-    #[token("*>")]
+    #[token(b"*>")]
     StarGt,
-    #[token("|->")]
+    #[token(b"|->")]
     PipeMinusGt,
-    #[token("|=>")]
+    #[token(b"|=>")]
     PipeEqGt,
     #[token(r"\")]
     Bslash,
     // Other Language Grammar
-    #[token("PATHPULSE$")]
+    #[token(b"PATHPULSE$")]
     PathpulseDollar,
-    #[token("1step")]
+    #[token(b"1step")]
     OneStep,
-    #[token("$setup")]
+    #[token(b"$setup")]
     DollarSetup,
-    #[token("$hold")]
+    #[token(b"$hold")]
     DollarHold,
-    #[token("$setuphold")]
+    #[token(b"$setuphold")]
     DollarSetuphold,
-    #[token("$recovery")]
+    #[token(b"$recovery")]
     DollarRecovery,
-    #[token("$removal")]
+    #[token(b"$removal")]
     DollarRemoval,
-    #[token("$recrem")]
+    #[token(b"$recrem")]
     DollarRecrem,
-    #[token("$skew")]
+    #[token(b"$skew")]
     DollarSkew,
-    #[token("$timeskew")]
+    #[token(b"$timeskew")]
     DollarTimeskew,
-    #[token("$fullskew")]
+    #[token(b"$fullskew")]
     DollarFullskew,
-    #[token("$period")]
+    #[token(b"$period")]
     DollarPeriod,
-    #[token("$width")]
+    #[token(b"$width")]
     DollarWidth,
-    #[token("$nochange")]
+    #[token(b"$nochange")]
     DollarNochange,
-    #[token("$root")]
+    #[token(b"$root")]
     DollarRoot,
-    #[token("$unit")]
+    #[token(b"$unit")]
     DollarUnit,
-    #[token("$fatal")]
+    #[token(b"$fatal")]
     DollarFatal,
-    #[token("$error")]
+    #[token(b"$error")]
     DollarError,
-    #[token("$warning")]
+    #[token(b"$warning")]
     DollarWarning,
-    #[token("$info")]
+    #[token(b"$info")]
     DollarInfo,
     // Comments
     #[regex(br"//[^\r\n]*", oneline_comment, allow_greedy = true)]
@@ -803,16 +803,11 @@ pub enum Token<'a> {
     SimpleIdentifier(&'a BStr),
     #[regex(br"\\[!-~]+(\s|$)", |lex| Into::<&BStr>::into(lex.slice()))]
     EscapedIdentifier(&'a BStr),
-    #[regex(br"([a-zA-Z_][a-zA-Z0-9_\$]*)?(``([a-zA-Z_][a-zA-Z0-9_\$]*)?)+", |lex| Into::<&BStr>::into(lex.slice()))]
-    PreprocessorIdentifier(&'a BStr),
     #[regex(br"`[a-zA-Z_][a-zA-Z0-9_\$]*", text_macro)]
     #[regex(br"`\\[!-~]+", text_macro)]
     TextMacro(&'a BStr),
-    #[regex(
-        br"`([a-zA-Z_][a-zA-Z0-9_\$]*)?(``([a-zA-Z_][a-zA-Z0-9_\$]*)?)+",
-        text_macro
-    )]
-    ConcatenatedTextMacro(&'a BStr),
+    #[token(b"``")]
+    MacroConcatenate,
     #[token(r#"""#, string_literal)]
     StringLiteral(&'a BStr),
     #[token(r#"`""#, preprocessor_string_literal)]
@@ -821,13 +816,15 @@ pub enum Token<'a> {
     TripleQuoteStringLiteral(&'a BStr),
     #[token(r#"`""""#, preprocessor_multiline_string_literal)]
     PreprocessorTripleQuoteStringLiteral(&'a BStr),
-    #[token("\n")]
-    #[token("\r")]
-    #[token("\r\n")]
+    #[token(b"\n")]
+    #[token(b"\r")]
+    #[token(b"\r\n")]
     #[token("\u{0085}")]
     #[token("\u{2028}")]
     #[token("\u{2029}")]
     Newline,
+    // Used for intermediate concatenation results
+    InvalidConcatenation(&'a BStr),
 }
 
 impl<'a> Token<'a> {
@@ -856,8 +853,7 @@ impl<'a> Token<'a> {
             | Token::DirUnconnectedDrive
             | Token::DirUndef
             | Token::DirUndefineall
-            | Token::TextMacro(_)
-            | Token::ConcatenatedTextMacro(_) => true,
+            | Token::TextMacro(_) => true,
             _ => false,
         }
     }
@@ -1249,9 +1245,8 @@ impl<'a> Token<'a> {
             Token::SystemTfIdentifier(_text) => "<system tf identifier>",
             Token::SimpleIdentifier(_text) => "<simple identifier>",
             Token::EscapedIdentifier(_text) => "<escaped identifier>",
-            Token::PreprocessorIdentifier(_text) => "<preprocessor identifier>",
             Token::TextMacro(_text) => "<text macro>",
-            Token::ConcatenatedTextMacro(_text) => "<concatenated text macro>",
+            Token::MacroConcatenate => "``",
             Token::StringLiteral(_text) => "<string>",
             Token::PreprocessorStringLiteral(_text) => "<preprocessor string>",
             Token::TripleQuoteStringLiteral(_text) => "<triple-quote string>",
@@ -1259,6 +1254,9 @@ impl<'a> Token<'a> {
                 "<preprocessor triple-quote string>"
             }
             Token::Newline => "newline",
+            Token::InvalidConcatenation(_text) => {
+                "<invalid token concatenation>"
+            }
         }
     }
 }
@@ -1319,16 +1317,8 @@ impl<'a> fmt::Display for Token<'a> {
                 temp_str = format!("escaped identifier '{}'", text);
                 temp_str.as_str()
             }
-            Token::PreprocessorIdentifier(text) => {
-                temp_str = format!("preprocessor identifier '{}'", text);
-                temp_str.as_str()
-            }
             Token::TextMacro(text) => {
                 temp_str = format!("text macro '{}'", text);
-                temp_str.as_str()
-            }
-            Token::ConcatenatedTextMacro(text) => {
-                temp_str = format!("concatenated text macro '{}'", text);
                 temp_str.as_str()
             }
             Token::StringLiteral(text) => {
@@ -1346,6 +1336,10 @@ impl<'a> fmt::Display for Token<'a> {
             Token::PreprocessorTripleQuoteStringLiteral(text) => {
                 temp_str =
                     format!("preprocessor string `\"\"\"{}`\"\"\"", text);
+                temp_str.as_str()
+            }
+            Token::InvalidConcatenation(text) => {
+                temp_str = format!("invalid token concatenation '{}'", text);
                 temp_str.as_str()
             }
             _ => self.as_str(),

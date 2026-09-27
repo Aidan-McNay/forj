@@ -30,9 +30,33 @@ struct Cli {
 
 fn print_node_tree(node: Node, depth: usize) {
     print!("{}", " ".to_owned().repeat(depth));
-    println!("{}", node.name());
-    for child_node in node.children() {
-        print_node_tree(child_node, depth + 2)
+    let name = node.name();
+    println!("{}", name);
+    let children = node.children();
+    if children.is_empty() {
+        let content = match node {
+            Node::QuotedString(quoted_string) => Some(quoted_string.0),
+            Node::TripleQuotedString(triple_quoted_string) => {
+                Some(triple_quoted_string.0)
+            }
+            Node::Identifier(identifier) => match identifier {
+                forj_syntax::Identifier::SimpleIdentifier((text, _)) => {
+                    Some(*text)
+                }
+                forj_syntax::Identifier::EscapedIdentifier((text, _)) => {
+                    Some(*text)
+                }
+            },
+            _ => None,
+        };
+        if let Some(text) = content {
+            print!("{}", " ".to_owned().repeat(depth + 2));
+            println!("{}", text)
+        }
+    } else {
+        for child_node in children {
+            print_node_tree(child_node, depth + 2)
+        }
     }
 }
 

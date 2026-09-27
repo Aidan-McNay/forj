@@ -282,11 +282,11 @@ pub enum PreprocessorError {
         /// The name of the missing parameter
         param_name: String,
     },
-    InvalidIdentifierFormation {
-        /// The name of the parameter used in a preprocessor identifier
-        param_name: String,
-        /// The [`Span`] of the invalid argument
-        arg_span: Span,
+    InvalidConcatenation {
+        /// The text that was attempted to be concatenated
+        concat_text: String,
+        /// The overall [`Span`] of the invalid concatenation
+        concat_span: Span,
     },
     InvalidRelativeTimescales {
         /// The [`Span`] of the `` `timescale `` directive
@@ -468,12 +468,12 @@ impl<'a> From<forj_parser::PreprocessorError<'a>> for PreprocessorError {
                 use_span: use_span.into(),
                 param_name: param_name.to_string(),
             },
-            forj_parser::PreprocessorError::InvalidIdentifierFormation {
-                param_name,
-                arg_span,
-            } => PreprocessorError::InvalidIdentifierFormation {
-                param_name: param_name.to_string(),
-                arg_span: arg_span.into(),
+            forj_parser::PreprocessorError::InvalidConcatenation {
+                concat_text,
+                concat_span,
+            } => PreprocessorError::InvalidConcatenation {
+                concat_text: concat_text.to_string(),
+                concat_span: concat_span.into(),
             },
             forj_parser::PreprocessorError::InvalidRelativeTimescales {
                 timescale_span,

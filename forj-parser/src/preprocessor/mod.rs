@@ -18,6 +18,7 @@ pub(crate) mod text_macro;
 pub(crate) mod timescale;
 pub(crate) mod unconnected;
 use crate::*;
+use bstr::ByteSlice;
 pub use cache::*;
 use conditional_compilation::*;
 use define::*;
@@ -402,7 +403,7 @@ pub(crate) fn recover<'s>(
         PreprocessorError::NoMacroArguments { .. } => true,
         PreprocessorError::TooManyMacroArguments { .. } => true,
         PreprocessorError::MissingMacroArgument { .. } => true,
-        PreprocessorError::InvalidIdentifierFormation { .. } => true,
+        PreprocessorError::InvalidConcatenation { .. } => true,
         PreprocessorError::InvalidRelativeTimescales { .. } => true,
         PreprocessorError::IncompleteMacroWithToken { .. } => {
             recover_newline(src)
@@ -554,9 +555,7 @@ pub(crate) fn preprocess_helper<'s>(
                         let _ = src.next();
                     };
                 }
-                Token::TextMacro(macro_name)
-                    if state.in_define_arg() || state.in_text_macro_arg() =>
-                {
+                Token::TextMacro(macro_name) if state.in_define_arg() => {
                     if let Err(err) = preprocess_macro(
                         src,
                         state,
@@ -793,6 +792,18 @@ pub(crate) fn preprocess_helper<'s>(
                     {
                         dest.push(spanned_token)
                     }
+                }
+                Token::InvalidConcatenation(concat_text) => {
+                    recover(
+                        src,
+                        state,
+                        PreprocessorError::InvalidConcatenation {
+                            concat_text: cache.retain_string(
+                                concat_text.to_str_lossy().into_owned(),
+                            ),
+                            concat_span: spanned_token.1,
+                        },
+                    )?;
                 }
                 token
                     if token.keyword_replace(state.get_keyword_standard()) =>
