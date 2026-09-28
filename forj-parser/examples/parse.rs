@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 #[derive(Parser)]
-#[command(version, author, about, long_about = None)]
+#[command(version, author, about = "A demo parser using forj-parser", long_about = None)]
 struct Cli {
     /// Directory to search for include paths
     #[arg(short = 'I', long, value_name = "DIR_PATH")]
@@ -75,7 +75,13 @@ fn main() -> ExitCode {
         .collect::<Vec<_>>();
     let mut state = preprocessor::PreprocessorState::new(includes, defines);
     for path in &args.paths {
-        let src = std::fs::read(&path).unwrap();
+        let src = match std::fs::read(&path) {
+            Ok(result) => result,
+            Err(err) => {
+                println!("Error: Couldn't open {}: {}", path.display(), err);
+                return ExitCode::FAILURE;
+            }
+        };
         // Currently process as the same compilation unit
         // state.make_fresh(defines.clone());
         let (_, src) = state.retain_file(
