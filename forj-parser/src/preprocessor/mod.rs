@@ -397,6 +397,7 @@ pub(crate) fn recover<'s>(
         PreprocessorError::IncompleteDirective { .. } => recover_newline(src),
         PreprocessorError::IncompleteDefine { .. } => recover_newline(src),
         PreprocessorError::UndefinedMacro { .. } => true, // Don't worry about functions here
+        PreprocessorError::RecursiveMacro { .. } => true,
         PreprocessorError::DuplicateMacroParameter { .. } => {
             recover_newline(src)
         }
@@ -555,7 +556,11 @@ pub(crate) fn preprocess_helper<'s>(
                         let _ = src.next();
                     };
                 }
-                Token::TextMacro(macro_name) if state.in_define_arg() => {
+                Token::TextMacro(macro_name)
+                    if (state.get_define_arg_macro() == Some(macro_name))
+                        || (state.get_text_macro_arg_macro()
+                            == Some(macro_name)) =>
+                {
                     if let Err(err) = preprocess_macro(
                         src,
                         state,

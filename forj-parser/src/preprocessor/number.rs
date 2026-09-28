@@ -50,7 +50,7 @@ fn get_expanded_slice<'s>(
 ) -> Option<&'s BStr> {
     let mut curr_span = span;
     loop {
-        if let Some(expanded_span) = curr_span.expanded_from {
+        if let Some((_, expanded_span)) = curr_span.expanded_from {
             curr_span = expanded_span;
         } else {
             break;

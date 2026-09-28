@@ -244,6 +244,14 @@ pub enum PreprocessorError {
         /// The [`Span`] of the undefined macro
         undefined_span: Span,
     },
+    RecursiveMacro {
+        /// The name of the macro
+        macro_name: String,
+        /// The [`Span`] where the macro was defined
+        define_span: Span,
+        /// The [`Span`] where the macro was expanded recursively
+        use_span: Span,
+    },
     DuplicateMacroParameter {
         /// The name of the macro for which duplicate parameters were specified
         define_name: String,
@@ -425,6 +433,15 @@ impl<'a> From<forj_parser::PreprocessorError<'a>> for PreprocessorError {
             } => PreprocessorError::UndefinedMacro {
                 undefined_name: undefined_name.to_string(),
                 undefined_span: undefined_span.into(),
+            },
+            forj_parser::PreprocessorError::RecursiveMacro {
+                macro_name,
+                define_span,
+                use_span,
+            } => PreprocessorError::RecursiveMacro {
+                macro_name: macro_name.to_string(),
+                define_span: define_span.into(),
+                use_span: use_span.into(),
             },
             forj_parser::PreprocessorError::DuplicateMacroParameter {
                 define_name,

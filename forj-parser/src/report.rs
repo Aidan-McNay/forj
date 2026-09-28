@@ -100,7 +100,7 @@ impl<'a> Report {
             ReportKind::Custom(_, color) => color.clone(),
         };
         loop {
-            if let Some(expanded_span) = curr_span.expanded_from {
+            if let Some((_, expanded_span)) = curr_span.expanded_from {
                 self.builder = self.builder.with_label(
                     Label::new((
                         curr_span.file.to_string(),

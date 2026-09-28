@@ -18,7 +18,8 @@ pub type ByteSpan = Range<usize>;
 /// If the [`Span`] is part of a `` `define `` directive, each expanded
 /// text macro will have the original [`Span`] of the (now expanded) macro,
 /// with [`Span::expanded_from`] referencing the original token (in the
-/// `` `define `` directive) before expansion
+/// `` `define `` directive) before expansion, as well as the name of the
+/// macro it was expanded from
 ///
 /// Invalid [`Span`]s (such as those from CLI defines) will have an
 /// empty string as the `file`
@@ -26,7 +27,7 @@ pub type ByteSpan = Range<usize>;
 pub struct Span<'a> {
     pub file: &'a str,
     pub bytes: ByteSpan,
-    pub expanded_from: Option<&'a Span<'a>>,
+    pub expanded_from: Option<(&'a str, &'a Span<'a>)>,
     pub included_from: Option<&'a Span<'a>>,
 }
 
@@ -44,7 +45,7 @@ const fn expansion_depth_helper<'a>(
     span: &Span<'a>,
     curr_depth: usize,
 ) -> usize {
-    if let Some(expanded_from_span) = span.expanded_from {
+    if let Some((_, expanded_from_span)) = span.expanded_from {
         expansion_depth_helper(expanded_from_span, curr_depth + 1)
     } else {
         curr_depth
@@ -84,7 +85,7 @@ impl<'a> Span<'a> {
     fn indeces_to_compare(&self) -> Vec<Vec<usize>> {
         let mut indeces = vec![self.include_indeces()];
         match self.expanded_from {
-            Some(expanded_span) => {
+            Some((_, expanded_span)) => {
                 indeces.extend(expanded_span.indeces_to_compare())
             }
             None => (),
@@ -237,7 +238,7 @@ fn define_span_comparison() {
     let span2 = Span {
         file: "",
         bytes: (4..6),
-        expanded_from: Some(&definition_span),
+        expanded_from: Some(("", &definition_span)),
         included_from: None,
     };
     assert_eq!(span1.compare(&span2), SpanRelation::Earlier)
@@ -254,7 +255,7 @@ fn mixed_define_span_comparison() {
     let span1 = Span {
         file: "",
         bytes: (0..2),
-        expanded_from: Some(&definition_span1),
+        expanded_from: Some(("", &definition_span1)),
         included_from: None,
     };
     let definition_span2 = Span {
@@ -267,7 +268,7 @@ fn mixed_define_span_comparison() {
     let span2 = Span {
         file: "",
         bytes: (2..4),
-        expanded_from: Some(&definition_span2),
+        expanded_from: Some(("", &definition_span2)),
         included_from: None,
     };
     assert_eq!(span1.compare(&span2), SpanRelation::Earlier)
@@ -284,7 +285,7 @@ fn same_definition_span_comparison() {
     let span1 = Span {
         file: "",
         bytes: (100..104),
-        expanded_from: Some(&definition_span1),
+        expanded_from: Some(("", &definition_span1)),
         included_from: None,
     };
     let definition_span2 = Span {
@@ -296,7 +297,7 @@ fn same_definition_span_comparison() {
     let span2 = Span {
         file: "",
         bytes: (100..104),
-        expanded_from: Some(&definition_span2),
+        expanded_from: Some(("", &definition_span2)),
         included_from: None,
     };
     assert_eq!(span1.compare(&span2), SpanRelation::Later)
@@ -320,7 +321,7 @@ fn define_include_span_comparison() {
     let span1 = Span {
         file: "",
         bytes: (100..104),
-        expanded_from: Some(&definition_span1),
+        expanded_from: Some(("", &definition_span1)),
         included_from: Some(&inclusion_span1),
     };
     let definition_span2 = Span {
@@ -338,7 +339,7 @@ fn define_include_span_comparison() {
     let span2 = Span {
         file: "",
         bytes: (100..104),
-        expanded_from: Some(&definition_span2),
+        expanded_from: Some(("", &definition_span2)),
         included_from: Some(&inclusion_span2),
     };
     assert_eq!(span1.compare(&span2), SpanRelation::Earlier)
@@ -362,7 +363,7 @@ fn same_define_include_span_comparison() {
     let span1 = Span {
         file: "",
         bytes: (100..104),
-        expanded_from: Some(&definition_span1),
+        expanded_from: Some(("", &definition_span1)),
         included_from: Some(&inclusion_span1),
     };
     let definition_span2 = Span {
@@ -380,7 +381,7 @@ fn same_define_include_span_comparison() {
     let span2 = Span {
         file: "",
         bytes: (100..104),
-        expanded_from: Some(&definition_span2),
+        expanded_from: Some(("", &definition_span2)),
         included_from: Some(&inclusion_span2),
     };
     assert_eq!(span1.compare(&span2), SpanRelation::Later)

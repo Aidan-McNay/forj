@@ -89,7 +89,8 @@ fn get_text_macro_args<'s>(
     let end_span =
         loop {
             let mut new_arg: Vec<SpannedToken<'s>> = vec![];
-            let prev_in_text_macro_arg = state.enter_text_macro_arg();
+            let prev_in_text_macro_arg =
+                state.enter_text_macro_arg(text_macro.0.into());
             let result = preprocess_helper(src, &mut new_arg, state, cache);
             state.exit_text_macro_arg(prev_in_text_macro_arg);
             match result {
@@ -123,7 +124,7 @@ fn resolve_text_macro_args<'s>(
     specified_args: Vec<Vec<SpannedToken<'s>>>,
     original_args: Vec<(SpannedString<'s>, Option<Vec<SpannedToken<'s>>>)>,
     define_span: &Span<'s>,
-    text_macro: (&'s str, Span<'s>),
+    text_macro: &(&'s str, Span<'s>),
 ) -> Result<
     HashMap<&'s BStr, (Span<'s>, Vec<SpannedToken<'s>>)>,
     PreprocessorError<'s>,
@@ -132,7 +133,7 @@ fn resolve_text_macro_args<'s>(
         return Err(PreprocessorError::TooManyMacroArguments {
             macro_name: text_macro.0,
             define_span: define_span.clone(),
-            use_span: text_macro.1,
+            use_span: text_macro.1.clone(),
             expected: original_args.len(),
             found: specified_args.len(),
         });
@@ -177,7 +178,7 @@ fn resolve_text_macro_args<'s>(
                 None => {
                     return Err(PreprocessorError::MissingMacroArgument {
                         define_span: define_span.clone(),
-                        use_span: text_macro.1,
+                        use_span: text_macro.1.clone(),
                         param_name: arg_name.0,
                     });
                 }
@@ -188,6 +189,7 @@ fn resolve_text_macro_args<'s>(
 }
 
 struct SpanReplacer<'a> {
+    text_macro_name: &'a str,
     text_macro_span: Span<'a>,
     tokens: IntoIter<SpannedToken<'a>>,
     cache: &'a PreprocessorCache<'a>,
@@ -216,18 +218,17 @@ impl<'a> DoubleEndedIterator for SpanReplacer<'a> {
 fn insert_base_expansion<'a>(
     cache: &'a PreprocessorCache<'a>,
     span: &'a Span<'a>,
-    expanded_ref: &'a Span<'a>,
+    expanded_ref: (&'a str, &'a Span<'a>),
 ) -> &'a Span<'a> {
     let mut new_span = span.clone();
     match new_span.expanded_from {
         None => {
             new_span.expanded_from = Some(expanded_ref);
         }
-        Some(nested_expansion) => {
-            new_span.expanded_from = Some(insert_base_expansion(
-                cache,
-                nested_expansion,
-                expanded_ref,
+        Some((macro_name, nested_expansion)) => {
+            new_span.expanded_from = Some((
+                macro_name,
+                insert_base_expansion(cache, nested_expansion, expanded_ref),
             ));
         }
     };
@@ -236,11 +237,13 @@ fn insert_base_expansion<'a>(
 
 impl<'a> SpanReplacer<'a> {
     fn new(
+        text_macro_name: &'a str,
         text_macro_span: Span<'a>,
         tokens: IntoIter<SpannedToken<'a>>,
         cache: &'a PreprocessorCache<'a>,
     ) -> Self {
         Self {
+            text_macro_name,
             text_macro_span,
             tokens,
             cache,
@@ -254,12 +257,21 @@ impl<'a> SpanReplacer<'a> {
         } else {
             // Check for nested macros
             let original_span_ref = match self.text_macro_span.expanded_from {
-                Some(prev_expansion) => insert_base_expansion(
-                    self.cache,
-                    prev_expansion,
+                Some((prev_macro_name, prev_expansion)) => (
+                    prev_macro_name,
+                    insert_base_expansion(
+                        self.cache,
+                        prev_expansion,
+                        (
+                            self.text_macro_name,
+                            self.cache.retain_span(original_span),
+                        ),
+                    ),
+                ),
+                None => (
+                    self.text_macro_name,
                     self.cache.retain_span(original_span),
                 ),
-                None => self.cache.retain_span(original_span),
             };
             Span {
                 expanded_from: Some(original_span_ref),
@@ -273,6 +285,22 @@ impl<'a> SpanReplacer<'a> {
 impl<'a> ExactSizeIterator for SpanReplacer<'a> {
     fn len(&self) -> usize {
         self.tokens.len()
+    }
+}
+
+fn recursive_definition<'s>(
+    text_macro_name: &str,
+    text_macro_span: &Span<'s>,
+) -> bool {
+    match text_macro_span.expanded_from {
+        None => false,
+        Some((macro_name, expanded_span)) => {
+            if macro_name == text_macro_name {
+                true
+            } else {
+                recursive_definition(text_macro_name, expanded_span)
+            }
+        }
     }
 }
 
@@ -298,16 +326,24 @@ pub fn preprocess_macro<'s>(
                     function_args,
                     define_args,
                     &define_span,
-                    text_macro,
+                    &text_macro,
                 )?
             } else {
                 HashMap::new()
             };
+            if recursive_definition(text_macro.0, &text_macro.1) {
+                return Err(PreprocessorError::RecursiveMacro {
+                    macro_name: text_macro.0,
+                    define_span: state.get_define_decl(text_macro.0).unwrap(),
+                    use_span: text_macro.1,
+                });
+            }
             let token_result_vec = TokenGluer::new(
                 Stringify::new(
                     ArgReplace::new(token_vec.into_iter(), &arguments),
                     &state,
                     cache,
+                    vec![text_macro.0.into()],
                     &arguments,
                 ),
                 cache,
@@ -323,8 +359,12 @@ pub fn preprocess_macro<'s>(
                     }
                 })
                 .collect::<Vec<_>>();
-            let token_iter =
-                SpanReplacer::new(macro_span, new_token_vec.into_iter(), cache);
+            let token_iter = SpanReplacer::new(
+                text_macro.0,
+                macro_span,
+                new_token_vec.into_iter(),
+                cache,
+            );
             src.prepend_tokens(token_iter);
             Ok(())
         }
@@ -556,6 +596,53 @@ mod stringify_with_macros {
             `define STRINGIFY(a) `\"a( _test, in_string )`\"
             `STRINGIFY(`TEST)",
             vec![Token::StringLiteral("in_string_test".into())]
+        )
+    }
+}
+
+#[cfg(test)]
+mod recursive {
+    use super::*;
+    #[test]
+    #[should_panic(expected = "RecursiveMacro")]
+    fn recursive_use() {
+        check_preprocessor!(
+            "`define TEST1 `TEST2
+            `define TEST2 `TEST1
+            `TEST1",
+            Vec::<Token<'_>>::new()
+        )
+    }
+
+    #[test]
+    fn recursive_redefine() {
+        check_preprocessor!(
+            "`define TEST1 `TEST2
+            `define TEST2 `TEST1
+            `define TEST1 2
+            `TEST2",
+            vec![Token::UnsignedNumber("2".into())],
+            false
+        )
+    }
+
+    #[test]
+    fn recursive_stringify() {
+        check_preprocessor!(
+            "`define TEST `\"`TEST`\"
+            `TEST",
+            vec![Token::StringLiteral("`TEST".into())]
+        )
+    }
+
+    #[test]
+    fn recursive_stringify_multilevel() {
+        check_preprocessor!(
+            "`define TEST(a) `\"a`\"
+            `define SUM(b) `VAL + b
+            `define VAL `SUM(2)
+            `TEST(`VAL)",
+            vec![Token::StringLiteral("`VAL + 2".into())]
         )
     }
 }

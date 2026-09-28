@@ -14,6 +14,7 @@ pub(crate) struct Stringify<'a: 'b, 'b, T> {
     args: &'b HashMap<&'a BStr, (Span<'a>, Vec<SpannedToken<'a>>)>,
     state: &'b PreprocessorState<'a>,
     cache: &'a PreprocessorCache<'a>,
+    expanding_macros: Vec<&'a BStr>,
     inner_iter: T,
 }
 
@@ -46,12 +47,14 @@ where
         iter: T,
         state: &'b PreprocessorState<'a>,
         cache: &'a PreprocessorCache<'a>,
+        expanding_macros: Vec<&'a BStr>,
         args: &'b HashMap<&'a BStr, (Span<'a>, Vec<SpannedToken<'a>>)>,
     ) -> Self {
         Self {
             args,
             state,
             cache,
+            expanding_macros,
             inner_iter: iter,
         }
     }
@@ -137,6 +140,7 @@ where
         &self,
         define_id: BString,
         func: &DefineFunction<'a>,
+        already_replaced: Vec<&'a BStr>,
         mut curr_string: BString,
     ) -> BString {
         let start_idx = curr_string.find(&define_id).unwrap();
@@ -157,7 +161,7 @@ where
                 })
                 .collect(),
             &Span::default(),
-            ("", Span::default()),
+            &("", Span::default()),
         ) else {
             return curr_string;
         };
@@ -172,6 +176,7 @@ where
                 ),
                 self.state,
                 self.cache,
+                already_replaced.clone(),
                 &resolved_args,
             ),
             self.cache,
@@ -184,64 +189,71 @@ where
             start_idx..end_idx,
             Into::<Vec<u8>>::into(replacement_string).into_iter(),
         );
-        curr_string
+        self.replace_macros(curr_string, already_replaced)
     }
 
-    fn replace_macros(&self, mut pp_string: BString) -> BString {
-        let mut need_rerun: bool = true;
-        loop {
-            if !need_rerun {
-                break;
+    fn replace_macros(
+        &self,
+        mut pp_string: BString,
+        already_replaced: Vec<&'a BStr>,
+    ) -> BString {
+        for define in &self.state.defines {
+            if already_replaced.contains(&(define.name.0.into())) {
+                // Avoid self-referential expansion
+                continue;
             }
-            need_rerun = false;
-            for define in &self.state.defines {
-                let mut define_id = BString::new(b"`".to_vec());
-                define_id.extend_from_slice(define.name.0.as_bytes());
-                if pp_string.contains_str(&define_id) {
-                    need_rerun = true;
-                    match &define.body {
-                        DefineBody::Empty => {
-                            pp_string =
-                                pp_string.replace(define_id, b"").into();
-                        }
-                        DefineBody::Text(tokens) => {
-                            match TokenGluer::new(
-                                Stringify::new(
-                                    tokens.clone().into_iter(),
-                                    self.state,
-                                    self.cache,
-                                    &HashMap::new(),
-                                ),
+            let mut define_id = BString::new(b"`".to_vec());
+            define_id.extend_from_slice(define.name.0.as_bytes());
+            if pp_string.contains_str(&define_id) {
+                match &define.body {
+                    DefineBody::Empty => {
+                        pp_string = pp_string.replace(define_id, b"").into();
+                    }
+                    DefineBody::Text(tokens) => {
+                        let mut new_already_replaced = already_replaced.clone();
+                        new_already_replaced.push(define.name.0.into());
+                        match TokenGluer::new(
+                            Stringify::new(
+                                tokens.clone().into_iter(),
+                                self.state,
                                 self.cache,
-                            )
-                            .collect::<Result<Vec<_>, _>>()
-                            {
-                                Ok(pp_tokens) => {
-                                    pp_string = pp_string
-                                        .replace(
-                                            define_id,
-                                            string_substitute(&pp_tokens),
-                                        )
-                                        .into();
-                                }
-                                Err(_) => {
-                                    // Errors on comments - avoid substitution for now
-                                    pp_string = pp_string
-                                        .replace(
-                                            define_id,
-                                            string_substitute(tokens),
-                                        )
-                                        .into();
-                                }
-                            };
-                        }
-                        DefineBody::Function(def_function) => {
-                            pp_string = self.replace_macro_function(
-                                define_id,
-                                def_function,
-                                pp_string,
-                            );
-                        }
+                                new_already_replaced.clone(),
+                                &HashMap::new(),
+                            ),
+                            self.cache,
+                        )
+                        .collect::<Result<Vec<_>, _>>()
+                        {
+                            Ok(pp_tokens) => {
+                                pp_string = pp_string
+                                    .replace(
+                                        define_id,
+                                        string_substitute(&pp_tokens),
+                                    )
+                                    .into();
+                            }
+                            Err(_) => {
+                                // Errors on comments - avoid substitution for now
+                                pp_string = pp_string
+                                    .replace(
+                                        define_id,
+                                        string_substitute(tokens),
+                                    )
+                                    .into();
+                            }
+                        };
+                        pp_string = self
+                            .replace_macros(pp_string, new_already_replaced);
+                    }
+                    DefineBody::Function(def_function) => {
+                        let mut new_already_replaced = already_replaced.clone();
+                        new_already_replaced.push(define.name.0.into());
+                        pp_string = self.replace_macro_function(
+                            define_id,
+                            def_function,
+                            new_already_replaced,
+                            pp_string,
+                        );
                     }
                 }
             }
@@ -259,9 +271,11 @@ where
         is_triple_quote: bool,
     ) -> &'a BStr {
         let owned_string = pp_string.to_owned();
-        let mut replaced_string = self.replace_escape_sequence(
-            self.replace_macros(self.replace_args(owned_string)),
-        );
+        let mut replaced_string =
+            self.replace_escape_sequence(self.replace_macros(
+                self.replace_args(owned_string),
+                self.expanding_macros.clone(),
+            ));
         if is_triple_quote {
             replaced_string = replaced_string.replace(b"\\\n", b"\n").into();
         }

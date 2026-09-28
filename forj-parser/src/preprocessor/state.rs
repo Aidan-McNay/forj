@@ -225,8 +225,8 @@ pub struct PreprocessorState<'a> {
     /// Any errors encountered so far
     pub errors: Vec<PreprocessorError<'a>>,
     pub(crate) in_define: bool,
-    pub(crate) in_define_arg: bool,
-    pub(crate) in_text_macro_arg: bool,
+    pub(crate) define_arg_macro: Option<&'a BStr>,
+    pub(crate) text_macro_arg_macro: Option<&'a BStr>,
     pub(crate) include_depth: usize,
     pub(crate) design_element_depth: usize,
     pub(crate) pragma_handlers:
@@ -248,8 +248,8 @@ impl<'a> PreprocessorState<'a> {
             curr_standard: vec![],
             errors: vec![],
             in_define: false,
-            in_define_arg: false,
-            in_text_macro_arg: false,
+            define_arg_macro: None,
+            text_macro_arg_macro: None,
             include_depth: 0,
             design_element_depth: 0,
             pragma_handlers: HashMap::new(),
@@ -269,7 +269,8 @@ impl<'a> PreprocessorState<'a> {
         self.curr_standard.clear();
         self.errors.clear();
         self.in_define = false;
-        self.in_define_arg = false;
+        self.define_arg_macro = None;
+        self.text_macro_arg_macro = None;
         self.include_depth = 0;
         self.design_element_depth = 0;
         self.pragma_handlers.clear();
@@ -356,10 +357,13 @@ impl<'a> PreprocessorState<'a> {
     /// Each call to [`PreprocessorState::enter_define_arg`] should be
     /// paired with a later call to [`PreprocessorState::exit_define_arg`]
     #[inline]
-    pub(crate) fn enter_define_arg(&mut self) -> bool {
-        let prev_in_define_arg = self.in_define_arg;
-        self.in_define_arg = true;
-        prev_in_define_arg
+    pub(crate) fn enter_define_arg(
+        &mut self,
+        macro_name: &'a BStr,
+    ) -> Option<&'a BStr> {
+        let prev_define_arg_macro = self.define_arg_macro;
+        self.define_arg_macro = Some(macro_name);
+        prev_define_arg_macro
     }
 
     /// Called when stopping preprocessing of a definition argument
@@ -367,14 +371,23 @@ impl<'a> PreprocessorState<'a> {
     /// Each call to [`PreprocessorState::enter_define_arg`] should be
     /// paired with a later call to [`PreprocessorState::exit_define_arg`]
     #[inline]
-    pub(crate) fn exit_define_arg(&mut self, prev_in_define_arg: bool) {
-        self.in_define_arg = prev_in_define_arg;
+    pub(crate) fn exit_define_arg(
+        &mut self,
+        prev_define_arg_macro: Option<&'a BStr>,
+    ) {
+        self.define_arg_macro = prev_define_arg_macro;
     }
 
-    /// Whether we're currently preprocessing a definition argument
+    /// Whether we're currently processing a default macro argument
     #[inline]
     pub fn in_define_arg(&self) -> bool {
-        self.in_define_arg
+        self.define_arg_macro.is_some()
+    }
+
+    /// The macro name we're processing a default argument for, if any
+    #[inline]
+    pub fn get_define_arg_macro(&self) -> Option<&'a BStr> {
+        self.define_arg_macro
     }
 
     /// Called when starting to preprocess a text macro argument
@@ -382,10 +395,13 @@ impl<'a> PreprocessorState<'a> {
     /// Each call to [`PreprocessorState::enter_text_macro_arg`] should be
     /// paired with a later call to [`PreprocessorState::exit_text_macro_arg`]
     #[inline]
-    pub(crate) fn enter_text_macro_arg(&mut self) -> bool {
-        let prev_in_text_macro_arg = self.in_text_macro_arg;
-        self.in_text_macro_arg = true;
-        prev_in_text_macro_arg
+    pub(crate) fn enter_text_macro_arg(
+        &mut self,
+        macro_name: &'a BStr,
+    ) -> Option<&'a BStr> {
+        let prev_text_macro_arg_macro = self.text_macro_arg_macro;
+        self.text_macro_arg_macro = Some(macro_name);
+        prev_text_macro_arg_macro
     }
 
     /// Called when stopping preprocessing of a text macro argument
@@ -393,14 +409,23 @@ impl<'a> PreprocessorState<'a> {
     /// Each call to [`PreprocessorState::enter_text_macro_arg`] should be
     /// paired with a later call to [`PreprocessorState::exit_text_macro_arg`]
     #[inline]
-    pub(crate) fn exit_text_macro_arg(&mut self, prev_in_text_macro_arg: bool) {
-        self.in_text_macro_arg = prev_in_text_macro_arg;
+    pub(crate) fn exit_text_macro_arg(
+        &mut self,
+        prev_text_macro_arg_macro: Option<&'a BStr>,
+    ) {
+        self.text_macro_arg_macro = prev_text_macro_arg_macro;
     }
 
-    /// Whether we're currently preprocessing a text macro argument
+    /// Whether we're currently processing a text macro argument
     #[inline]
     pub fn in_text_macro_arg(&self) -> bool {
-        self.in_text_macro_arg
+        self.text_macro_arg_macro.is_some()
+    }
+
+    /// The name of the macro we're currently processing an argument for, if any
+    #[inline]
+    pub fn get_text_macro_arg_macro(&self) -> Option<&'a BStr> {
+        self.text_macro_arg_macro
     }
 
     /// Remove a given macro, evaluating to whether a macro was removed

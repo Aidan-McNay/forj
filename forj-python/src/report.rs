@@ -490,6 +490,29 @@ impl PreprocessorError {
                 );
                 report
             }
+            PreprocessorError::RecursiveMacro {
+                macro_name,
+                define_span,
+                use_span,
+            } => {
+                let mut report = Report::new(
+                    ReportKind::Error(),
+                    use_span.clone(),
+                    "PP15".to_owned(),
+                    format!("Recursive expansion of '{macro_name}'"),
+                );
+                report.label(
+                    use_span.clone(),
+                    ReportKind::Error(),
+                    "Recursive expansion".to_owned(),
+                );
+                report.label(
+                    define_span.clone(),
+                    ReportKind::Note(),
+                    "Original definition".to_owned(),
+                );
+                report
+            }
             PreprocessorError::RedefinedMacro {
                 macro_name,
                 redef_span,

@@ -17,7 +17,10 @@ macro_rules! check_lexer {
 
 #[macro_export]
 macro_rules! check_preprocessor {
-    ($input:expr, $expected:expr) => {{
+    ($input:expr, $expected:expr) => {
+        check_preprocessor!($input, $expected, true)
+    };
+    ($input:expr, $expected:expr, $check_warnings:expr) => {{
         let mut state = PreprocessorState::new(vec![], vec![]);
         let cache = PreprocessorCache::new();
         let (_, src) = state.retain_file(
@@ -34,8 +37,10 @@ macro_rules! check_preprocessor {
         match preprocess_result {
             Ok(result) => {
                 assert_eq!(result, $expected);
-                if let Some(err) = state.errors.first() {
-                    panic!("{:?}", err)
+                if $check_warnings {
+                    if let Some(err) = state.errors.first() {
+                        panic!("{:?}", err)
+                    }
                 }
             }
             Err(()) => panic!("{:?}", state.errors.first()),

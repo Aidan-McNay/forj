@@ -272,7 +272,7 @@ fn get_define_function_arg<'s>(
     };
     let mut default_arg_text: Vec<SpannedToken<'s>> = vec![];
     let prev_in_define = state.enter_define();
-    let prev_in_define_arg = state.enter_define_arg();
+    let prev_in_define_arg = state.enter_define_arg(define_name.into());
     let result = preprocess_helper(src, &mut default_arg_text, state, cache);
     state.exit_define(prev_in_define);
     state.exit_define_arg(prev_in_define_arg);
@@ -315,10 +315,29 @@ fn replace_keyword_mapping<'s>(
     }
 }
 
+fn check_recursive_use<'s>(
+    define_body: &Vec<SpannedToken<'s>>,
+    macro_name: &SpannedString<'s>,
+) -> Result<(), PreprocessorError<'s>> {
+    for SpannedToken(token, token_span) in define_body.iter() {
+        if let Token::TextMacro(token_macro_name) = token {
+            if *token_macro_name == macro_name.0 {
+                return Err(PreprocessorError::RecursiveMacro {
+                    macro_name: macro_name.0,
+                    define_span: macro_name.1.clone(),
+                    use_span: token_span.clone(),
+                });
+            }
+        }
+    }
+    Ok(())
+}
+
 fn get_define_body<'s>(
     src: &mut TokenIterator<'s, impl Iterator<Item = SpannedToken<'s>>>,
     state: &mut PreprocessorState<'s>,
     cache: &'s PreprocessorCache<'s>,
+    macro_name: &SpannedString<'s>,
     keyword_mapping: &HashMap<Token<'s>, &'s str>,
 ) -> Result<Option<Vec<SpannedToken<'s>>>, PreprocessorError<'s>> {
     let mut define_body: Vec<SpannedToken<'s>> = vec![];
@@ -326,11 +345,11 @@ fn get_define_body<'s>(
     let result = preprocess_helper(src, &mut define_body, state, cache);
     state.exit_define(prev_in_define);
     match result {
-        Ok(()) => {
-            Ok(Some(replace_keyword_mapping(define_body, keyword_mapping)))
-        }
-        Err(PreprocessorError::NewlineInDefine(_)) => {
-            Ok(Some(replace_keyword_mapping(define_body, keyword_mapping)))
+        Ok(()) | Err(PreprocessorError::NewlineInDefine(_)) => {
+            let replaced_body =
+                replace_keyword_mapping(define_body, keyword_mapping);
+            check_recursive_use(&replaced_body, macro_name)?;
+            Ok(Some(replaced_body))
         }
         Err(err) => Err(err),
     }
@@ -360,7 +379,8 @@ pub fn preprocess_define<'s>(
         cache,
         &mut keyword_mapping,
     )?;
-    let define_text = get_define_body(src, state, cache, &keyword_mapping)?;
+    let define_text =
+        get_define_body(src, state, cache, &define_name, &keyword_mapping)?;
     if is_compiler_directive(define_name.0) {
         return Err(PreprocessorError::RedefinedDirective {
             directive_name: define_name.0,
@@ -573,4 +593,10 @@ fn function_with_no_default_after_default() {
         "`define TEST(a, b = 1 + 2, c) a - b + c",
         Vec::<Token<'_>>::new()
     )
+}
+
+#[test]
+#[should_panic(expected = "RecursiveMacro")]
+fn recursive_definition() {
+    check_preprocessor!("`define TEST `TEST", Vec::<Token<'_>>::new())
 }

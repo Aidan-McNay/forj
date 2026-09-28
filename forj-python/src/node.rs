@@ -3,9 +3,9 @@
 // =======================================================================
 //! A wrapper around [`forj_syntax::Node`]
 
-use pyo3::{exceptions::PyIOError, prelude::*};
 use forj_parser::PreprocessorCache;
 use forj_syntax::*;
+use pyo3::{exceptions::PyIOError, prelude::*};
 use std::io::{Read, Seek};
 use std::{fs::File, ops::Range};
 
@@ -56,8 +56,8 @@ pub struct Span {
     /// The byte-span within the source file
     #[pyo3(get, set)]
     pub bytes: Bytes,
-    /// The [`Span`] of the original token, if this is a text macro
-    pub expanded_from: Option<Box<Span>>,
+    /// The name and [`Span`] of the original token, if this is a text macro
+    pub expanded_from: Option<(String, Box<Span>)>,
     /// The [`Span`] of the `` `include `` directive that produced this
     /// one, if any
     pub included_from: Option<Box<Span>>,
@@ -69,9 +69,10 @@ impl<'a> From<forj_syntax::Span<'a>> for Span {
             file: value.file.to_string(),
             bytes: value.bytes.into(),
             expanded_from: match value.expanded_from {
-                Some(expanded_from_ref) => {
-                    Some(Box::new(expanded_from_ref.clone().into()))
-                }
+                Some((expanded_from_name, expanded_from_ref)) => Some((
+                    expanded_from_name.to_string(),
+                    Box::new(expanded_from_ref.clone().into()),
+                )),
                 None => None,
             },
             included_from: match value.included_from {
@@ -94,9 +95,10 @@ impl<'a> Span {
             file: &self.file,
             bytes: self.bytes.clone().into(),
             expanded_from: match &self.expanded_from {
-                Some(expanded_from_box) => {
-                    Some(expanded_from_box.as_ref().to_span_ref(cache))
-                }
+                Some((expanded_from_name, expanded_from_box)) => Some((
+                    &expanded_from_name,
+                    expanded_from_box.as_ref().to_span_ref(cache),
+                )),
                 None => None,
             },
             included_from: match &self.included_from {

@@ -1331,6 +1331,23 @@ Preprocessing
             :type: Span
    
                The :py:class:`Span` where the not-previously-defined name was specified
+      
+      .. py:class:: PreprocessorError.RecursiveMacro(PreprocessorError)
+         
+         .. py:property:: define_span
+            :type: Span
+   
+               The :py:class:`Span` where the macro was defined
+         
+         .. py:property:: macro_name
+            :type: str
+   
+               The name of the macro
+         
+         .. py:property:: use_span
+            :type: Span
+   
+               The :py:class:`Span` where the macro was expanded recursively
 
       .. py:class:: PreprocessorError.RedefinedDirective(PreprocessorError)
          
