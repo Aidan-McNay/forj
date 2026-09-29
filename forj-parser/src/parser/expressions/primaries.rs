@@ -347,12 +347,36 @@ pub fn time_literal_parser<'s>(
         )),
         time_unit_parser,
     )
-        .map(|(a, b)| match a {
-            TimeLiteral::TimeLiteralFixedPoint(box_value) => {
-                TimeLiteral::TimeLiteralFixedPoint(Box::new((box_value.0, b)))
-            }
-            TimeLiteral::TimeLiteralUnsigned(box_value) => {
-                TimeLiteral::TimeLiteralUnsigned(Box::new((box_value.0, b)))
+        .verify_map(|(a, b)| {
+            let b_span_start = match &b {
+                TimeUnit::S(metadata) => metadata.span.bytes.start,
+                TimeUnit::MS(metadata) => metadata.span.bytes.start,
+                TimeUnit::US(metadata) => metadata.span.bytes.start,
+                TimeUnit::NS(metadata) => metadata.span.bytes.start,
+                TimeUnit::PS(metadata) => metadata.span.bytes.start,
+                TimeUnit::FS(metadata) => metadata.span.bytes.start,
+            };
+            match a {
+                TimeLiteral::TimeLiteralFixedPoint(box_value) => {
+                    if box_value.0.1.span.bytes.end == b_span_start {
+                        Some(TimeLiteral::TimeLiteralFixedPoint(Box::new((
+                            box_value.0,
+                            b,
+                        ))))
+                    } else {
+                        None // BNF clarification 49
+                    }
+                }
+                TimeLiteral::TimeLiteralUnsigned(box_value) => {
+                    if box_value.0.1.span.bytes.end == b_span_start {
+                        Some(TimeLiteral::TimeLiteralUnsigned(Box::new((
+                            box_value.0,
+                            b,
+                        ))))
+                    } else {
+                        None // BNF clarification 49
+                    }
+                }
             }
         })
         .parse_next(input)

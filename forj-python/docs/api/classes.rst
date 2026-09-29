@@ -1502,7 +1502,7 @@ Reporting
 
    .. py:method:: eprint()
 
-      Print the :py:class:`Report` to ``stdout``
+      Print the :py:class:`Report` to ``stderr``
 
    .. py:method:: include(file_name: str, file_content: str)
 
