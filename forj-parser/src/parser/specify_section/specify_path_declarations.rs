@@ -48,18 +48,57 @@ pub fn simple_path_declaration_parser<'s>(
     .parse_next(input)
 }
 
+fn plus_parallel_connection_parser<'s>(
+    input: &mut Tokens<'s>,
+) -> ModalResult<(Option<PolarityOperator<'s>>, Metadata<'s>), VerboseError<'s>>
+{
+    let plus_equal = token(Token::PlusEq).parse_next(input)?;
+    let gt = token(Token::Gt)
+        .verify(|a| a.span.bytes.start == plus_equal.span.bytes.end)
+        .parse_next(input)?;
+    let mut plus_metadata = plus_equal;
+    plus_metadata.span.bytes.end -= 1;
+    let mut equal_gt_metadata = gt;
+    equal_gt_metadata.span.bytes.start -= 1;
+    Ok((
+        Some(PolarityOperator::Plus(plus_metadata)),
+        equal_gt_metadata,
+    ))
+}
+
+fn minus_parallel_connection_parser<'s>(
+    input: &mut Tokens<'s>,
+) -> ModalResult<(Option<PolarityOperator<'s>>, Metadata<'s>), VerboseError<'s>>
+{
+    let minus_equal = token(Token::MinusEq).parse_next(input)?;
+    let gt = token(Token::Gt)
+        .verify(|a| a.span.bytes.start == minus_equal.span.bytes.end)
+        .parse_next(input)?;
+    let mut minus_metadata = minus_equal;
+    minus_metadata.span.bytes.end -= 1;
+    let mut equal_gt_metadata = gt;
+    equal_gt_metadata.span.bytes.start -= 1;
+    Ok((
+        Some(PolarityOperator::Minus(minus_metadata)),
+        equal_gt_metadata,
+    ))
+}
+
 pub fn parallel_path_description_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ParallelPathDescription<'s>, VerboseError<'s>> {
     (
         token(Token::Paren),
         specify_input_terminal_descriptor_parser,
-        opt_note(polarity_operator_parser),
-        token(Token::EqGt),
+        alt((
+            plus_parallel_connection_parser,
+            minus_parallel_connection_parser,
+            (opt_note(polarity_operator_parser), token(Token::EqGt)),
+        )),
         specify_output_terminal_descriptor_parser,
         token(Token::EParen),
     )
-        .map(|(a, b, c, d, e, f)| ParallelPathDescription(a, b, c, d, e, f))
+        .map(|(a, b, (c, d), e, f)| ParallelPathDescription(a, b, c, d, e, f))
         .parse_next(input)
 }
 
@@ -138,8 +177,11 @@ pub fn parallel_edge_sensitive_path_description_parser<'s>(
         token(Token::Paren),
         opt_note(edge_identifier_parser),
         specify_input_terminal_descriptor_parser,
-        opt_note(polarity_operator_parser),
-        token(Token::EqGt),
+        alt((
+            plus_parallel_connection_parser,
+            minus_parallel_connection_parser,
+            (opt_note(polarity_operator_parser), token(Token::EqGt)),
+        )),
         token(Token::Paren),
         specify_output_terminal_descriptor_parser,
         alt((
@@ -151,7 +193,7 @@ pub fn parallel_edge_sensitive_path_description_parser<'s>(
         token(Token::EParen),
         token(Token::EParen),
     )
-        .map(|(a, b, c, d, e, f, g, (h, i), j, k, l)| {
+        .map(|(a, b, c, (d, e), f, g, (h, i), j, k, l)| {
             ParallelEdgeSensitivePathDescription::DataSource(Box::new((
                 a, b, c, d, e, f, g, h, i, j, k, l,
             )))
@@ -160,12 +202,15 @@ pub fn parallel_edge_sensitive_path_description_parser<'s>(
         token(Token::Paren),
         opt_note(edge_identifier_parser),
         specify_input_terminal_descriptor_parser,
-        opt_note(polarity_operator_parser),
-        token(Token::EqGt),
+        alt((
+            plus_parallel_connection_parser,
+            minus_parallel_connection_parser,
+            (opt_note(polarity_operator_parser), token(Token::EqGt)),
+        )),
         specify_output_terminal_descriptor_parser,
         token(Token::EParen),
     )
-        .map(|(a, b, c, d, e, f, g)| {
+        .map(|(a, b, c, (d, e), f, g)| {
             ParallelEdgeSensitivePathDescription::NoDataSource(Box::new((
                 a, b, c, d, e, f, g,
             )))

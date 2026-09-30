@@ -158,49 +158,54 @@ fn double_level_symbol_parser<'s>(
             'B' => Some(LevelSymbol::BigB(metadata)),
             _ => None,
         };
-    identifier_parser
-        .verify_map(|a| match a {
+    alt((
+        identifier_parser.verify_map(|a| match a {
             Identifier::EscapedIdentifier(_) => None,
             Identifier::SimpleIdentifier((text, metadata)) => {
-                let char_vec: Vec<char> = text.chars().collect();
-                if char_vec.len() != 2 {
-                    None
-                } else {
-                    let span_midpoint = (metadata.span.bytes.start
-                        + metadata.span.bytes.end)
-                        / 2;
-                    let span0 = Span {
-                        file: metadata.span.file,
-                        bytes: ByteSpan {
-                            start: metadata.span.bytes.start,
-                            end: span_midpoint,
-                        },
-                        expanded_from: metadata.span.expanded_from,
-                        included_from: metadata.span.included_from,
-                    };
-                    let span1 = Span {
-                        file: metadata.span.file,
-                        bytes: ByteSpan {
-                            start: span_midpoint,
-                            end: metadata.span.bytes.end,
-                        },
-                        expanded_from: metadata.span.expanded_from,
-                        included_from: metadata.span.included_from,
-                    };
-                    let metadata0 = Metadata::new(span0, vec![]);
-                    let mut metadata1 = metadata;
-                    metadata1.span = span1;
-                    match (
-                        text_to_level_symbol(char_vec[0], metadata0),
-                        text_to_level_symbol(char_vec[1], metadata1),
-                    ) {
-                        (Some(ls0), Some(ls1)) => Some((ls0, ls1)),
-                        _ => None,
-                    }
-                }
+                Some((text, metadata))
             }
-        })
-        .parse_next(input)
+        }),
+        unsigned_number_parser
+            .map(|UnsignedNumber(text, metadata)| (text, metadata)),
+    ))
+    .verify_map(|(text, metadata)| {
+        let char_vec: Vec<char> = text.chars().collect();
+        if char_vec.len() != 2 {
+            None
+        } else {
+            let span_midpoint =
+                (metadata.span.bytes.start + metadata.span.bytes.end) / 2;
+            let span0 = Span {
+                file: metadata.span.file,
+                bytes: ByteSpan {
+                    start: metadata.span.bytes.start,
+                    end: span_midpoint,
+                },
+                expanded_from: metadata.span.expanded_from,
+                included_from: metadata.span.included_from,
+            };
+            let span1 = Span {
+                file: metadata.span.file,
+                bytes: ByteSpan {
+                    start: span_midpoint,
+                    end: metadata.span.bytes.end,
+                },
+                expanded_from: metadata.span.expanded_from,
+                included_from: metadata.span.included_from,
+            };
+            let metadata0 = Metadata::new(span0, vec![]);
+            let mut metadata1 = metadata;
+            metadata1.span = span1;
+            match (
+                text_to_level_symbol(char_vec[0], metadata0),
+                text_to_level_symbol(char_vec[1], metadata1),
+            ) {
+                (Some(ls0), Some(ls1)) => Some((ls0, ls1)),
+                _ => None,
+            }
+        }
+    })
+    .parse_next(input)
 }
 
 pub fn edge_indicator_parser<'s>(
