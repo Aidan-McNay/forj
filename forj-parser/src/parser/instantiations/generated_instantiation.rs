@@ -156,15 +156,18 @@ pub fn generate_block_parser<'s>(
     .parse_next(input)?;
     if let GenerateBlock::Block(generate_block) = &result {
         let inner_struct = &**generate_block;
-        check_block_identifiers(
-            inner_struct.0.as_ref().map(|a| &a.0.0),
-            inner_struct.5.as_ref().map(|a| &a.1.0),
-        )?;
-        check_block_identifiers(
-            inner_struct.2.as_ref().map(|a| &a.1.0),
-            inner_struct.5.as_ref().map(|a| &a.1.0),
-        )?;
-        if let (Some(_), Some(_)) = (&inner_struct.0, &inner_struct.2) {
+        if inner_struct.0.is_some() {
+            check_block_identifiers(
+                inner_struct.0.as_ref().map(|a| &a.0.0),
+                inner_struct.5.as_ref().map(|a| &a.1.0),
+            )?;
+        } else {
+            check_block_identifiers(
+                inner_struct.2.as_ref().map(|a| &a.1.0),
+                inner_struct.5.as_ref().map(|a| &a.1.0),
+            )?;
+        }
+        if inner_struct.0.is_some() && inner_struct.2.is_some() {
             check_block_identifiers(
                 inner_struct.0.as_ref().map(|a| &a.0.0),
                 inner_struct.2.as_ref().map(|a| &a.1.0),

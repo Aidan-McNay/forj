@@ -10,17 +10,9 @@ use std::ops::Range;
 
 /// An iterator to glue together macro tokens delimited by ``
 pub(crate) struct TokenGluer<'a, T: std::iter::Iterator> {
-    prev_token: Option<SpannedToken<'a>>,
+    prev_tokens: Vec<SpannedToken<'a>>,
     inner_iter: std::iter::Peekable<T>,
     cache: &'a PreprocessorCache<'a>,
-}
-
-/// Whether `span1` comes right before `span2`
-///
-/// Here, we don't have to worry about expansions/inclusions, as
-/// none of that has happened yet
-const fn adjacent<'a>(span1: &Span<'a>, span2: &Span<'a>) -> bool {
-    span1.bytes.end == span2.bytes.start
 }
 
 fn block_comment_error<'a>(
@@ -42,7 +34,7 @@ where
     /// Wrap a token iterator in a [`TokenGluer`]
     pub(crate) fn new(iter: T, cache: &'a PreprocessorCache<'a>) -> Self {
         Self {
-            prev_token: None,
+            prev_tokens: Vec::new(),
             inner_iter: iter.peekable(),
             cache,
         }
@@ -165,7 +157,7 @@ where
                     break;
                 }
                 Some(concat_token) => {
-                    if !adjacent(&curr_span, &concat_token.1) {
+                    if !curr_span.adjacent(&concat_token.1) {
                         break;
                     }
                     let concat_token = self.inner_iter.next().unwrap();
@@ -178,7 +170,9 @@ where
                             break;
                         }
                         Some(next_token) => {
-                            if next_token.0 != Token::MacroConcatenate {
+                            if (next_token.0 != Token::MacroConcatenate)
+                                || !curr_span.adjacent(&next_token.1)
+                            {
                                 break;
                             }
                             // Consume concatenation token
@@ -196,9 +190,43 @@ where
             self.take_oneline_comment(curr_span)
         } else {
             let bytes = self.cache.retain_bytes(curr_id.into());
-            let tokens = Token::lexer(bytes).collect::<Vec<_>>();
-            match tokens[..] {
-                [Ok(result_token)] => Ok(SpannedToken(result_token, curr_span)),
+            let tokens = Token::lexer(bytes).spanned().collect::<Vec<_>>();
+            match &tokens[..] {
+                [(Ok(result_token), _)] => {
+                    Ok(SpannedToken(result_token.clone(), curr_span))
+                }
+                // Could have also consumed the next token by accident
+                [
+                    (Ok(first_token), first_token_bytes),
+                    (Ok(second_token), second_token_bytes),
+                ] => {
+                    let first_spanned_token = SpannedToken(
+                        first_token.clone(),
+                        Span {
+                            bytes: Range {
+                                start: first_token_bytes.start
+                                    + curr_span.bytes.start,
+                                end: first_token_bytes.end
+                                    + curr_span.bytes.start,
+                            },
+                            ..curr_span
+                        },
+                    );
+                    let second_spanned_token = SpannedToken(
+                        second_token.clone(),
+                        Span {
+                            bytes: Range {
+                                start: second_token_bytes.start
+                                    + curr_span.bytes.start,
+                                end: second_token_bytes.end
+                                    + curr_span.bytes.start,
+                            },
+                            ..curr_span
+                        },
+                    );
+                    self.prev_tokens.push(second_spanned_token);
+                    Ok(first_spanned_token)
+                }
                 _ => Ok(SpannedToken(
                     Token::InvalidConcatenation(bytes.into()),
                     curr_span,
@@ -218,7 +246,7 @@ where
         let mut overall_span = concatenate_span;
         let mut overall_id = BString::new(vec![]);
         if let Some(curr_token) = curr_token {
-            if adjacent(&curr_token.1, &overall_span) {
+            if curr_token.1.adjacent(&overall_span) {
                 // The current token is part of the concatenation
                 overall_span.bytes.start = curr_token.1.bytes.start;
                 overall_id = text_macro::into_text(&curr_token.0);
@@ -226,12 +254,12 @@ where
             } else {
                 match self.take_concatenate(overall_span, overall_id) {
                     Ok(next_token) => {
-                        self.prev_token = Some(next_token);
+                        self.prev_tokens.push(next_token);
                         Ok(curr_token)
                     }
                     Err(err) => {
                         // Keep the curr_token for next time
-                        self.prev_token = Some(curr_token);
+                        self.prev_tokens.push(curr_token);
                         Err(err)
                     }
                 }
@@ -249,13 +277,18 @@ where
     type Item = Result<SpannedToken<'a>, PreprocessorError<'a>>;
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            match (self.prev_token.take(), self.inner_iter.next()) {
+            let prev_token = self.prev_tokens.pop();
+            let curr_token = match self.prev_tokens.pop() {
+                Some(next_token) => Some(next_token),
+                None => self.inner_iter.next(),
+            };
+            match (prev_token, curr_token) {
                 (None, None) => {
                     break None;
                 }
                 (None, Some(next_token)) => {
                     if next_token.0 != Token::MacroConcatenate {
-                        self.prev_token.replace(next_token);
+                        self.prev_tokens.push(next_token);
                     } else {
                         break Some(
                             self.concatenate_tokens(None, next_token.1),
@@ -265,7 +298,7 @@ where
                 (Some(curr_token), None) => break Some(Ok(curr_token)),
                 (Some(curr_token), Some(next_token)) => {
                     if next_token.0 != Token::MacroConcatenate {
-                        self.prev_token = Some(next_token);
+                        self.prev_tokens.push(next_token);
                         break Some(Ok(curr_token));
                     } else {
                         break Some(self.concatenate_tokens(
@@ -317,6 +350,12 @@ fn trailing() {
 }
 
 #[test]
+fn empty() {
+    let source = b" `` ";
+    test_token_gluer(source, vec![Token::InvalidConcatenation("".into())])
+}
+
+#[test]
 fn non_id() {
     let source = b"  `NEW``MACRO  ";
     test_token_gluer(source, vec![Token::TextMacro("NEWMACRO".into())]);
@@ -336,11 +375,11 @@ fn non_concat_tokens() {
 }
 
 #[test]
-fn invalid() {
+fn extra() {
     let source = b"  plus``is``+  ";
     test_token_gluer(
         source,
-        vec![Token::InvalidConcatenation("plusis+".into())],
+        vec![Token::SimpleIdentifier("plusis".into()), Token::Plus],
     );
 }
 
@@ -419,6 +458,26 @@ fn macros() {
     let source = b" `PREFIX``_```SUFFIX  ";
     test_token_gluer(
         source,
-        vec![Token::InvalidConcatenation("`PREFIX_`SUFFIX".into())],
+        vec![
+            Token::TextMacro("PREFIX_".into()),
+            Token::TextMacro("SUFFIX".into()),
+        ],
     );
+}
+
+// Taken from `declare_csr_addr` in black parrot
+#[test]
+fn neighbors() {
+    let source =
+        b"rv64_``csr_name_mp``_s ``csr_name_mp``_li, ``csr_name_mp``_lo;";
+    test_token_gluer(
+        source,
+        vec![
+            Token::SimpleIdentifier("rv64_csr_name_mp_s".into()),
+            Token::SimpleIdentifier("csr_name_mp_li".into()),
+            Token::Comma,
+            Token::SimpleIdentifier("csr_name_mp_lo".into()),
+            Token::SColon,
+        ],
+    )
 }

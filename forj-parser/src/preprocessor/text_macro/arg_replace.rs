@@ -3,6 +3,7 @@
 // =======================================================================
 // Replace the arguments in a preprocessor macro with their values
 
+use crate::preprocessor::insert_base_expansion;
 use crate::*;
 use bstr::BStr;
 use std::collections::HashMap;
@@ -11,6 +12,7 @@ use std::vec::IntoIter;
 /// An iterator to glue together preprocessor macro arguments
 pub(crate) struct ArgReplace<'a: 'b, 'b, T> {
     args: &'b HashMap<&'a BStr, (Span<'a>, Vec<SpannedToken<'a>>)>,
+    cache: &'a PreprocessorCache<'a>,
     expanded_tokens: IntoIter<SpannedToken<'a>>,
     inner_iter: T,
 }
@@ -22,9 +24,11 @@ where
     pub fn new(
         iter: T,
         args: &'b HashMap<&'a BStr, (Span<'a>, Vec<SpannedToken<'a>>)>,
+        cache: &'a PreprocessorCache<'a>,
     ) -> Self {
         Self {
             args,
+            cache,
             expanded_tokens: vec![].into_iter(),
             inner_iter: iter,
         }
@@ -52,10 +56,27 @@ where
                         self.expanded_tokens = replacement_tokens
                             .iter()
                             .map(|spanned_token| {
-                                SpannedToken(
-                                    spanned_token.0.clone(),
-                                    id_span.clone(),
-                                )
+                                let mut new_span = id_span.clone();
+                                let arg_token = self
+                                    .cache
+                                    .retain_span(spanned_token.1.clone());
+                                match new_span.expanded_from {
+                                    None => {
+                                        new_span.expanded_from =
+                                            Some((" arg ", arg_token))
+                                    }
+                                    Some((macro_name, nested_expansion)) => {
+                                        new_span.expanded_from = Some((
+                                            macro_name,
+                                            insert_base_expansion(
+                                                self.cache,
+                                                nested_expansion,
+                                                (" arg ", arg_token),
+                                            ),
+                                        ))
+                                    }
+                                };
+                                SpannedToken(spanned_token.0.clone(), new_span)
                             })
                             .collect::<Vec<_>>()
                             .into_iter()
@@ -93,7 +114,7 @@ fn test_token_gluer<'a>(
             )
         })
         .collect();
-    let replaced_args = ArgReplace::new(tokens, &args)
+    let replaced_args = ArgReplace::new(tokens, &args, &cache)
         .into_iter()
         .map(|a| a.0)
         .collect::<Vec<_>>();

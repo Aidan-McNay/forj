@@ -173,6 +173,7 @@ where
                         None => vec![].into_iter(),
                     },
                     &resolved_args,
+                    self.cache,
                 ),
                 self.state,
                 self.cache,

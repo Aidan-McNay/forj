@@ -215,7 +215,7 @@ impl<'a> DoubleEndedIterator for SpanReplacer<'a> {
 }
 
 /// Create a clone of a span and all its expansions, inserting the new one
-fn insert_base_expansion<'a>(
+pub(crate) fn insert_base_expansion<'a>(
     cache: &'a PreprocessorCache<'a>,
     span: &'a Span<'a>,
     expanded_ref: (&'a str, &'a Span<'a>),
@@ -340,7 +340,7 @@ pub fn preprocess_macro<'s>(
             }
             let token_result_vec = TokenGluer::new(
                 Stringify::new(
-                    ArgReplace::new(token_vec.into_iter(), &arguments),
+                    ArgReplace::new(token_vec.into_iter(), &arguments, cache),
                     &state,
                     cache,
                     vec![text_macro.0.into()],

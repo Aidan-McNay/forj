@@ -19,7 +19,9 @@ pub type ByteSpan = Range<usize>;
 /// text macro will have the original [`Span`] of the (now expanded) macro,
 /// with [`Span::expanded_from`] referencing the original token (in the
 /// `` `define `` directive) before expansion, as well as the name of the
-/// macro it was expanded from
+/// macro it was expanded from. If the token is an expanded argument, its
+/// [`Span::expanded_from`] will additionally refer to the original
+/// argument token, with the `&'a str` being `" arg "`
 ///
 /// Invalid [`Span`]s (such as those from CLI defines) will have an
 /// empty string as the `file`
@@ -69,6 +71,28 @@ impl<'a> Span<'a> {
     /// opposed to a default [`Span`], such as from CLI defines)
     pub fn from_source(&self) -> bool {
         !self.file.is_empty()
+    }
+    /// Whether two spans are adjacent.
+    ///
+    /// Specifically, whether for [`span1.adjacent(span2)`], `span1`
+    /// comes directly before [`span2`]
+    pub fn adjacent(&self, other: &Span) -> bool {
+        if self.bytes.end == other.bytes.start {
+            true
+        } else if self.bytes.start == other.bytes.start {
+            if let (
+                Some((self_macro_name, expanded_self_ref)),
+                Some((other_macro_name, expanded_other_ref)),
+            ) = (self.expanded_from, other.expanded_from)
+                && self_macro_name == other_macro_name
+            {
+                expanded_self_ref.adjacent(expanded_other_ref)
+            } else {
+                false
+            }
+        } else {
+            false
+        }
     }
     fn include_indeces(&self) -> Vec<usize> {
         match &self.included_from {

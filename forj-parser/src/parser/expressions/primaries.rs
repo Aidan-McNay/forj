@@ -348,17 +348,17 @@ pub fn time_literal_parser<'s>(
         time_unit_parser,
     )
         .verify_map(|(a, b)| {
-            let b_span_start = match &b {
-                TimeUnit::S(metadata) => metadata.span.bytes.start,
-                TimeUnit::MS(metadata) => metadata.span.bytes.start,
-                TimeUnit::US(metadata) => metadata.span.bytes.start,
-                TimeUnit::NS(metadata) => metadata.span.bytes.start,
-                TimeUnit::PS(metadata) => metadata.span.bytes.start,
-                TimeUnit::FS(metadata) => metadata.span.bytes.start,
+            let b_span = match &b {
+                TimeUnit::S(metadata) => &metadata.span,
+                TimeUnit::MS(metadata) => &metadata.span,
+                TimeUnit::US(metadata) => &metadata.span,
+                TimeUnit::NS(metadata) => &metadata.span,
+                TimeUnit::PS(metadata) => &metadata.span,
+                TimeUnit::FS(metadata) => &metadata.span,
             };
             match a {
                 TimeLiteral::TimeLiteralFixedPoint(box_value) => {
-                    if box_value.0.1.span.bytes.end == b_span_start {
+                    if box_value.0.1.span.adjacent(&b_span) {
                         Some(TimeLiteral::TimeLiteralFixedPoint(Box::new((
                             box_value.0,
                             b,
@@ -368,7 +368,7 @@ pub fn time_literal_parser<'s>(
                     }
                 }
                 TimeLiteral::TimeLiteralUnsigned(box_value) => {
-                    if box_value.0.1.span.bytes.end == b_span_start {
+                    if box_value.0.1.span.adjacent(&b_span) {
                         Some(TimeLiteral::TimeLiteralUnsigned(Box::new((
                             box_value.0,
                             b,
