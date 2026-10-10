@@ -416,7 +416,6 @@ pub enum Token {
     TripleQuoteStringLiteral { text: String },
     PreprocessorTripleQuoteStringLiteral { text: String },
     Newline(),
-    InvalidConcatenation { text: String },
 }
 
 impl std::fmt::Display for Token {
@@ -881,11 +880,6 @@ impl<'a> From<forj_parser::Token<'a>> for Token {
                 }
             }
             forj_parser::Token::Newline => Token::Newline(),
-            forj_parser::Token::InvalidConcatenation(str) => {
-                Token::InvalidConcatenation {
-                    text: str.to_string(),
-                }
-            }
         }
     }
 }
@@ -1337,11 +1331,6 @@ impl<'a> From<&'a Token> for forj_parser::Token<'a> {
                 )
             }
             Token::Newline() => forj_parser::Token::Newline,
-            Token::InvalidConcatenation { text } => {
-                forj_parser::Token::InvalidConcatenation(
-                    (*text).as_bytes().into(),
-                )
-            }
         }
     }
 }

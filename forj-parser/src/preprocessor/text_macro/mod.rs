@@ -27,8 +27,7 @@ pub(crate) fn into_text<'a>(token: &Token<'a>) -> BString {
         | Token::UnbasedUnsizedLiteral(text)
         | Token::SystemTfIdentifier(text)
         | Token::SimpleIdentifier(text)
-        | Token::EscapedIdentifier(text)
-        | Token::InvalidConcatenation(text) => (*text).to_owned(),
+        | Token::EscapedIdentifier(text) => (*text).to_owned(),
         Token::StringLiteral(text) => {
             let mut content: BString = BString::new(b"\"".to_vec());
             content.extend_from_slice(text);

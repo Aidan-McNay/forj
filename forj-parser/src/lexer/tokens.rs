@@ -823,8 +823,6 @@ pub enum Token<'a> {
     #[token("\u{2028}")]
     #[token("\u{2029}")]
     Newline,
-    // Used for intermediate concatenation results
-    InvalidConcatenation(&'a BStr),
 }
 
 impl<'a> Token<'a> {
@@ -1254,9 +1252,6 @@ impl<'a> Token<'a> {
                 "<preprocessor triple-quote string>"
             }
             Token::Newline => "newline",
-            Token::InvalidConcatenation(_text) => {
-                "<invalid token concatenation>"
-            }
         }
     }
 }
@@ -1336,10 +1331,6 @@ impl<'a> fmt::Display for Token<'a> {
             Token::PreprocessorTripleQuoteStringLiteral(text) => {
                 temp_str =
                     format!("preprocessor string `\"\"\"{}`\"\"\"", text);
-                temp_str.as_str()
-            }
-            Token::InvalidConcatenation(text) => {
-                temp_str = format!("invalid token concatenation '{}'", text);
                 temp_str.as_str()
             }
             _ => self.as_str(),

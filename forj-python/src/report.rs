@@ -521,7 +521,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Warning(),
                     redef_span.clone(),
-                    "PP15".to_owned(),
+                    "PP16".to_owned(),
                     format!("Redefining {macro_name}"),
                 );
                 if !prev_def_span.file.is_empty() {
@@ -545,7 +545,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Warning(),
                     macro_span.clone(),
-                    "PP16".to_owned(),
+                    "PP17".to_owned(),
                     format!(
                         "Undefining {}, which has not been previously defined",
                         macro_name
@@ -567,7 +567,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     dup_span.clone(),
-                    "PP17".to_owned(),
+                    "PP18".to_owned(),
                     format!(
                         "'{}' was already declared as a macro parameter for {}",
                         param_name, define_name
@@ -593,7 +593,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     use_span.clone(),
-                    "PP18".to_owned(),
+                    "PP19".to_owned(),
                     format!("Expected arguments when using {macro_name}"),
                 );
                 report.label(
@@ -618,7 +618,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     use_span.clone(),
-                    "PP19".to_owned(),
+                    "PP20".to_owned(),
                     format!(
                         "{} expected {} arguments, but {} were provided",
                         macro_name, expected, found
@@ -644,7 +644,7 @@ impl PreprocessorError {
                 let mut report = Report::new(
                     ReportKind::Error(),
                     use_span.clone(),
-                    "PP20".to_owned(),
+                    "PP21".to_owned(),
                     format!(
                         "'{param_name}' wasn't specified and has no default"
                     ),
@@ -658,26 +658,6 @@ impl PreprocessorError {
                     use_span.clone(),
                     ReportKind::Error(),
                     "Missing argument".to_owned(),
-                );
-                report
-            }
-            PreprocessorError::InvalidConcatenation {
-                concat_text,
-                concat_span,
-            } => {
-                let mut report = Report::new(
-                    ReportKind::Error(),
-                    concat_span.clone(),
-                    "PP21".to_owned(),
-                    format!(
-                        "The concatenation '{}' is not a valid token",
-                        concat_text
-                    ),
-                );
-                report.label(
-                    concat_span.clone(),
-                    ReportKind::Error(),
-                    "No valid concatenation".to_owned(),
                 );
                 report
             }

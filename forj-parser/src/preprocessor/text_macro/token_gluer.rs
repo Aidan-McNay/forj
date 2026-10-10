@@ -27,6 +27,32 @@ fn block_comment_error<'a>(
     }
 }
 
+// Form the new span for a glued token, factoring in the original
+// span and any gaps introduced by concatenation characters
+fn glue_span<'a>(
+    range: Range<usize>,
+    orig_span: &Span<'a>,
+    gaps: &Vec<usize>,
+) -> Span<'a> {
+    let mut new_span = Span {
+        bytes: Range {
+            start: orig_span.bytes.start + range.start,
+            end: orig_span.bytes.start + range.end,
+        },
+        ..*orig_span
+    };
+    // Don't include leading/trailing, as can lead to confusion
+    for gap in gaps.iter() {
+        if *gap <= new_span.bytes.start {
+            new_span.bytes.start += 2;
+        }
+        if *gap < new_span.bytes.end {
+            new_span.bytes.end += 2;
+        }
+    }
+    new_span
+}
+
 impl<'a, T> TokenGluer<'a, T>
 where
     T: Iterator<Item = SpannedToken<'a>>,
@@ -150,7 +176,8 @@ where
         &mut self,
         mut curr_span: Span<'a>,
         mut curr_id: BString,
-    ) -> Result<SpannedToken<'a>, PreprocessorError<'a>> {
+        mut gaps: Vec<usize>,
+    ) -> Option<Result<SpannedToken<'a>, PreprocessorError<'a>>> {
         loop {
             match self.inner_iter.peek() {
                 None => {
@@ -162,6 +189,11 @@ where
                     }
                     let concat_token = self.inner_iter.next().unwrap();
                     curr_span.bytes.end = concat_token.1.bytes.end;
+                    if concat_token.0 == Token::MacroConcatenate {
+                        // Don't add to overall concatenation
+                        gaps.push(concat_token.1.bytes.start);
+                        continue;
+                    }
                     curr_id.extend_from_slice(
                         text_macro::into_text(&concat_token.0).as_ref(),
                     );
@@ -177,6 +209,7 @@ where
                             }
                             // Consume concatenation token
                             let next_token = self.inner_iter.next().unwrap();
+                            gaps.push(next_token.1.bytes.start);
                             curr_span.bytes.end = next_token.1.bytes.end;
                         }
                     }
@@ -185,87 +218,38 @@ where
         }
         // Re-lex, handling comments explicitly
         if curr_id == b"/*" {
-            self.take_block_comment(curr_span)
+            Some(self.take_block_comment(curr_span))
         } else if curr_id == b"//" {
-            self.take_oneline_comment(curr_span)
+            Some(self.take_oneline_comment(curr_span))
         } else {
             let bytes = self.cache.retain_bytes(curr_id.into());
-            let tokens = Token::lexer(bytes).spanned().collect::<Vec<_>>();
-            match &tokens[..] {
-                [(Ok(result_token), _)] => {
-                    Ok(SpannedToken(result_token.clone(), curr_span))
+            let tokens = Token::lexer(bytes)
+                .spanned()
+                .map(|(result, bytes)| result.map(|token| (token, bytes)))
+                .collect::<Result<Vec<_>, _>>();
+            match tokens {
+                Ok(tokens) => {
+                    let mut new_spanned_tokens =
+                        tokens.into_iter().map(|(token, range)| {
+                            SpannedToken(
+                                token,
+                                glue_span(range, &curr_span, &gaps),
+                            )
+                        });
+                    let next_token = new_spanned_tokens.next();
+                    self.prev_tokens.extend(new_spanned_tokens.rev());
+                    next_token.map(|spanned_token| Ok(spanned_token))
                 }
-                // Could have also consumed the next token by accident
-                [
-                    (Ok(first_token), first_token_bytes),
-                    (Ok(second_token), second_token_bytes),
-                ] => {
-                    let first_spanned_token = SpannedToken(
-                        first_token.clone(),
-                        Span {
-                            bytes: Range {
-                                start: first_token_bytes.start
-                                    + curr_span.bytes.start,
-                                end: first_token_bytes.end
-                                    + curr_span.bytes.start,
-                            },
-                            ..curr_span
-                        },
-                    );
-                    let second_spanned_token = SpannedToken(
-                        second_token.clone(),
-                        Span {
-                            bytes: Range {
-                                start: second_token_bytes.start
-                                    + curr_span.bytes.start,
-                                end: second_token_bytes.end
-                                    + curr_span.bytes.start,
-                            },
-                            ..curr_span
-                        },
-                    );
-                    self.prev_tokens.push(second_spanned_token);
-                    Ok(first_spanned_token)
-                }
-                _ => Ok(SpannedToken(
-                    Token::InvalidConcatenation(bytes.into()),
-                    curr_span,
-                )),
+                Err(_) => Some(Err(PreprocessorError::VerboseError {
+                    err: VerboseError {
+                        span: curr_span,
+                        found: Some(Token::Error),
+                        reason: VerboseErrorReason::Expected(vec![
+                            Expectation::Label("a valid concatenation"),
+                        ]),
+                    },
+                })),
             }
-        }
-    }
-
-    /// Perform token concatenation, returning the next token to be yielded
-    /// (either the previous token if not part of the concatenation, or the
-    /// concatenated token)
-    fn concatenate_tokens(
-        &mut self,
-        curr_token: Option<SpannedToken<'a>>,
-        concatenate_span: Span<'a>,
-    ) -> Result<SpannedToken<'a>, PreprocessorError<'a>> {
-        let mut overall_span = concatenate_span;
-        let mut overall_id = BString::new(vec![]);
-        if let Some(curr_token) = curr_token {
-            if curr_token.1.adjacent(&overall_span) {
-                // The current token is part of the concatenation
-                overall_span.bytes.start = curr_token.1.bytes.start;
-                overall_id = text_macro::into_text(&curr_token.0);
-                self.take_concatenate(overall_span, overall_id)
-            } else {
-                match self.take_concatenate(overall_span, overall_id) {
-                    Ok(next_token) => {
-                        self.prev_tokens.push(next_token);
-                        Ok(curr_token)
-                    }
-                    Err(err) => {
-                        // Keep the curr_token for next time
-                        self.prev_tokens.push(curr_token);
-                        Err(err)
-                    }
-                }
-            }
-        } else {
-            self.take_concatenate(overall_span, overall_id)
         }
     }
 }
@@ -290,9 +274,14 @@ where
                     if next_token.0 != Token::MacroConcatenate {
                         self.prev_tokens.push(next_token);
                     } else {
-                        break Some(
-                            self.concatenate_tokens(None, next_token.1),
-                        );
+                        let gaps = vec![next_token.1.bytes.start];
+                        if let Some(result) = self.take_concatenate(
+                            next_token.1,
+                            BString::new(vec![]),
+                            gaps,
+                        ) {
+                            break Some(result);
+                        }
                     }
                 }
                 (Some(curr_token), None) => break Some(Ok(curr_token)),
@@ -301,10 +290,39 @@ where
                         self.prev_tokens.push(next_token);
                         break Some(Ok(curr_token));
                     } else {
-                        break Some(self.concatenate_tokens(
-                            Some(curr_token),
-                            next_token.1,
-                        ));
+                        let gaps = vec![next_token.1.bytes.start];
+                        if curr_token.1.adjacent(&next_token.1) {
+                            if let Some(result) = self.take_concatenate(
+                                Span {
+                                    bytes: Range {
+                                        start: curr_token.1.bytes.start,
+                                        end: next_token.1.bytes.end,
+                                    },
+                                    ..next_token.1
+                                },
+                                text_macro::into_text(&curr_token.0),
+                                gaps,
+                            ) {
+                                break Some(result);
+                            }
+                        } else {
+                            match self.take_concatenate(
+                                next_token.1,
+                                BString::new(vec![]),
+                                gaps,
+                            ) {
+                                Some(Ok(next_token)) => {
+                                    self.prev_tokens.push(next_token);
+                                    break Some(Ok(curr_token));
+                                }
+                                Some(Err(err)) => {
+                                    // Keep the curr_token for next time
+                                    self.prev_tokens.push(curr_token);
+                                    break Some(Err(err));
+                                }
+                                None => (),
+                            }
+                        };
                     }
                 }
             }
@@ -321,6 +339,36 @@ fn test_token_gluer<'a>(src: &[u8], expected: Vec<Token<'a>>) {
     let glued_tokens = TokenGluer::new(tokens, &cache)
         .into_iter()
         .map(|a| a.unwrap().0)
+        .collect::<Vec<_>>();
+    assert_eq!(glued_tokens, expected);
+}
+
+#[cfg(test)]
+fn test_token_gluer_spans<'a>(
+    src: &[u8],
+    expected: Vec<(Token<'a>, Range<usize>)>,
+) {
+    let mut state = PreprocessorState::new(vec![], vec![]);
+    let cache = PreprocessorCache::new();
+    state.retain_file("test.v".to_string(), src.to_vec(), &cache);
+    let tokens = lex(src, "test.v").tokens();
+    let glued_tokens = TokenGluer::new(tokens, &cache)
+        .into_iter()
+        .map(|a| a.unwrap())
+        .collect::<Vec<_>>();
+    let expected = expected
+        .into_iter()
+        .map(|(token, range)| {
+            SpannedToken(
+                token,
+                Span {
+                    file: "test.v",
+                    bytes: range,
+                    expanded_from: None,
+                    included_from: None,
+                },
+            )
+        })
         .collect::<Vec<_>>();
     assert_eq!(glued_tokens, expected);
 }
@@ -351,8 +399,42 @@ fn trailing() {
 
 #[test]
 fn empty() {
-    let source = b" `` ";
-    test_token_gluer(source, vec![Token::InvalidConcatenation("".into())])
+    let source = b" ``  ``test`` ``  ";
+    test_token_gluer(source, vec![Token::SimpleIdentifier("test".into())])
+}
+
+#[test]
+fn multi_concat() {
+    let source = b"a``````b````````c";
+    test_token_gluer(source, vec![Token::SimpleIdentifier("abc".into())])
+}
+
+#[test]
+fn multi_non_concat() {
+    let source = b"id1``.``id2";
+    test_token_gluer(
+        source,
+        vec![
+            Token::SimpleIdentifier("id1".into()),
+            Token::Period,
+            Token::SimpleIdentifier("id2".into()),
+        ],
+    )
+}
+
+#[test]
+fn spans() {
+    let source = b"  ``a``  ``b``.``c  concat_``id";
+    test_token_gluer_spans(
+        source,
+        vec![
+            (Token::SimpleIdentifier("a".into()), 4..5),
+            (Token::SimpleIdentifier("b".into()), 11..12),
+            (Token::Period, 14..15),
+            (Token::SimpleIdentifier("c".into()), 17..18),
+            (Token::SimpleIdentifier("concat_id".into()), 20..31),
+        ],
+    )
 }
 
 #[test]

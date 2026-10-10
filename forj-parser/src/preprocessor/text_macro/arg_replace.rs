@@ -91,7 +91,7 @@ where
 }
 
 #[cfg(test)]
-fn test_token_gluer<'a>(
+fn test_arg_replace<'a>(
     src: &[u8],
     args: HashMap<&'a BStr, Vec<Token<'a>>>,
     expected: Vec<Token<'a>>,
@@ -130,7 +130,7 @@ fn basic() {
     ]
     .into_iter()
     .collect();
-    test_token_gluer(
+    test_arg_replace(
         source,
         args,
         vec![
@@ -157,7 +157,7 @@ fn no_token() {
     ]
     .into_iter()
     .collect();
-    test_token_gluer(
+    test_arg_replace(
         source,
         args,
         vec![
@@ -190,7 +190,7 @@ fn multi_token() {
     ]
     .into_iter()
     .collect();
-    test_token_gluer(
+    test_arg_replace(
         source,
         args,
         vec![

@@ -554,35 +554,6 @@ pub enum PreprocessorError<'a> {
         /// The name of the missing parameter
         param_name: &'a str,
     },
-    /// An invalid preprocessor identifier specification
-    ///
-    /// ```rust
-    /// # use forj_parser::*;
-    /// # let mut state = PreprocessorState::new(vec![], vec![]);
-    /// # let cache = PreprocessorCache::new();
-    /// let source = "
-    /// `define TEST(a, b) a``_with_``b
-    /// `TEST(++, \"two\")
-    /// ".as_bytes();
-    /// state.retain_file("test.v".to_string(), source.to_vec(), &cache);
-    /// let input = lex(source, "test.v").tokens();
-    /// let preprocess_result = preprocess(
-    ///     input,
-    ///     &mut state,
-    ///     &cache,
-    /// );
-    /// assert!(preprocess_result.is_err());
-    /// assert!(matches!(state.errors.first(), Some(PreprocessorError::InvalidConcatenation{
-    ///     concat_text: "++_with_\"two\"",
-    ///     ..
-    /// })));
-    /// ```
-    InvalidConcatenation {
-        /// The text that was attempted to be concatenated
-        concat_text: &'a str,
-        /// The overall [`Span`] of the invalid concatenation
-        concat_span: Span<'a>,
-    },
     /// A precision that is less precise than the unit in a `` `timescale `` directive
     ///
     /// ```rust
@@ -1191,28 +1162,11 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
                 report::ReportKind::Error,
                 "Missing argument",
             ),
-            PreprocessorError::InvalidConcatenation {
-                concat_text,
-                concat_span,
-            } => Report::new(
-                report::ReportKind::Error,
-                &concat_span,
-                "PP22",
-                format!(
-                    "The concatenation '{}' is not a valid token",
-                    concat_text
-                ),
-            )
-            .with_label(
-                &concat_span,
-                report::ReportKind::Error,
-                "No valid concatenation",
-            ),
             PreprocessorError::InvalidRelativeTimescales { timescale_span } => {
                 Report::new(
                     report::ReportKind::Error,
                     &timescale_span,
-                    "PP23",
+                    "PP22",
                     "Time precision is larger than the time unit",
                 )
                 .with_label(
@@ -1227,7 +1181,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &error_span,
-                "PP24",
+                "PP23",
                 format!(
                     "Usage of {} resulted in an incomplete macro",
                     error_token
@@ -1245,7 +1199,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &include_path_span,
-                "PP25",
+                "PP24",
                 format!("Error when reading {}", include_path),
             )
             .with_label(
@@ -1256,7 +1210,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             PreprocessorError::IncludeDepth { include_span } => Report::new(
                 report::ReportKind::Error,
                 &include_span,
-                "PP26",
+                "PP25",
                 format!("Max include depth of {} reached", MAX_INCLUDE_DEPTH),
             )
             .with_label(
@@ -1270,7 +1224,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
             } => Report::new(
                 report::ReportKind::Error,
                 &directive_span,
-                "PP27",
+                "PP26",
                 format!("Tried to use {} inside a design element", directive),
             )
             .with_label(
@@ -1278,7 +1232,7 @@ impl<'s> From<&PreprocessorError<'s>> for Report {
                 report::ReportKind::Error,
                 "Illegal inside a design element",
             ),
-            PreprocessorError::VerboseError { err } => err.report("PP28"),
+            PreprocessorError::VerboseError { err } => err.report("PP27"),
             PreprocessorError::NewlineInDefine(newline_span) => Report::new(
                 report::ReportKind::Error,
                 &newline_span,

@@ -550,13 +550,6 @@ General
 
       .. py:class:: Token.Instance(Token)
 
-      .. py:class:: Token.InvalidConcatenation(Token)
-
-         .. py:property:: text
-            :type: str
-
-            The text referenced by the token
-
       .. py:class:: Token.Int(Token)
 
       .. py:class:: Token.Integer(Token)
