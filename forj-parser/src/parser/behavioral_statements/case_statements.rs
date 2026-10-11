@@ -264,3 +264,79 @@ pub fn value_range_parser<'s>(
     ))
     .parse_next(input)
 }
+
+pub fn constant_range_list_parser<'s>(
+    input: &mut Tokens<'s>,
+) -> ModalResult<ConstantRangeList<'s>, VerboseError<'s>> {
+    let _value_range_vec_parser =
+        repeat_note((token(Token::Comma), constant_value_range_parser));
+    (constant_value_range_parser, _value_range_vec_parser)
+        .map(|(a, b)| ConstantRangeList(a, b))
+        .parse_next(input)
+}
+
+pub fn constant_value_range_parser<'s>(
+    input: &mut Tokens<'s>,
+) -> ModalResult<ConstantValueRange<'s>, VerboseError<'s>> {
+    let _expression_parser = constant_expression_parser
+        .map(|a| ConstantValueRange::Expression(Box::new(a)));
+    let _slice_parser = (
+        token(Token::Bracket),
+        constant_expression_parser,
+        token(Token::Colon),
+        constant_expression_parser,
+        token(Token::EBracket),
+    )
+        .map(|(a, b, c, d, e)| {
+            ConstantValueRange::Slice(Box::new((a, b, c, d, e)))
+        });
+    let _dollar_low_parser = (
+        token(Token::Bracket),
+        token(Token::Dollar),
+        token(Token::Colon),
+        constant_expression_parser,
+        token(Token::EBracket),
+    )
+        .map(|(a, b, c, d, e)| {
+            ConstantValueRange::DollarLow(Box::new((a, b, c, d, e)))
+        });
+    let _dollar_high_parser = (
+        token(Token::Bracket),
+        constant_expression_parser.clone(),
+        token(Token::Colon),
+        token(Token::Dollar),
+        token(Token::EBracket),
+    )
+        .map(|(a, b, c, d, e)| {
+            ConstantValueRange::DollarHigh(Box::new((a, b, c, d, e)))
+        });
+    let _absolute_tolerance_parser = (
+        token(Token::Bracket),
+        constant_expression_parser,
+        token(Token::PlusSlashMinus),
+        constant_expression_parser,
+        token(Token::EBracket),
+    )
+        .map(|(a, b, c, d, e)| {
+            ConstantValueRange::AbsoluteTolerance(Box::new((a, b, c, d, e)))
+        });
+    let _relative_tolerance_parser = (
+        token(Token::Bracket),
+        constant_expression_parser,
+        token(Token::PlusPercentMinus),
+        constant_expression_parser,
+        token(Token::EBracket),
+    )
+        .map(|(a, b, c, d, e)| {
+            ConstantValueRange::RelativeTolerance(Box::new((a, b, c, d, e)))
+        });
+    alt((
+        _expression_parser,
+        _slice_parser,
+        _dollar_low_parser,
+        _dollar_high_parser,
+        _absolute_tolerance_parser,
+        _relative_tolerance_parser,
+    ))
+    .parse_next(input)
+}

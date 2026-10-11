@@ -9,6 +9,9 @@ fn main() {
     let text = std::env::args().nth(1).expect("Usage: lex text_to_lex");
     let lexed_src = lex(&text.as_bytes(), "test");
     for token in lexed_src.tokens() {
-        println!(" - {}", token.0);
+        println!(
+            " - [{}:{}] {}",
+            token.1.bytes.start, token.1.bytes.end, token.0
+        );
     }
 }

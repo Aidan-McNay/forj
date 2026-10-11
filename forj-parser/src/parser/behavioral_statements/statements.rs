@@ -23,13 +23,37 @@ pub fn statement_or_null_parser<'s>(
 pub fn statement_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<Statement<'s>, VerboseError<'s>> {
-    (
+    let result = (
         opt_note((block_identifier_parser, token(Token::Colon))),
         attribute_instance_vec_parser,
         statement_item_parser,
     )
         .map(|(a, b, c)| Statement(a, b, c))
-        .parse_next(input)
+        .parse_next(input)?;
+    let (begin_id_1, begin_id_2, end_id) = match &result.2 {
+        StatementItem::Seq(seq_block_box) => (
+            result.0.as_ref().map(|a| &a.0.0),
+            (*seq_block_box).1.as_ref().map(|a| &a.1.0),
+            (*seq_block_box).5.as_ref().map(|a| &a.1.0),
+        ),
+        StatementItem::Par(par_block_box) => (
+            result.0.as_ref().map(|a| &a.0.0),
+            (*par_block_box).1.as_ref().map(|a| &a.1.0),
+            (*par_block_box).5.as_ref().map(|a| &a.1.0),
+        ),
+        _ => {
+            return Ok(result);
+        }
+    };
+    if begin_id_1.is_some() {
+        check_block_identifiers(begin_id_1, end_id)?;
+    } else {
+        check_block_identifiers(begin_id_2, end_id)?;
+    };
+    if begin_id_1.is_some() && begin_id_2.is_some() {
+        check_block_identifiers(begin_id_1, begin_id_2)?;
+    }
+    Ok(result)
 }
 
 pub fn statement_item_parser<'s>(

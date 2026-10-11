@@ -921,28 +921,31 @@ pub fn package_or_class_scope_parser<'s>(
 pub fn ps_parameter_identifier_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<PsParameterIdentifier<'s>, VerboseError<'s>> {
-    let _scoped_parser = (
-        opt_note(package_or_class_scope_parser),
-        parameter_identifier_parser,
-    )
-        .map(|(a, b)| PsParameterIdentifier::Scoped(a, b));
-    let _generated_parser = (
-        repeat_note(terminated(
-            (
-                generate_block_identifier_parser,
-                opt_note((
-                    token(Token::Bracket),
-                    constant_expression_parser,
-                    token(Token::EBracket),
-                )),
-                token(Token::Period),
-            ),
-            peek(parameter_identifier_parser),
-        )),
-        parameter_identifier_parser,
-    )
-        .map(|(a, b)| PsParameterIdentifier::Generated(a, b));
-    alt((_scoped_parser, _generated_parser)).parse_next(input)
+    let opt_scope =
+        opt_note(package_or_class_scope_parser).parse_next(input)?;
+    match opt_scope {
+        None => (
+            repeat_note(terminated(
+                (
+                    generate_block_identifier_parser,
+                    opt_note((
+                        token(Token::Bracket),
+                        constant_expression_parser,
+                        token(Token::EBracket),
+                    )),
+                    token(Token::Period),
+                ),
+                peek(parameter_identifier_parser),
+            )),
+            parameter_identifier_parser,
+        )
+            .map(|(a, b)| PsParameterIdentifier::Generated(a, b))
+            .parse_next(input),
+        Some(scope) => {
+            let identifier = parameter_identifier_parser(input)?;
+            Ok(PsParameterIdentifier::Scoped(Some(scope), identifier))
+        }
+    }
 }
 
 pub fn ps_type_identifier_parser<'s>(

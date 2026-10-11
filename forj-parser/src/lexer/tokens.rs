@@ -690,6 +690,8 @@ pub enum Token<'a> {
     Brace,
     #[token(b"}")]
     EBrace,
+    // Avoid matching a comment in ColonSlash
+    #[token(b"://", |lex| lex.bump((-2 as isize) as usize))]
     #[token(b":")]
     Colon,
     #[token(b";")]

@@ -10,6 +10,7 @@ use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::{alt, not, peek, terminated};
+use winnow::stream::Stream;
 
 pub fn inc_or_dec_expression_parser<'s>(
     input: &mut Tokens<'s>,
@@ -48,6 +49,7 @@ pub fn conditional_expression_parser<'s>(
 enum ConstantExpressionPrattOp<'a> {
     Binary(BinaryOperator<'a>),
     Ternary(Metadata<'a>),
+    Inside(Metadata<'a>),
 }
 
 #[inline]
@@ -136,6 +138,13 @@ fn constant_expression_bp_parser<'s>(
                 }
                 Some((ConstantExpressionPrattOp::Ternary(a), r_bp))
             }),
+            token(Token::Inside).verify_map(|a| {
+                let (l_bp, r_bp) = inside_operator_binding_power();
+                if l_bp < min_bp {
+                    return None;
+                }
+                Some((ConstantExpressionPrattOp::Inside(a), r_bp))
+            }),
         ))
         .parse_next(input) else {
             return Ok(lhs);
@@ -153,6 +162,14 @@ fn constant_expression_bp_parser<'s>(
                 let rhs = constant_expression_bp_parser(input, r_bp)?;
                 ConstantExpression::Ternary(Box::new((
                     lhs, quest, attrs, mhs, colon, rhs,
+                )))
+            }
+            ConstantExpressionPrattOp::Inside(inside) => {
+                let brace = token(Token::Brace)(input)?;
+                let range_list = constant_range_list_parser(input)?;
+                let ebrace = token(Token::EBrace)(input)?;
+                ConstantExpression::Inside(Box::new((
+                    lhs, inside, brace, range_list, ebrace,
                 )))
             }
         }
@@ -391,8 +408,15 @@ enum ExpressionPrattOp<'a> {
 fn expression_bp_parser<'s>(
     input: &mut Tokens<'s>,
     min_bp: u8,
+    // Should consume ?, but don't have to consume matches/&&& if not in ternary expr
+    in_cond_predicate: bool,
 ) -> ModalResult<Expression<'s>, VerboseError<'s>> {
     let mut lhs = basic_expression_parser.parse_next(input)?;
+    let cond_predicate_checkpoint = if in_cond_predicate {
+        Some(input.checkpoint())
+    } else {
+        None
+    };
     loop {
         let Ok((op, r_bp)) = alt((
             binary_operator_parser.verify_map(|a| {
@@ -437,14 +461,14 @@ fn expression_bp_parser<'s>(
         lhs = match op {
             ExpressionPrattOp::Binary(binop) => {
                 let attrs = attribute_instance_vec_parser(input)?;
-                let rhs = expression_bp_parser(input, r_bp)?;
+                let rhs = expression_bp_parser(input, r_bp, in_cond_predicate)?;
                 Expression::Binary(Box::new((lhs, binop, attrs, rhs)))
             }
             ExpressionPrattOp::Ternary(quest) => {
                 let attrs = attribute_instance_vec_parser(input)?;
-                let mhs = expression_bp_parser(input, 0)?;
+                let mhs = expression_bp_parser(input, 0, in_cond_predicate)?;
                 let colon = token(Token::Colon)(input)?;
-                let rhs = expression_bp_parser(input, r_bp)?;
+                let rhs = expression_bp_parser(input, r_bp, in_cond_predicate)?;
                 Expression::ConditionalExpression(Box::new(
                     ConditionalExpression(
                         CondPredicate(
@@ -461,7 +485,6 @@ fn expression_bp_parser<'s>(
             }
             ExpressionPrattOp::Matches(matches) => {
                 let pattern = pattern_bp_parser(input, r_bp + 1)?;
-                let cond_pattern = CondPattern(lhs, matches, pattern);
                 let mut cond_predicate: Vec<(
                     Metadata<'s>,
                     ExpressionOrCondPattern<'s>,
@@ -469,8 +492,11 @@ fn expression_bp_parser<'s>(
                 match opt_note(token(Token::AmpAmpAmp)).parse_next(input)? {
                     None => (),
                     Some(mut amp_amp_amp) => loop {
-                        let next_expression =
-                            expression_bp_parser(input, r_bp + 1)?;
+                        let next_expression = expression_bp_parser(
+                            input,
+                            r_bp + 1,
+                            in_cond_predicate,
+                        )?;
                         let expression_or_cond_patter = match opt_note((
                             token(Token::Matches),
                             gen_pattern_parser(r_bp + 1),
@@ -504,17 +530,30 @@ fn expression_bp_parser<'s>(
                         }
                     },
                 }
-                let quest = token(Token::Quest)(input)?;
+                let quest = match token(Token::Quest)(input) {
+                    Ok(quest) => quest,
+                    Err(err) => match cond_predicate_checkpoint {
+                        None => return Err(err),
+                        Some(checkpoint) => {
+                            input.reset(&checkpoint);
+                            return Ok(lhs);
+                        }
+                    },
+                };
                 let attrs = attribute_instance_vec_parser(input)?;
-                let mhs = expression_bp_parser(input, 0)?;
+                let mhs = expression_bp_parser(input, 0, in_cond_predicate)?;
                 let colon = token(Token::Colon)(input)?;
                 let (_, ternary_r_bp) = ternary_operator_binding_power();
-                let rhs = expression_bp_parser(input, ternary_r_bp)?;
+                let rhs = expression_bp_parser(
+                    input,
+                    ternary_r_bp,
+                    in_cond_predicate,
+                )?;
                 Expression::ConditionalExpression(Box::new(
                     ConditionalExpression(
                         CondPredicate(
                             ExpressionOrCondPattern::CondPattern(Box::new(
-                                cond_pattern,
+                                CondPattern(lhs, matches, pattern),
                             )),
                             cond_predicate,
                         ),
@@ -535,6 +574,7 @@ fn expression_bp_parser<'s>(
                     let next_expression = expression_bp_parser(
                         input,
                         matches_operator_binding_power() + 1,
+                        in_cond_predicate,
                     )?;
                     let expression_or_cond_patter = match opt_note((
                         token(Token::Matches),
@@ -562,11 +602,20 @@ fn expression_bp_parser<'s>(
                         }
                     }
                 }
-                let quest = token(Token::Quest)(input)?;
+                let quest = match token(Token::Quest)(input) {
+                    Ok(quest) => quest,
+                    Err(err) => match cond_predicate_checkpoint {
+                        None => return Err(err),
+                        Some(checkpoint) => {
+                            input.reset(&checkpoint);
+                            return Ok(lhs);
+                        }
+                    },
+                };
                 let attrs = attribute_instance_vec_parser(input)?;
-                let mhs = expression_bp_parser(input, 0)?;
+                let mhs = expression_bp_parser(input, 0, in_cond_predicate)?;
                 let colon = token(Token::Colon)(input)?;
-                let rhs = expression_bp_parser(input, r_bp)?;
+                let rhs = expression_bp_parser(input, r_bp, in_cond_predicate)?;
                 Expression::ConditionalExpression(Box::new(
                     ConditionalExpression(
                         CondPredicate(
@@ -593,17 +642,16 @@ fn expression_bp_parser<'s>(
     }
 }
 
-pub(crate) fn gen_expression_parser<'s>(
-    min_bp: u8,
-) -> impl FnMut(&mut Tokens<'s>) -> ModalResult<Expression<'s>, VerboseError<'s>>
-{
-    move |input| expression_bp_parser(input, min_bp)
+pub(crate) fn cond_predicate_expression_parser<'s>(
+    input: &mut Tokens<'s>,
+) -> ModalResult<Expression<'s>, VerboseError<'s>> {
+    expression_bp_parser(input, 0, true)
 }
 
 pub fn expression_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<Expression<'s>, VerboseError<'s>> {
-    expression_bp_parser(input, 0)
+    expression_bp_parser(input, 0, false)
 }
 
 pub fn tagged_union_expression_parser<'s>(

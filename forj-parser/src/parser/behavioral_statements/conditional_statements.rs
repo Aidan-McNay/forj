@@ -64,7 +64,7 @@ pub fn expression_or_cond_pattern_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<ExpressionOrCondPattern<'s>, VerboseError<'s>> {
     (
-        gen_expression_parser(matches_operator_binding_power() + 1),
+        cond_predicate_expression_parser,
         opt_note((
             token(Token::Matches),
             gen_pattern_parser(matches_operator_binding_power() + 1),
@@ -84,7 +84,7 @@ pub fn cond_pattern_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<CondPattern<'s>, VerboseError<'s>> {
     (
-        gen_expression_parser(matches_operator_binding_power() + 1),
+        cond_predicate_expression_parser,
         token(Token::Matches),
         gen_pattern_parser(matches_operator_binding_power() + 1),
     )

@@ -96,7 +96,11 @@ pub fn constant_primary_parser<'s>(
         _mintypmax_parser,
         terminated(
             _function_call_parser,
-            peek(not(alt((token(Token::Bracket), token(Token::Period))))),
+            peek(not(alt((
+                token(Token::Bracket),
+                token(Token::Period),
+                token(Token::Apost),
+            )))),
         ),
         _ps_parameter_parser,
         _specparam_parser,

@@ -13,7 +13,8 @@ pub fn casting_type_parser<'s>(
     input: &mut Tokens<'s>,
 ) -> ModalResult<CastingType<'s>, VerboseError<'s>> {
     alt((
-        simple_type_parser.map(|a| CastingType::SimpleType(Box::new(a))),
+        terminated(simple_type_parser, peek(token(Token::Apost)))
+            .map(|a| CastingType::SimpleType(Box::new(a))),
         constant_primary_parser_without_cast
             .map(|a| CastingType::ConstantPrimary(Box::new(a))),
         signing_parser.map(|a| CastingType::Signing(Box::new(a))),
@@ -81,15 +82,6 @@ fn constant_primary_parser_without_cast<'s>(
         )),
     )
         .map(|(a, b)| ConstantPrimary::MultipleConcatenation(Box::new((a, b))));
-    let _function_call_parser = (
-        constant_function_call_parser,
-        opt_note((
-            token(Token::Bracket),
-            constant_range_expression_parser,
-            token(Token::EBracket),
-        )),
-    )
-        .map(|(a, b)| ConstantPrimary::FunctionCall(Box::new((a, b))));
     let _let_expression_parser = constant_let_expression_parser
         .map(|a| ConstantPrimary::LetExpression(Box::new(a)));
     let _mintypmax_parser = (
@@ -112,10 +104,7 @@ fn constant_primary_parser_without_cast<'s>(
         _assignment_pattern_expression_parser,
         _primary_literal_parser,
         _mintypmax_parser,
-        terminated(
-            _function_call_parser,
-            peek(not(alt((token(Token::Bracket), token(Token::Period))))),
-        ),
+        // Functions can't return types
         _ps_parameter_parser,
         _specparam_parser,
         _genvar_parser,

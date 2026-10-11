@@ -60,6 +60,15 @@ pub enum ConstantExpression<'a> {
             ConstantExpression<'a>,
         )>,
     ),
+    Inside(
+        Box<(
+            ConstantExpression<'a>,
+            Metadata<'a>, // inside
+            Metadata<'a>, // {
+            ConstantRangeList<'a>,
+            Metadata<'a>, // }
+        )>,
+    ),
 }
 
 #[derive(Clone, Debug, PartialEq)]

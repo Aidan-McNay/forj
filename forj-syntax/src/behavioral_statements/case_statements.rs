@@ -191,3 +191,59 @@ pub enum ValueRange<'a> {
         )>,
     ),
 }
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ConstantRangeList<'a>(
+    pub ConstantValueRange<'a>,
+    pub Vec<(Metadata<'a>, ConstantValueRange<'a>)>,
+);
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum ConstantValueRange<'a> {
+    Expression(Box<ConstantExpression<'a>>),
+    Slice(
+        Box<(
+            Metadata<'a>, // [
+            ConstantExpression<'a>,
+            Metadata<'a>, // :
+            ConstantExpression<'a>,
+            Metadata<'a>, // ]
+        )>,
+    ),
+    DollarLow(
+        Box<(
+            Metadata<'a>, // [
+            Metadata<'a>, // $
+            Metadata<'a>, // :
+            ConstantExpression<'a>,
+            Metadata<'a>, // ]
+        )>,
+    ),
+    DollarHigh(
+        Box<(
+            Metadata<'a>, // [
+            ConstantExpression<'a>,
+            Metadata<'a>, // :
+            Metadata<'a>, // $
+            Metadata<'a>, // ]
+        )>,
+    ),
+    AbsoluteTolerance(
+        Box<(
+            Metadata<'a>, // [
+            ConstantExpression<'a>,
+            Metadata<'a>, // +/-
+            ConstantExpression<'a>,
+            Metadata<'a>, // ]
+        )>,
+    ),
+    RelativeTolerance(
+        Box<(
+            Metadata<'a>, // [
+            ConstantExpression<'a>,
+            Metadata<'a>, // +%-
+            ConstantExpression<'a>,
+            Metadata<'a>, // ]
+        )>,
+    ),
+}
