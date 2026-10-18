@@ -6,6 +6,7 @@
 use crate::*;
 use bstr::BString;
 use logos::Logos;
+use std::collections::HashMap;
 use std::ops::Range;
 
 /// An iterator to glue together macro tokens delimited by ``
@@ -27,30 +28,61 @@ fn block_comment_error<'a>(
     }
 }
 
+#[derive(Debug)]
+struct Gap {
+    loc: usize,
+    size: isize,
+}
+
 // Form the new span for a glued token, factoring in the original
 // span and any gaps introduced by concatenation characters
 fn glue_span<'a>(
     range: Range<usize>,
     orig_span: &Span<'a>,
-    gaps: &Vec<usize>,
+    gaps: &mut Vec<Gap>,
+    arg_spans: &HashMap<usize, Span<'a>>,
 ) -> Span<'a> {
-    let mut new_span = Span {
-        bytes: Range {
-            start: orig_span.bytes.start + range.start,
-            end: orig_span.bytes.start + range.end,
-        },
-        ..*orig_span
+    let mut new_span_range = Range {
+        start: orig_span.bytes.start + range.start,
+        end: orig_span.bytes.start + range.end,
     };
     // Don't include leading/trailing, as can lead to confusion
     for gap in gaps.iter() {
-        if *gap <= new_span.bytes.start {
-            new_span.bytes.start += 2;
+        if gap.loc <= new_span_range.start {
+            new_span_range.start =
+                new_span_range.start.wrapping_add_signed(gap.size);
         }
-        if *gap < new_span.bytes.end {
-            new_span.bytes.end += 2;
+        if gap.loc < new_span_range.end {
+            new_span_range.end =
+                new_span_range.end.wrapping_add_signed(gap.size);
         }
     }
-    new_span
+    match arg_spans.get(&new_span_range.start) {
+        None => {
+            let new_span = Span {
+                bytes: new_span_range,
+                ..*orig_span
+            };
+            new_span
+        }
+        // If expanded from an argument, just use that span to avoid
+        // losing expansion information. However, we also need to
+        // insert a gap to offset future tokens
+        Some(arg_span) => {
+            // Know that expanded_from is Some(_) from insertion
+            let gap_size = (arg_span.bytes.len() as isize)
+                - (arg_span.expanded_from.unwrap().1.bytes.len() as isize);
+            // Can insert at the beginning, to affect all later spans first
+            gaps.insert(
+                0,
+                Gap {
+                    loc: orig_span.bytes.start + range.start,
+                    size: gap_size,
+                },
+            );
+            arg_span.clone()
+        }
+    }
 }
 
 impl<'a, T> TokenGluer<'a, T>
@@ -176,7 +208,8 @@ where
         &mut self,
         mut curr_span: Span<'a>,
         mut curr_id: BString,
-        mut gaps: Vec<usize>,
+        mut gaps: Vec<Gap>,
+        mut arg_spans: HashMap<usize, Span<'a>>,
     ) -> Option<Result<SpannedToken<'a>, PreprocessorError<'a>>> {
         loop {
             match self.inner_iter.peek() {
@@ -191,8 +224,15 @@ where
                     curr_span.bytes.end = concat_token.1.bytes.end;
                     if concat_token.0 == Token::MacroConcatenate {
                         // Don't add to overall concatenation
-                        gaps.push(concat_token.1.bytes.start);
+                        gaps.push(Gap {
+                            loc: concat_token.1.bytes.start,
+                            size: 2,
+                        });
                         continue;
+                    }
+                    if concat_token.1.expanded_from.is_some() {
+                        arg_spans
+                            .insert(concat_token.1.bytes.start, concat_token.1);
                     }
                     curr_id.extend_from_slice(
                         text_macro::into_text(&concat_token.0).as_ref(),
@@ -209,7 +249,10 @@ where
                             }
                             // Consume concatenation token
                             let next_token = self.inner_iter.next().unwrap();
-                            gaps.push(next_token.1.bytes.start);
+                            gaps.push(Gap {
+                                loc: next_token.1.bytes.start,
+                                size: 2,
+                            });
                             curr_span.bytes.end = next_token.1.bytes.end;
                         }
                     }
@@ -233,7 +276,9 @@ where
                         tokens.into_iter().map(|(token, range)| {
                             SpannedToken(
                                 token,
-                                glue_span(range, &curr_span, &gaps),
+                                glue_span(
+                                    range, &curr_span, &mut gaps, &arg_spans,
+                                ),
                             )
                         });
                     let next_token = new_spanned_tokens.next();
@@ -274,11 +319,15 @@ where
                     if next_token.0 != Token::MacroConcatenate {
                         self.prev_tokens.push(next_token);
                     } else {
-                        let gaps = vec![next_token.1.bytes.start];
+                        let gaps = vec![Gap {
+                            loc: next_token.1.bytes.start,
+                            size: 2,
+                        }];
                         if let Some(result) = self.take_concatenate(
                             next_token.1,
                             BString::new(vec![]),
                             gaps,
+                            HashMap::new(),
                         ) {
                             break Some(result);
                         }
@@ -290,18 +339,32 @@ where
                         self.prev_tokens.push(next_token);
                         break Some(Ok(curr_token));
                     } else {
-                        let gaps = vec![next_token.1.bytes.start];
+                        let gaps = vec![Gap {
+                            loc: next_token.1.bytes.start,
+                            size: 2,
+                        }];
                         if curr_token.1.adjacent(&next_token.1) {
-                            if let Some(result) = self.take_concatenate(
-                                Span {
-                                    bytes: Range {
-                                        start: curr_token.1.bytes.start,
-                                        end: next_token.1.bytes.end,
-                                    },
-                                    ..next_token.1
+                            let start_span = Span {
+                                bytes: Range {
+                                    start: curr_token.1.bytes.start,
+                                    end: next_token.1.bytes.end,
                                 },
+                                ..next_token.1
+                            };
+                            let arg_spans =
+                                if curr_token.1.expanded_from.is_some() {
+                                    HashMap::from([(
+                                        curr_token.1.bytes.start,
+                                        curr_token.1,
+                                    )])
+                                } else {
+                                    HashMap::new()
+                                };
+                            if let Some(result) = self.take_concatenate(
+                                start_span,
                                 text_macro::into_text(&curr_token.0),
                                 gaps,
+                                arg_spans,
                             ) {
                                 break Some(result);
                             }
@@ -310,6 +373,7 @@ where
                                 next_token.1,
                                 BString::new(vec![]),
                                 gaps,
+                                HashMap::new(),
                             ) {
                                 Some(Ok(next_token)) => {
                                     self.prev_tokens.push(next_token);

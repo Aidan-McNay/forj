@@ -25,6 +25,10 @@ struct Cli {
     #[arg(short, long)]
     print: bool,
 
+    /// Whether to print warnings
+    #[arg(short, long)]
+    warn: bool,
+
     paths: Vec<PathBuf>,
 }
 
@@ -96,8 +100,10 @@ fn main() -> ExitCode {
         let mut sources = state.included_files().sources();
         if !state.errors.is_empty() {
             for err in &state.errors {
-                let report: report::Report = err.into();
-                report.print(&mut sources).unwrap();
+                if !err.is_warning() || args.warn {
+                    let report: report::Report = err.into();
+                    report.print(&mut sources).unwrap();
+                }
             }
         }
         let preprocessed_stream = match preprocess_result {
