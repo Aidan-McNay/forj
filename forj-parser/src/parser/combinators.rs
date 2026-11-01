@@ -9,11 +9,11 @@ use winnow::combinator::trace;
 use winnow::error::{ErrMode, ParserError};
 use winnow::stream::{Accumulate, Stream};
 
-pub fn repeat_note<'s, Output, ParseNext>(
+pub fn repeat_note<'s: 'b, 'b, Output, ParseNext>(
     parser: ParseNext,
-) -> RepeatNote<'s, ParseNext, Output>
+) -> RepeatNote<'s, 'b, ParseNext, Output>
 where
-    ParseNext: Parser<Tokens<'s>, Output, ErrMode<VerboseError<'s>>>,
+    ParseNext: Parser<Tokens<'s, 'b>, Output, ErrMode<VerboseError<'s>>>,
 {
     RepeatNote {
         parser,
@@ -22,26 +22,26 @@ where
     }
 }
 
-pub struct RepeatNote<'s, P, O>
+pub struct RepeatNote<'s: 'b, 'b, P, O>
 where
-    P: Parser<Tokens<'s>, O, ErrMode<VerboseError<'s>>>,
+    P: Parser<Tokens<'s, 'b>, O, ErrMode<VerboseError<'s>>>,
 {
     parser: P,
-    i: core::marker::PhantomData<Tokens<'s>>,
+    i: core::marker::PhantomData<Tokens<'s, 'b>>,
     o: core::marker::PhantomData<O>,
 }
 
-impl<'s, P, O> Parser<Tokens<'s>, Vec<O>, ErrMode<VerboseError<'s>>>
-    for RepeatNote<'s, P, O>
+impl<'s: 'b, 'b, P, O> Parser<Tokens<'s, 'b>, Vec<O>, ErrMode<VerboseError<'s>>>
+    for RepeatNote<'s, 'b, P, O>
 where
-    P: Parser<Tokens<'s>, O, ErrMode<VerboseError<'s>>>,
+    P: Parser<Tokens<'s, 'b>, O, ErrMode<VerboseError<'s>>>,
 {
     #[inline(always)]
     fn parse_next(
         &mut self,
-        i: &mut Tokens<'s>,
+        i: &mut Tokens<'s, 'b>,
     ) -> Result<Vec<O>, ErrMode<VerboseError<'s>>> {
-        trace("repeat_note", move |i: &mut Tokens<'s>| {
+        trace("repeat_note", move |i: &mut Tokens<'s, 'b>| {
             fold_repeat0_(
                 &mut self.parser,
                 &mut || Vec::initial(None),
@@ -56,14 +56,14 @@ where
     }
 }
 
-fn fold_repeat0_<'s, O, P, N, F, R>(
+fn fold_repeat0_<'s: 'b, 'b, O, P, N, F, R>(
     parser: &mut P,
     init: &mut N,
     fold: &mut F,
-    input: &mut Tokens<'s>,
+    input: &mut Tokens<'s, 'b>,
 ) -> Result<R, ErrMode<VerboseError<'s>>>
 where
-    P: Parser<Tokens<'s>, O, ErrMode<VerboseError<'s>>>,
+    P: Parser<Tokens<'s, 'b>, O, ErrMode<VerboseError<'s>>>,
     N: FnMut() -> R,
     F: FnMut(R, O) -> R,
 {
@@ -87,8 +87,8 @@ where
             Err(err) => match err {
                 ErrMode::Backtrack(verbose_error) => {
                     input.reset(&start);
-                    match &mut input.state.0 {
-                        None => input.state.0 = Some(verbose_error),
+                    match &mut input.state.last_err {
+                        None => input.state.last_err = Some(verbose_error),
                         Some(prev_error) => {
                             prev_error.or_in_place(verbose_error)
                         }
@@ -101,21 +101,21 @@ where
     }
 }
 
-pub fn opt_note<'s, Output, ParseNext>(
+pub fn opt_note<'s: 'b, 'b, Output, ParseNext>(
     mut parser: ParseNext,
-) -> impl Parser<Tokens<'s>, Option<Output>, ErrMode<VerboseError<'s>>>
+) -> impl Parser<Tokens<'s, 'b>, Option<Output>, ErrMode<VerboseError<'s>>>
 where
-    ParseNext: Parser<Tokens<'s>, Output, ErrMode<VerboseError<'s>>>,
+    ParseNext: Parser<Tokens<'s, 'b>, Output, ErrMode<VerboseError<'s>>>,
 {
-    trace("opt", move |input: &mut Tokens<'s>| {
+    trace("opt", move |input: &mut Tokens<'s, 'b>| {
         let start = input.checkpoint();
         match parser.parse_next(input) {
             Ok(o) => Ok(Some(o)),
             Err(err) => match err {
                 ErrMode::Backtrack(verbose_error) => {
                     input.reset(&start);
-                    match &mut input.state.0 {
-                        None => input.state.0 = Some(verbose_error),
+                    match &mut input.state.last_err {
+                        None => input.state.last_err = Some(verbose_error),
                         Some(prev_error) => {
                             prev_error.or_in_place(verbose_error)
                         }

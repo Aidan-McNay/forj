@@ -13,8 +13,8 @@ use winnow::token::any;
 
 // A parser for matching extra nodes
 #[cfg(feature = "parse_lossless")]
-pub fn non_trivia_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn non_trivia_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Vec<NonTriviaToken<'s>>, VerboseError<'s>> {
     let comment_parser = any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
         Token::OnelineComment(text) => {
@@ -34,8 +34,8 @@ pub fn non_trivia_parser<'s>(
 
 #[inline]
 #[cfg(not(feature = "parse_lossless"))]
-pub fn non_trivia_parser<'s>(
-    _: &mut Tokens<'s>,
+pub fn non_trivia_parser<'s, 'b>(
+    _: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Vec<NonTriviaToken<'s>>, VerboseError<'s>> {
     Ok(vec![])
 }
@@ -61,11 +61,11 @@ pub fn replace_non_trivia<'a>(
 
 // A parser for matching a token and extra nodes, producing metadata
 #[cfg(feature = "parse_lossless")]
-pub fn token<'s>(
+pub fn token<'s: 'b, 'b>(
     token_to_match: Token<'s>,
-) -> impl FnMut(&mut Tokens<'s>) -> ModalResult<Metadata<'s>, VerboseError<'s>>
+) -> impl FnMut(&mut Tokens<'s, 'b>) -> ModalResult<Metadata<'s>, VerboseError<'s>>
 {
-    move |input: &mut Tokens<'s>| {
+    move |input: &mut Tokens<'s, 'b>| {
         (token_to_match, non_trivia_parser)
             .context(token_to_match)
             .parse_next(input)
@@ -77,11 +77,11 @@ pub fn token<'s>(
 
 // A parser for matching a token and extra nodes, producing metadata
 #[cfg(not(feature = "parse_lossless"))]
-pub fn token<'s>(
+pub fn token<'s: 'b, 'b>(
     token_to_match: Token<'s>,
-) -> impl FnMut(&mut Tokens<'s>) -> ModalResult<Metadata<'s>, VerboseError<'s>>
+) -> impl FnMut(&mut Tokens<'s, 'b>) -> ModalResult<Metadata<'s>, VerboseError<'s>>
 {
-    move |input: &mut Tokens<'s>| {
+    move |input: &mut Tokens<'s, 'b>| {
         token_to_match
             .context(token_to_match)
             .map(|spanned_token| Metadata::new(spanned_token.1.clone(), vec![]))
@@ -91,11 +91,11 @@ pub fn token<'s>(
 
 // A parser for matching a specific identifier name and extra nodes, producing metadata
 #[cfg(feature = "parse_lossless")]
-pub fn name<'s>(
+pub fn name<'s: 'b, 'b>(
     name: &'s str,
-) -> impl FnMut(&mut Tokens<'s>) -> ModalResult<Metadata<'s>, VerboseError<'s>>
+) -> impl FnMut(&mut Tokens<'s, 'b>) -> ModalResult<Metadata<'s>, VerboseError<'s>>
 {
-    move |input: &mut Tokens<'s>| {
+    move |input: &mut Tokens<'s, 'b>| {
         let name_parser = any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
             Token::SimpleIdentifier(text) if text == name => Some(s.1.clone()),
             _ => None,
@@ -108,11 +108,11 @@ pub fn name<'s>(
 
 // A parser for matching a specific identifier name and extra nodes, producing metadata
 #[cfg(not(feature = "parse_lossless"))]
-pub fn name<'s>(
+pub fn name<'s: 'b, 'b>(
     name: &'s str,
-) -> impl FnMut(&mut Tokens<'s>) -> ModalResult<Metadata<'s>, VerboseError<'s>>
+) -> impl FnMut(&mut Tokens<'s, 'b>) -> ModalResult<Metadata<'s>, VerboseError<'s>>
 {
-    move |input: &mut Tokens<'s>| {
+    move |input: &mut Tokens<'s, 'b>| {
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
             Token::SimpleIdentifier(text) if text == name => {
                 Some(Metadata::new(s.1.clone(), vec![]))

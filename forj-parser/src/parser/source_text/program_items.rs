@@ -8,8 +8,8 @@ use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::combinator::alt;
 
-pub fn program_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn program_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ProgramItem<'s>, VerboseError<'s>> {
     alt((
         (port_declaration_parser, token(Token::SColon))
@@ -27,8 +27,8 @@ enum NonPortProgramItemBody<'a> {
     Assertion(ConcurrentAssertionItem<'a>),
 }
 
-pub fn non_port_program_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn non_port_program_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NonPortProgramItem<'s>, VerboseError<'s>> {
     let _attribute_item_parser = (
         attribute_instance_vec_parser,
@@ -73,8 +73,8 @@ pub fn non_port_program_item_parser<'s>(
     .parse_next(input)
 }
 
-pub fn program_generate_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn program_generate_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ProgramGenerateItem<'s>, VerboseError<'s>> {
     alt((
         loop_generate_construct_parser

@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn path_delay_value_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn path_delay_value_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PathDelayValue<'s>, VerboseError<'s>> {
     alt((
         list_of_path_delay_expressions_parser
@@ -25,8 +25,8 @@ pub fn path_delay_value_parser<'s>(
     .parse_next(input)
 }
 
-pub fn list_of_path_delay_expressions_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_path_delay_expressions_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfPathDelayExpressions<'s>, VerboseError<'s>> {
     let _path_parser = t_path_delay_expression_parser
         .map(|a| ListOfPathDelayExpressions::Path(Box::new(a)));
@@ -106,136 +106,136 @@ pub fn list_of_path_delay_expressions_parser<'s>(
     .parse_next(input)
 }
 
-pub fn t_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn t_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TPathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| TPathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn trise_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn trise_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TrisePathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| TrisePathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn tfall_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn tfall_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TfallPathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| TfallPathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn tz_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn tz_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TzPathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| TzPathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn t01_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn t01_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<T01PathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| T01PathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn t10_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn t10_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<T10PathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| T10PathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn t0z_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn t0z_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<T0zPathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| T0zPathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn tz1_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn tz1_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Tz1PathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| Tz1PathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn t1z_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn t1z_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<T1zPathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| T1zPathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn tz0_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn tz0_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Tz0PathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| Tz0PathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn t0x_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn t0x_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<T0xPathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| T0xPathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn tx1_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn tx1_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Tx1PathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| Tx1PathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn t1x_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn t1x_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<T1xPathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| T1xPathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn tx0_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn tx0_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Tx0PathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| Tx0PathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn txz_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn txz_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TxzPathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| TxzPathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn tzx_path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn tzx_path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TzxPathDelayExpression<'s>, VerboseError<'s>> {
     path_delay_expression_parser
         .map(|a| TzxPathDelayExpression(a))
         .parse_next(input)
 }
 
-pub fn path_delay_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn path_delay_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PathDelayExpression<'s>, VerboseError<'s>> {
     constant_mintypmax_expression_parser
         .map(|a| PathDelayExpression(a))

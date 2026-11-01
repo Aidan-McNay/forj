@@ -8,8 +8,8 @@ use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::combinator::alt;
 
-pub fn config_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn config_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConfigDeclaration<'s>, VerboseError<'s>> {
     let result = (
         token(Token::Config),
@@ -32,8 +32,8 @@ pub fn config_declaration_parser<'s>(
     Ok(result)
 }
 
-pub fn design_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn design_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DesignStatement<'s>, VerboseError<'s>> {
     (
         token(Token::Design),
@@ -57,8 +57,8 @@ pub enum InstOrCellClause<'a> {
     Cell(CellClause<'a>),
 }
 
-pub fn config_rule_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn config_rule_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConfigRuleStatement<'s>, VerboseError<'s>> {
     let _default_parser = (
         default_clause_parser,
@@ -118,24 +118,24 @@ pub fn config_rule_statement_parser<'s>(
     alt((_default_parser, _remaining_parser)).parse_next(input)
 }
 
-pub fn default_clause_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn default_clause_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DefaultClause<'s>, VerboseError<'s>> {
     token(Token::Default)
         .map(|a| DefaultClause(a))
         .parse_next(input)
 }
 
-pub fn inst_clause_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn inst_clause_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InstClause<'s>, VerboseError<'s>> {
     (token(Token::Instance), inst_name_parser)
         .map(|(a, b)| InstClause(a, b))
         .parse_next(input)
 }
 
-pub fn inst_name_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn inst_name_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InstName<'s>, VerboseError<'s>> {
     (
         topmodule_identifier_parser,
@@ -145,8 +145,8 @@ pub fn inst_name_parser<'s>(
         .parse_next(input)
 }
 
-pub fn cell_clause_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn cell_clause_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CellClause<'s>, VerboseError<'s>> {
     (
         token(Token::Cell),
@@ -157,8 +157,8 @@ pub fn cell_clause_parser<'s>(
         .parse_next(input)
 }
 
-pub fn liblist_clause_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn liblist_clause_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LiblistClause<'s>, VerboseError<'s>> {
     (
         token(Token::Liblist),
@@ -168,8 +168,8 @@ pub fn liblist_clause_parser<'s>(
         .parse_next(input)
 }
 
-pub fn use_clause_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn use_clause_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UseClause<'s>, VerboseError<'s>> {
     (
         token(Token::Use),

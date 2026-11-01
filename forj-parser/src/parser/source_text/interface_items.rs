@@ -8,8 +8,8 @@ use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::combinator::alt;
 
-pub fn interface_or_generate_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_or_generate_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceOrGenerateItem<'s>, VerboseError<'s>> {
     alt((
         (attribute_instance_vec_parser, module_common_item_parser).map(
@@ -21,8 +21,8 @@ pub fn interface_or_generate_item_parser<'s>(
     .parse_next(input)
 }
 
-pub fn extern_tf_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn extern_tf_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ExternTfDeclaration<'s>, VerboseError<'s>> {
     let _method_parser = (
         token(Token::Extern),
@@ -40,8 +40,8 @@ pub fn extern_tf_declaration_parser<'s>(
     alt((_task_parser, _method_parser)).parse_next(input)
 }
 
-pub fn interface_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceItem<'s>, VerboseError<'s>> {
     alt((
         (port_declaration_parser, token(Token::SColon))
@@ -52,8 +52,8 @@ pub fn interface_item_parser<'s>(
     .parse_next(input)
 }
 
-pub fn non_port_interface_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn non_port_interface_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NonPortInterfaceItem<'s>, VerboseError<'s>> {
     alt((
         program_declaration_parser

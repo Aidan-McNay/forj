@@ -8,8 +8,8 @@ use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::combinator::alt;
 
-pub fn udp_nonansi_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn udp_nonansi_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UdpNonansiDeclaration<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -24,8 +24,8 @@ pub fn udp_nonansi_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn udp_ansi_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn udp_ansi_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UdpAnsiDeclaration<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -40,8 +40,8 @@ pub fn udp_ansi_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn udp_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn udp_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UdpDeclaration<'s>, VerboseError<'s>> {
     let _nonansi_parser = (
         udp_nonansi_declaration_parser,

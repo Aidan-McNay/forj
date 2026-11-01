@@ -7,8 +7,8 @@ use crate::*;
 use forj_syntax::*;
 use winnow::ModalResult;
 
-pub fn udp_instantiation_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn udp_instantiation_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UdpInstantiation<'s>, VerboseError<'s>> {
     (
         udp_identifier_parser,
@@ -22,8 +22,8 @@ pub fn udp_instantiation_parser<'s>(
         .parse_next(input)
 }
 
-pub fn udp_instance_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn udp_instance_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UdpInstance<'s>, VerboseError<'s>> {
     (
         opt_note(name_of_instance_parser),

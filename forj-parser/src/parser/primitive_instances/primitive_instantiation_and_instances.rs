@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::{alt, peek, terminated};
 
-pub fn gate_instantiation_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn gate_instantiation_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<GateInstantiation<'s>, VerboseError<'s>> {
     let _cmos_parser = (
         cmos_switchtype_parser,
@@ -116,8 +116,8 @@ pub fn gate_instantiation_parser<'s>(
     .parse_next(input)
 }
 
-pub fn cmos_switch_instance_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn cmos_switch_instance_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CmosSwitchInstance<'s>, VerboseError<'s>> {
     (
         opt_note(name_of_instance_parser),
@@ -137,8 +137,8 @@ pub fn cmos_switch_instance_parser<'s>(
         .parse_next(input)
 }
 
-pub fn enable_gate_instance_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn enable_gate_instance_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EnableGateInstance<'s>, VerboseError<'s>> {
     (
         opt_note(name_of_instance_parser),
@@ -156,8 +156,8 @@ pub fn enable_gate_instance_parser<'s>(
         .parse_next(input)
 }
 
-pub fn mos_switch_instance_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn mos_switch_instance_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<MosSwitchInstance<'s>, VerboseError<'s>> {
     (
         opt_note(name_of_instance_parser),
@@ -175,8 +175,8 @@ pub fn mos_switch_instance_parser<'s>(
         .parse_next(input)
 }
 
-pub fn n_input_gate_instance_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn n_input_gate_instance_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NInputGateInstance<'s>, VerboseError<'s>> {
     (
         opt_note(name_of_instance_parser),
@@ -191,8 +191,8 @@ pub fn n_input_gate_instance_parser<'s>(
         .parse_next(input)
 }
 
-pub fn n_output_gate_instance_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn n_output_gate_instance_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NOutputGateInstance<'s>, VerboseError<'s>> {
     (
         opt_note(name_of_instance_parser),
@@ -213,8 +213,8 @@ pub fn n_output_gate_instance_parser<'s>(
         .parse_next(input)
 }
 
-pub fn pass_switch_instance_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn pass_switch_instance_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PassSwitchInstance<'s>, VerboseError<'s>> {
     (
         opt_note(name_of_instance_parser),
@@ -228,8 +228,8 @@ pub fn pass_switch_instance_parser<'s>(
         .parse_next(input)
 }
 
-pub fn pass_enable_switch_instance_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn pass_enable_switch_instance_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PassEnableSwitchInstance<'s>, VerboseError<'s>> {
     (
         opt_note(name_of_instance_parser),
@@ -247,8 +247,8 @@ pub fn pass_enable_switch_instance_parser<'s>(
         .parse_next(input)
 }
 
-pub fn pull_gate_instance_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn pull_gate_instance_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PullGateInstance<'s>, VerboseError<'s>> {
     (
         opt_note(name_of_instance_parser),

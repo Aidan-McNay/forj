@@ -10,8 +10,8 @@ use logos::Span as ByteSpan;
 use winnow::ModalResult;
 use winnow::combinator::alt;
 
-pub fn udp_body_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn udp_body_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UdpBody<'s>, VerboseError<'s>> {
     alt((
         combinational_body_parser.map(|a| UdpBody::Combinational(Box::new(a))),
@@ -20,8 +20,8 @@ pub fn udp_body_parser<'s>(
     .parse_next(input)
 }
 
-pub fn combinational_body_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn combinational_body_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CombinationalBody<'s>, VerboseError<'s>> {
     (
         token(Token::Table),
@@ -33,8 +33,8 @@ pub fn combinational_body_parser<'s>(
         .parse_next(input)
 }
 
-pub fn combinational_entry_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn combinational_entry_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CombinationalEntry<'s>, VerboseError<'s>> {
     (
         level_input_list_parser,
@@ -46,8 +46,8 @@ pub fn combinational_entry_parser<'s>(
         .parse_next(input)
 }
 
-pub fn sequential_body_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn sequential_body_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequentialBody<'s>, VerboseError<'s>> {
     (
         opt_note(udp_initial_statement_parser),
@@ -60,8 +60,8 @@ pub fn sequential_body_parser<'s>(
         .parse_next(input)
 }
 
-pub fn udp_initial_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn udp_initial_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UdpInitialStatement<'s>, VerboseError<'s>> {
     (
         token(Token::Initial),
@@ -74,8 +74,8 @@ pub fn udp_initial_statement_parser<'s>(
         .parse_next(input)
 }
 
-pub fn init_val_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn init_val_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InitVal<'s>, VerboseError<'s>> {
     let _binary_parser =
         binary_number_parser.verify_map(|BinaryNumber(text, metadata)| {
@@ -99,8 +99,8 @@ pub fn init_val_parser<'s>(
     alt((_binary_parser, _number_parser)).parse_next(input)
 }
 
-pub fn sequential_entry_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn sequential_entry_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequentialEntry<'s>, VerboseError<'s>> {
     (
         seq_input_list_parser,
@@ -114,8 +114,8 @@ pub fn sequential_entry_parser<'s>(
         .parse_next(input)
 }
 
-pub fn seq_input_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn seq_input_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SeqInputList<'s>, VerboseError<'s>> {
     alt((
         edge_input_list_parser.map(|a| SeqInputList::Edge(Box::new(a))),
@@ -124,16 +124,16 @@ pub fn seq_input_list_parser<'s>(
     .parse_next(input)
 }
 
-pub fn level_input_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn level_input_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LevelInputList<'s>, VerboseError<'s>> {
     (level_symbol_parser, repeat_note(level_symbol_parser))
         .map(|(a, b)| LevelInputList(a, b))
         .parse_next(input)
 }
 
-pub fn edge_input_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn edge_input_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EdgeInputList<'s>, VerboseError<'s>> {
     (
         repeat_note(level_symbol_parser),
@@ -144,8 +144,8 @@ pub fn edge_input_list_parser<'s>(
         .parse_next(input)
 }
 
-fn double_level_symbol_parser<'s>(
-    input: &mut Tokens<'s>,
+fn double_level_symbol_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<(LevelSymbol<'s>, LevelSymbol<'s>), VerboseError<'s>> {
     let text_to_level_symbol =
         |character: char, metadata: Metadata<'s>| match character {
@@ -208,8 +208,8 @@ fn double_level_symbol_parser<'s>(
     .parse_next(input)
 }
 
-pub fn edge_indicator_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn edge_indicator_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EdgeIndicator<'s>, VerboseError<'s>> {
     let _explicit_parser = (
         token(Token::Paren),
@@ -227,16 +227,16 @@ pub fn edge_indicator_parser<'s>(
     .parse_next(input)
 }
 
-pub fn current_state_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn current_state_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CurrentState<'s>, VerboseError<'s>> {
     level_symbol_parser
         .map(|a| CurrentState(a))
         .parse_next(input)
 }
 
-pub fn next_state_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn next_state_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NextState<'s>, VerboseError<'s>> {
     alt((
         output_symbol_parser.map(|a| NextState::Output(Box::new(a))),
@@ -245,8 +245,8 @@ pub fn next_state_parser<'s>(
     .parse_next(input)
 }
 
-pub fn output_symbol_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn output_symbol_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<OutputSymbol<'s>, VerboseError<'s>> {
     let _identifier_parser = identifier_parser.verify_map(|a| match a {
         Identifier::SimpleIdentifier(("x", metadata)) => {
@@ -265,8 +265,8 @@ pub fn output_symbol_parser<'s>(
     alt((_identifier_parser, _number_parser)).parse_next(input)
 }
 
-pub fn level_symbol_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn level_symbol_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LevelSymbol<'s>, VerboseError<'s>> {
     let _identifier_parser = identifier_parser.verify_map(|a| match a {
         Identifier::SimpleIdentifier(("x", metadata)) => {
@@ -296,8 +296,8 @@ pub fn level_symbol_parser<'s>(
     .parse_next(input)
 }
 
-pub fn edge_symbol_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn edge_symbol_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EdgeSymbol<'s>, VerboseError<'s>> {
     let _identifier_parser = identifier_parser.verify_map(|a| match a {
         Identifier::SimpleIdentifier(("r", metadata)) => {

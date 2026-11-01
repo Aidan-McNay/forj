@@ -39,17 +39,31 @@ impl<'s> MemoizedState<'s> {
     }
 }
 
+#[derive(Debug)]
+pub(crate) struct ParserState<'s> {
+    pub last_err: Option<VerboseError<'s>>,
+    pub memoized: MemoizedState<'s>,
+}
+
+impl<'s> ParserState<'s> {
+    pub(crate) fn new(stream: &TokenSlice<'s, SpannedToken<'s>>) -> Self {
+        Self {
+            last_err: None,
+            memoized: MemoizedState::new(stream),
+        }
+    }
+}
+
 // Keep track of the largest error we've seen in repeat/opt branches
-pub(crate) type Tokens<'s> = Stateful<
-    TokenSlice<'s, SpannedToken<'s>>,
-    (Option<VerboseError<'s>>, MemoizedState<'s>),
->;
-impl<'s> Parser<Tokens<'s>, &'s SpannedToken<'s>, ErrMode<VerboseError<'s>>>
+pub(crate) type Tokens<'s, 'b> =
+    Stateful<TokenSlice<'s, SpannedToken<'s>>, &'b mut ParserState<'s>>;
+impl<'s: 'b, 'b>
+    Parser<Tokens<'s, 'b>, &'s SpannedToken<'s>, ErrMode<VerboseError<'s>>>
     for Token<'s>
 {
     fn parse_next(
         &mut self,
-        input: &mut Tokens<'s>,
+        input: &mut Tokens<'s, 'b>,
     ) -> ModalResult<&'s SpannedToken<'s>, VerboseError<'s>> {
         literal(*self).parse_next(input).map(|t| &t[0])
     }

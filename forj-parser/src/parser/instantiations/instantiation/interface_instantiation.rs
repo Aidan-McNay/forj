@@ -8,8 +8,8 @@ use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::Parser;
 
-pub fn interface_instantiation_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_instantiation_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceInstantiation<'s>, VerboseError<'s>> {
     (
         interface_identifier_parser,

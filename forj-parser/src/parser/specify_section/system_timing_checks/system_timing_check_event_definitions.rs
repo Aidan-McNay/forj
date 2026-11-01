@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn timing_check_event_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn timing_check_event_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TimingCheckEvent<'s>, VerboseError<'s>> {
     (
         opt_note(timing_check_event_control_parser),
@@ -21,8 +21,8 @@ pub fn timing_check_event_parser<'s>(
         .parse_next(input)
 }
 
-pub fn controlled_timing_check_event_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn controlled_timing_check_event_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ControlledTimingCheckEvent<'s>, VerboseError<'s>> {
     (
         timing_check_event_control_parser,
@@ -33,8 +33,8 @@ pub fn controlled_timing_check_event_parser<'s>(
         .parse_next(input)
 }
 
-pub fn timing_check_event_control_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn timing_check_event_control_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TimingCheckEventControl<'s>, VerboseError<'s>> {
     alt((
         token(Token::Posedge)
@@ -48,8 +48,8 @@ pub fn timing_check_event_control_parser<'s>(
     .parse_next(input)
 }
 
-pub fn specify_terminal_descriptor_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn specify_terminal_descriptor_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SpecifyTerminalDescriptor<'s>, VerboseError<'s>> {
     alt((
         specify_input_terminal_descriptor_parser
@@ -60,8 +60,8 @@ pub fn specify_terminal_descriptor_parser<'s>(
     .parse_next(input)
 }
 
-pub fn edge_control_specifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn edge_control_specifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EdgeControlSpecifier<'s>, VerboseError<'s>> {
     (
         token(Token::Edge),
@@ -74,8 +74,8 @@ pub fn edge_control_specifier_parser<'s>(
         .parse_next(input)
 }
 
-pub fn edge_descriptor_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn edge_descriptor_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EdgeDescriptor<'s>, VerboseError<'s>> {
     let _number_parser = unsigned_number_parser
         .verify_map(|UnsignedNumber(num, metadata)| {
@@ -200,8 +200,8 @@ pub fn edge_descriptor_parser<'s>(
     .parse_next(input)
 }
 
-pub fn timing_check_condition_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn timing_check_condition_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TimingCheckCondition<'s>, VerboseError<'s>> {
     alt((
         scalar_timing_check_condition_parser
@@ -289,8 +289,8 @@ fn scalar_constant<'s>(
     }
 }
 
-pub fn scalar_timing_check_condition_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn scalar_timing_check_condition_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ScalarTimingCheckCondition<'s>, VerboseError<'s>> {
     expression_parser
         .map(|a| match a {

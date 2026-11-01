@@ -17,8 +17,8 @@ enum ClassItemBody<'a> {
     Covergroup(CovergroupDeclaration<'a>),
 }
 
-pub fn class_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassItem<'s>, VerboseError<'s>> {
     let _class_item_body_parser = alt((
         class_property_parser.map(|a| ClassItemBody::Property(a)),
@@ -66,8 +66,8 @@ pub fn class_item_parser<'s>(
     .parse_next(input)
 }
 
-pub fn class_property_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_property_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassProperty<'s>, VerboseError<'s>> {
     let _data_parser = (
         repeat_note(property_qualifier_parser),
@@ -88,8 +88,8 @@ pub fn class_property_parser<'s>(
     alt((_const_parser, _data_parser)).parse_next(input)
 }
 
-pub fn constant_expression_or_class_new_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_expression_or_class_new_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantExpressionOrClassNew<'s>, VerboseError<'s>> {
     alt((
         class_new_parser.map(|a| ConstantExpressionOrClassNew::ClassNew(a)),
@@ -99,8 +99,8 @@ pub fn constant_expression_or_class_new_parser<'s>(
     .parse_next(input)
 }
 
-pub fn class_method_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_method_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassMethod<'s>, VerboseError<'s>> {
     let _task_parser = (
         repeat_note(method_qualifier_parser),
@@ -180,8 +180,8 @@ pub fn class_method_parser<'s>(
     }
 }
 
-pub fn list_of_arguments_or_default_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_arguments_or_default_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfArgumentsOrDefault<'s>, VerboseError<'s>> {
     alt((
         list_of_arguments_parser
@@ -192,8 +192,8 @@ pub fn list_of_arguments_or_default_parser<'s>(
     .parse_next(input)
 }
 
-pub fn class_constructor_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_constructor_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassConstructorDeclaration<'s>, VerboseError<'s>> {
     (
         token(Token::Function),
@@ -227,8 +227,8 @@ pub fn class_constructor_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn class_constructor_prototype_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_constructor_prototype_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassConstructorPrototype<'s>, VerboseError<'s>> {
     (
         token(Token::Function),
@@ -244,8 +244,8 @@ pub fn class_constructor_prototype_parser<'s>(
         .parse_next(input)
 }
 
-pub fn class_constructor_arg_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_constructor_arg_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassConstructorArgList<'s>, VerboseError<'s>> {
     (
         class_constructor_arg_parser,
@@ -255,8 +255,8 @@ pub fn class_constructor_arg_list_parser<'s>(
         .parse_next(input)
 }
 
-pub fn class_constructor_arg_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_constructor_arg_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassConstructorArg<'s>, VerboseError<'s>> {
     alt((
         tf_port_item_parser.map(|a| ClassConstructorArg::TfPort(Box::new(a))),
@@ -266,8 +266,8 @@ pub fn class_constructor_arg_parser<'s>(
     .parse_next(input)
 }
 
-pub fn interface_class_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_class_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceClassItem<'s>, VerboseError<'s>> {
     let _type_parser =
         type_declaration_parser.map(|a| InterfaceClassItem::Type(Box::new(a)));
@@ -292,8 +292,8 @@ pub fn interface_class_item_parser<'s>(
     .parse_next(input)
 }
 
-pub fn interface_class_method_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_class_method_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceClassMethod<'s>, VerboseError<'s>> {
     (
         token(Token::Pure),
@@ -305,8 +305,8 @@ pub fn interface_class_method_parser<'s>(
         .parse_next(input)
 }
 
-pub fn class_constraint_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_constraint_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassConstraint<'s>, VerboseError<'s>> {
     alt((
         constraint_prototype_parser
@@ -317,8 +317,8 @@ pub fn class_constraint_parser<'s>(
     .parse_next(input)
 }
 
-pub fn class_item_qualifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_item_qualifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassItemQualifier<'s>, VerboseError<'s>> {
     alt((
         token(Token::Static).map(|a| ClassItemQualifier::Static(a)),
@@ -328,8 +328,8 @@ pub fn class_item_qualifier_parser<'s>(
     .parse_next(input)
 }
 
-pub fn property_qualifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn property_qualifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PropertyQualifier<'s>, VerboseError<'s>> {
     alt((
         random_qualifier_parser.map(|a| PropertyQualifier::Random(Box::new(a))),
@@ -339,8 +339,8 @@ pub fn property_qualifier_parser<'s>(
     .parse_next(input)
 }
 
-pub fn random_qualifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn random_qualifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RandomQualifier<'s>, VerboseError<'s>> {
     alt((
         token(Token::Rand).map(|a| RandomQualifier::Rand(a)),
@@ -349,8 +349,8 @@ pub fn random_qualifier_parser<'s>(
     .parse_next(input)
 }
 
-pub fn method_qualifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn method_qualifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<MethodQualifier<'s>, VerboseError<'s>> {
     let _pure_virtual_parser =
         (opt_note(token(Token::Pure)), token(Token::Virtual))
@@ -360,8 +360,8 @@ pub fn method_qualifier_parser<'s>(
     alt((_pure_virtual_parser, _class_item_parser)).parse_next(input)
 }
 
-pub fn method_prototype_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn method_prototype_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<MethodPrototype<'s>, VerboseError<'s>> {
     alt((
         task_prototype_parser.map(|a| MethodPrototype::Task(Box::new(a))),

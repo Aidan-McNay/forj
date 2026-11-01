@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn list_of_path_inputs_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_path_inputs_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfPathInputs<'s>, VerboseError<'s>> {
     (
         specify_input_terminal_descriptor_parser,
@@ -23,8 +23,8 @@ pub fn list_of_path_inputs_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_path_outputs_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_path_outputs_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfPathOutputs<'s>, VerboseError<'s>> {
     (
         specify_output_terminal_descriptor_parser,
@@ -37,8 +37,8 @@ pub fn list_of_path_outputs_parser<'s>(
         .parse_next(input)
 }
 
-pub fn specify_input_terminal_descriptor_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn specify_input_terminal_descriptor_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SpecifyInputTerminalDescriptor<'s>, VerboseError<'s>> {
     (
         input_identifier_parser,
@@ -52,8 +52,8 @@ pub fn specify_input_terminal_descriptor_parser<'s>(
         .parse_next(input)
 }
 
-pub fn specify_output_terminal_descriptor_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn specify_output_terminal_descriptor_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SpecifyOutputTerminalDescriptor<'s>, VerboseError<'s>> {
     (
         output_identifier_parser,
@@ -67,8 +67,8 @@ pub fn specify_output_terminal_descriptor_parser<'s>(
         .parse_next(input)
 }
 
-pub fn input_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn input_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InputIdentifier<'s>, VerboseError<'s>> {
     alt((
         (
@@ -85,8 +85,8 @@ pub fn input_identifier_parser<'s>(
     .parse_next(input)
 }
 
-pub fn output_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn output_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<OutputIdentifier<'s>, VerboseError<'s>> {
     alt((
         (

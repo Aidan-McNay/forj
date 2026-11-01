@@ -96,9 +96,9 @@ pub struct VerboseError<'s> {
     pub reason: VerboseErrorReason<'s>,
 }
 
-impl<'s> ParserError<Tokens<'s>> for VerboseError<'s> {
+impl<'s: 'b, 'b> ParserError<Tokens<'s, 'b>> for VerboseError<'s> {
     type Inner = Self;
-    fn from_input(input: &Tokens<'s>) -> Self {
+    fn from_input(input: &Tokens<'s, 'b>) -> Self {
         match input.peek_token() {
             Some(token) => VerboseError {
                 span: token.1.clone(),
@@ -213,11 +213,11 @@ impl<'s> VerboseError<'s> {
     }
 }
 
-impl<'s> AddContext<Tokens<'s>, Token<'s>> for VerboseError<'s> {
+impl<'s: 'b, 'b> AddContext<Tokens<'s, 'b>, Token<'s>> for VerboseError<'s> {
     fn add_context(
         mut self,
-        _input: &Tokens<'s>,
-        _token_start: &<Tokens<'s> as Stream>::Checkpoint,
+        _input: &Tokens<'s, 'b>,
+        _token_start: &<Tokens<'s, 'b> as Stream>::Checkpoint,
         _context: Token<'s>,
     ) -> Self {
         match &mut self.reason {
@@ -234,11 +234,11 @@ impl<'s> AddContext<Tokens<'s>, Token<'s>> for VerboseError<'s> {
         self
     }
 }
-impl<'s> AddContext<Tokens<'s>, &'s str> for VerboseError<'s> {
+impl<'s: 'b, 'b> AddContext<Tokens<'s, 'b>, &'s str> for VerboseError<'s> {
     fn add_context(
         mut self,
-        _input: &Tokens<'s>,
-        _token_start: &<Tokens<'s> as Stream>::Checkpoint,
+        _input: &Tokens<'s, 'b>,
+        _token_start: &<Tokens<'s, 'b> as Stream>::Checkpoint,
         _context: &'s str,
     ) -> Self {
         match &mut self.reason {

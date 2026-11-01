@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::{alt, not, peek, terminated};
 
-pub fn unary_operator_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn unary_operator_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UnaryOperator<'s>, VerboseError<'s>> {
     alt((
         token(Token::Plus).map(|a| UnaryOperator::Plus(a)),
@@ -28,8 +28,8 @@ pub fn unary_operator_parser<'s>(
     .parse_next(input)
 }
 
-pub fn binary_operator_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn binary_operator_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<BinaryOperator<'s>, VerboseError<'s>> {
     // Note: Got errors when combining these into one `choice`, seemingly because Rust used
     // alphabetic identifiers for each parser type, and didn't like more than 26...
@@ -70,8 +70,8 @@ pub fn binary_operator_parser<'s>(
     alt((temp1, temp2)).parse_next(input)
 }
 
-pub fn inc_or_dec_operator_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn inc_or_dec_operator_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<IncOrDecOperator<'s>, VerboseError<'s>> {
     alt((
         token(Token::PlusPlus).map(|a| IncOrDecOperator::PlusPlus(a)),
@@ -80,8 +80,8 @@ pub fn inc_or_dec_operator_parser<'s>(
     .parse_next(input)
 }
 
-pub fn unary_module_path_operator_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn unary_module_path_operator_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UnaryModulePathOperator<'s>, VerboseError<'s>> {
     alt((
         token(Token::Exclamation)
@@ -100,8 +100,8 @@ pub fn unary_module_path_operator_parser<'s>(
     .parse_next(input)
 }
 
-pub fn binary_module_path_operator_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn binary_module_path_operator_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<BinaryModulePathOperator<'s>, VerboseError<'s>> {
     alt((
         token(Token::EqEq).map(|a| BinaryModulePathOperator::EqEq(a)),

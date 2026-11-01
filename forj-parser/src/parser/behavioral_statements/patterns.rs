@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn pattern_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn pattern_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Pattern<'s>, VerboseError<'s>> {
     let _parentheses_parser =
         (token(Token::Paren), pattern_parser, token(Token::EParen))
@@ -67,8 +67,8 @@ pub fn pattern_parser<'s>(
     .parse_next(input)
 }
 
-pub fn assignment_pattern_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn assignment_pattern_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AssignmentPattern<'s>, VerboseError<'s>> {
     let _empty_parser = (
         token(Token::Apost),
@@ -143,8 +143,8 @@ pub fn assignment_pattern_parser<'s>(
     .parse_next(input)
 }
 
-pub fn structure_pattern_key_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn structure_pattern_key_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<StructurePatternKey<'s>, VerboseError<'s>> {
     alt((
         member_identifier_parser
@@ -155,8 +155,8 @@ pub fn structure_pattern_key_parser<'s>(
     .parse_next(input)
 }
 
-pub fn array_pattern_key_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn array_pattern_key_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ArrayPatternKey<'s>, VerboseError<'s>> {
     alt((
         constant_expression_parser
@@ -167,8 +167,8 @@ pub fn array_pattern_key_parser<'s>(
     .parse_next(input)
 }
 
-pub fn assignment_pattern_key_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn assignment_pattern_key_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AssignmentPatternKey<'s>, VerboseError<'s>> {
     alt((
         token(Token::Default)
@@ -179,8 +179,8 @@ pub fn assignment_pattern_key_parser<'s>(
     .parse_next(input)
 }
 
-pub fn assignment_pattern_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn assignment_pattern_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AssignmentPatternExpression<'s>, VerboseError<'s>> {
     (
         opt_note(assignment_pattern_expression_type_parser),
@@ -190,8 +190,8 @@ pub fn assignment_pattern_expression_parser<'s>(
         .parse_next(input)
 }
 
-pub fn assignment_pattern_expression_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn assignment_pattern_expression_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AssignmentPatternExpressionType<'s>, VerboseError<'s>> {
     alt((
         ps_type_identifier_parser
@@ -206,16 +206,16 @@ pub fn assignment_pattern_expression_type_parser<'s>(
     .parse_next(input)
 }
 
-pub fn constant_assignment_pattern_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_assignment_pattern_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantAssignmentPatternExpression<'s>, VerboseError<'s>> {
     assignment_pattern_expression_parser
         .map(|a| ConstantAssignmentPatternExpression(a))
         .parse_next(input)
 }
 
-pub fn assignment_pattern_net_lvalue_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn assignment_pattern_net_lvalue_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AssignmentPatternNetLvalue<'s>, VerboseError<'s>> {
     (
         token(Token::Apost),
@@ -229,8 +229,8 @@ pub fn assignment_pattern_net_lvalue_parser<'s>(
 }
 
 // Inlined for variable_lvalue_parser
-pub fn assignment_pattern_variable_lvalue_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn assignment_pattern_variable_lvalue_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AssignmentPatternVariableLvalue<'s>, VerboseError<'s>> {
     (
         token(Token::Apost),

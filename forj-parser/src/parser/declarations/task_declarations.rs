@@ -9,8 +9,8 @@ use winnow::Parser;
 use winnow::combinator::{alt, peek, terminated};
 use winnow::error::ModalResult;
 
-pub fn task_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn task_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TaskDeclaration<'s>, VerboseError<'s>> {
     (
         token(Token::Task),
@@ -22,8 +22,8 @@ pub fn task_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn interface_identifier_or_class_scope_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_identifier_or_class_scope_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceIdentifierOrClassScope<'s>, VerboseError<'s>> {
     alt((
         (interface_identifier_parser, token(Token::Period)).map(|(a, b)| {
@@ -37,8 +37,8 @@ pub fn interface_identifier_or_class_scope_parser<'s>(
     .parse_next(input)
 }
 
-pub fn task_body_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn task_body_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TaskBodyDeclaration<'s>, VerboseError<'s>> {
     let _tf_parser = (
         opt_note(interface_identifier_or_class_scope_parser),
@@ -85,8 +85,8 @@ pub fn task_body_declaration_parser<'s>(
     Ok(result)
 }
 
-pub fn tf_item_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn tf_item_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TfItemDeclaration<'s>, VerboseError<'s>> {
     alt((
         block_item_declaration_parser
@@ -96,8 +96,8 @@ pub fn tf_item_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn tf_port_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn tf_port_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TfPortList<'s>, VerboseError<'s>> {
     (
         tf_port_item_parser,
@@ -107,8 +107,8 @@ pub fn tf_port_list_parser<'s>(
         .parse_next(input)
 }
 
-pub fn tf_port_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn tf_port_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TfPortItem<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -125,8 +125,8 @@ pub fn tf_port_item_parser<'s>(
         .parse_next(input)
 }
 
-fn data_type_or_implicit_parser_tf_port_item<'s>(
-    input: &mut Tokens<'s>,
+fn data_type_or_implicit_parser_tf_port_item<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataTypeOrImplicit<'s>, VerboseError<'s>> {
     alt((
         terminated(
@@ -157,8 +157,8 @@ fn data_type_or_implicit_parser_tf_port_item<'s>(
     .parse_next(input)
 }
 
-pub fn tf_port_direction_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn tf_port_direction_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TfPortDirection<'s>, VerboseError<'s>> {
     alt((
         port_direction_parser.map(|a| TfPortDirection::Port(Box::new(a))),
@@ -172,8 +172,8 @@ pub fn tf_port_direction_parser<'s>(
     .parse_next(input)
 }
 
-pub fn tf_port_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn tf_port_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TfPortDeclaration<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -187,8 +187,8 @@ pub fn tf_port_declaration_parser<'s>(
         .parse_next(input)
 }
 
-fn data_type_or_implicit_parser_tf_port_declaration<'s>(
-    input: &mut Tokens<'s>,
+fn data_type_or_implicit_parser_tf_port_declaration<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataTypeOrImplicit<'s>, VerboseError<'s>> {
     alt((
         terminated(data_type_parser, peek(port_identifier_parser))
@@ -199,8 +199,8 @@ fn data_type_or_implicit_parser_tf_port_declaration<'s>(
     .parse_next(input)
 }
 
-pub fn task_prototype_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn task_prototype_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TaskPrototype<'s>, VerboseError<'s>> {
     (
         token(Token::Task),
@@ -216,8 +216,8 @@ pub fn task_prototype_parser<'s>(
         .parse_next(input)
 }
 
-pub fn opt_dynamic_override_specifiers_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn opt_dynamic_override_specifiers_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Option<DynamicOverrideSpecifiers<'s>>, VerboseError<'s>> {
     opt_note(dynamic_override_specifiers_parser)
         .map(|a| match a {
@@ -227,8 +227,8 @@ pub fn opt_dynamic_override_specifiers_parser<'s>(
         .parse_next(input)
 }
 
-pub fn dynamic_override_specifiers_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dynamic_override_specifiers_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DynamicOverrideSpecifiers<'s>, VerboseError<'s>> {
     (
         opt_note(initial_or_extends_specifier_parser),
@@ -238,8 +238,8 @@ pub fn dynamic_override_specifiers_parser<'s>(
         .parse_next(input)
 }
 
-pub fn initial_or_extends_specifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn initial_or_extends_specifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InitialOrExtendsSpecifier<'s>, VerboseError<'s>> {
     alt((
         (token(Token::Colon), token(Token::Initial))
@@ -250,8 +250,8 @@ pub fn initial_or_extends_specifier_parser<'s>(
     .parse_next(input)
 }
 
-pub fn final_specifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn final_specifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FinalSpecifier<'s>, VerboseError<'s>> {
     (token(Token::Colon), token(Token::Final))
         .map(|(a, b)| FinalSpecifier(a, b))

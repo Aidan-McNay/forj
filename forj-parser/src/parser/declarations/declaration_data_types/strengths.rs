@@ -9,8 +9,8 @@ use winnow::Parser;
 use winnow::combinator::alt;
 use winnow::error::ModalResult;
 
-pub fn drive_strength_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn drive_strength_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DriveStrength<'s>, VerboseError<'s>> {
     alt((
         (
@@ -65,8 +65,8 @@ pub fn drive_strength_parser<'s>(
     .parse_next(input)
 }
 
-pub fn strength0_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn strength0_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Strength0<'s>, VerboseError<'s>> {
     alt((
         token(Token::Supply0).map(|a| Strength0::Supply0(a)),
@@ -77,8 +77,8 @@ pub fn strength0_parser<'s>(
     .parse_next(input)
 }
 
-pub fn strength1_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn strength1_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Strength1<'s>, VerboseError<'s>> {
     alt((
         token(Token::Supply1).map(|a| Strength1::Supply1(a)),
@@ -89,8 +89,8 @@ pub fn strength1_parser<'s>(
     .parse_next(input)
 }
 
-pub fn charge_strength_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn charge_strength_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ChargeStrength<'s>, VerboseError<'s>> {
     let charge_strength_size_parser = alt((
         token(Token::Small).map(|a| ChargeStrengthSize::Small(a)),

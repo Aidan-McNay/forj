@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn pulldown_strength_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn pulldown_strength_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PulldownStrength<'s>, VerboseError<'s>> {
     alt((
         (
@@ -39,8 +39,8 @@ pub fn pulldown_strength_parser<'s>(
     .parse_next(input)
 }
 
-pub fn pullup_strength_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn pullup_strength_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PullupStrength<'s>, VerboseError<'s>> {
     alt((
         (

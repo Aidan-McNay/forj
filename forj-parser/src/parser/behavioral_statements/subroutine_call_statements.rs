@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn subroutine_call_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn subroutine_call_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SubroutineCallStatement<'s>, VerboseError<'s>> {
     let _subroutine_parser = (subroutine_call_parser, token(Token::SColon))
         .map(|(a, b)| SubroutineCallStatement::Subroutine(Box::new((a, b))));

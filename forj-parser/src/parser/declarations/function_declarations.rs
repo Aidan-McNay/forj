@@ -10,8 +10,8 @@ use winnow::Parser;
 use winnow::combinator::{alt, peek, terminated};
 use winnow::token::any;
 
-pub fn function_data_type_or_implicit_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn function_data_type_or_implicit_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FunctionDataTypeOrImplicit<'s>, VerboseError<'s>> {
     alt((
         terminated(
@@ -34,8 +34,8 @@ pub fn function_data_type_or_implicit_parser<'s>(
     .parse_next(input)
 }
 
-pub fn function_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn function_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FunctionDeclaration<'s>, VerboseError<'s>> {
     (
         token(Token::Function),
@@ -47,8 +47,8 @@ pub fn function_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn function_body_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn function_body_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FunctionBodyDeclaration<'s>, VerboseError<'s>> {
     let _tf_parser = (
         function_data_type_or_implicit_parser,
@@ -99,8 +99,8 @@ pub fn function_body_declaration_parser<'s>(
     Ok(result)
 }
 
-pub fn function_prototype_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn function_prototype_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FunctionPrototype<'s>, VerboseError<'s>> {
     (
         token(Token::Function),
@@ -117,8 +117,8 @@ pub fn function_prototype_parser<'s>(
         .parse_next(input)
 }
 
-pub fn dpi_import_export_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dpi_import_export_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DpiImportExport<'s>, VerboseError<'s>> {
     let _function_import_parser = (
         token(Token::Import),
@@ -173,8 +173,8 @@ pub fn dpi_import_export_parser<'s>(
     .parse_next(input)
 }
 
-pub fn dpi_spec_string_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dpi_spec_string_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DpiSpecString<'s>, VerboseError<'s>> {
     any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
         Token::StringLiteral(string_text) => {
@@ -194,8 +194,8 @@ pub fn dpi_spec_string_parser<'s>(
     .parse_next(input)
 }
 
-pub fn dpi_function_import_property_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dpi_function_import_property_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DpiFunctionImportProperty<'s>, VerboseError<'s>> {
     alt((
         token(Token::Context).map(|a| DpiFunctionImportProperty::Context(a)),
@@ -204,24 +204,24 @@ pub fn dpi_function_import_property_parser<'s>(
     .parse_next(input)
 }
 
-pub fn dpi_task_import_property_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dpi_task_import_property_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DpiTaskImportProperty<'s>, VerboseError<'s>> {
     token(Token::Context)
         .map(|a| DpiTaskImportProperty(a))
         .parse_next(input)
 }
 
-pub fn dpi_function_proto_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dpi_function_proto_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DpiFunctionProto<'s>, VerboseError<'s>> {
     function_prototype_parser
         .map(|a| DpiFunctionProto(a))
         .parse_next(input)
 }
 
-pub fn dpi_task_proto_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dpi_task_proto_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DpiTaskProto<'s>, VerboseError<'s>> {
     task_prototype_parser
         .map(|a| DpiTaskProto(a))

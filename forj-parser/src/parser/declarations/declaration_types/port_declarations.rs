@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn inout_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn inout_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InoutDeclaration<'s>, VerboseError<'s>> {
     (
         token(Token::Inout),
@@ -21,8 +21,8 @@ pub fn inout_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn input_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn input_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InputDeclaration<'s>, VerboseError<'s>> {
     let net_input_declaration_parser = (
         token(Token::Input),
@@ -47,8 +47,8 @@ pub fn input_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn output_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn output_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<OutputDeclaration<'s>, VerboseError<'s>> {
     let net_output_declaration_parser = (
         token(Token::Output),
@@ -73,8 +73,8 @@ pub fn output_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn interface_port_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_port_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfacePortDeclaration<'s>, VerboseError<'s>> {
     let interface_parser = (
         interface_identifier_parser,
@@ -93,8 +93,8 @@ pub fn interface_port_declaration_parser<'s>(
     alt((interface_parser, modport_parser)).parse_next(input)
 }
 
-pub fn ref_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ref_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RefDeclaration<'s>, VerboseError<'s>> {
     (
         token(Token::Ref),

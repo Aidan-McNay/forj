@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn clocking_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn clocking_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClockingDeclaration<'s>, VerboseError<'s>> {
     let _local_parser = (
         opt_note(token(Token::Default)),
@@ -56,8 +56,8 @@ pub fn clocking_declaration_parser<'s>(
     Ok(result)
 }
 
-pub fn clocking_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn clocking_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClockingItem<'s>, VerboseError<'s>> {
     let _default_parser = (
         token(Token::Default),
@@ -79,8 +79,8 @@ pub fn clocking_item_parser<'s>(
     alt((_default_parser, _decl_parser, _assert_parser)).parse_next(input)
 }
 
-pub fn default_skew_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn default_skew_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DefaultSkew<'s>, VerboseError<'s>> {
     let _input_parser = (token(Token::Input), clocking_skew_parser);
     let _input_or_input_output_parser = (
@@ -96,8 +96,8 @@ pub fn default_skew_parser<'s>(
     alt((_input_or_input_output_parser, _output_parser)).parse_next(input)
 }
 
-pub fn clocking_direction_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn clocking_direction_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClockingDirection<'s>, VerboseError<'s>> {
     let _input_parser = (token(Token::Input), opt_note(clocking_skew_parser));
     let _input_or_input_output_parser = (
@@ -118,8 +118,8 @@ pub fn clocking_direction_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_clocking_decl_assign_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_clocking_decl_assign_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfClockingDeclAssign<'s>, VerboseError<'s>> {
     (
         clocking_decl_assign_parser,
@@ -129,8 +129,8 @@ pub fn list_of_clocking_decl_assign_parser<'s>(
         .parse_next(input)
 }
 
-pub fn clocking_decl_assign_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn clocking_decl_assign_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClockingDeclAssign<'s>, VerboseError<'s>> {
     (
         signal_identifier_parser,
@@ -140,8 +140,8 @@ pub fn clocking_decl_assign_parser<'s>(
         .parse_next(input)
 }
 
-pub fn clocking_skew_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn clocking_skew_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClockingSkew<'s>, VerboseError<'s>> {
     let _edge_parser = (edge_identifier_parser, opt_note(delay_control_parser))
         .map(|(a, b)| ClockingSkew::Edge(Box::new((a, b))));
@@ -150,8 +150,8 @@ pub fn clocking_skew_parser<'s>(
     alt((_edge_parser, _delay_parser)).parse_next(input)
 }
 
-pub fn clocking_drive_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn clocking_drive_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClockingDrive<'s>, VerboseError<'s>> {
     (
         clockvar_expression_parser,
@@ -163,8 +163,8 @@ pub fn clocking_drive_parser<'s>(
         .parse_next(input)
 }
 
-pub fn cycle_delay_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn cycle_delay_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CycleDelay<'s>, VerboseError<'s>> {
     let _integral_parser = (token(Token::PoundPound), integral_number_parser)
         .map(|(a, b)| CycleDelay::Integral(Box::new((a, b))));
@@ -181,16 +181,16 @@ pub fn cycle_delay_parser<'s>(
         .parse_next(input)
 }
 
-pub fn clockvar_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn clockvar_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Clockvar<'s>, VerboseError<'s>> {
     hierarchical_identifier_parser
         .map(|a| Clockvar(a))
         .parse_next(input)
 }
 
-pub fn clockvar_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn clockvar_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClockvarExpression<'s>, VerboseError<'s>> {
     (clockvar_parser, select_parser)
         .map(|(a, b)| ClockvarExpression(a, b))

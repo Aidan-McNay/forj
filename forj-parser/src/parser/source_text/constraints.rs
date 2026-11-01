@@ -8,8 +8,8 @@ use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::combinator::alt;
 
-pub fn constraint_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constraint_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstraintDeclaration<'s>, VerboseError<'s>> {
     (
         opt_note(token(Token::Static)),
@@ -22,8 +22,8 @@ pub fn constraint_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn constraint_block_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constraint_block_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstraintBlock<'s>, VerboseError<'s>> {
     (
         token(Token::Brace),
@@ -34,8 +34,8 @@ pub fn constraint_block_parser<'s>(
         .parse_next(input)
 }
 
-pub fn constraint_block_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constraint_block_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstraintBlockItem<'s>, VerboseError<'s>> {
     let _ordering_parser = (
         token(Token::Solve),
@@ -52,8 +52,8 @@ pub fn constraint_block_item_parser<'s>(
     alt((_ordering_parser, _expression_parser)).parse_next(input)
 }
 
-pub fn solve_before_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn solve_before_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SolveBeforeList<'s>, VerboseError<'s>> {
     (
         constraint_primary_parser,
@@ -63,8 +63,8 @@ pub fn solve_before_list_parser<'s>(
         .parse_next(input)
 }
 
-pub fn constraint_primary_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constraint_primary_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstraintPrimary<'s>, VerboseError<'s>> {
     (
         opt_note(implicit_class_handle_or_class_scope_parser),
@@ -76,8 +76,8 @@ pub fn constraint_primary_parser<'s>(
         .parse_next(input)
 }
 
-pub fn constraint_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constraint_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstraintExpression<'s>, VerboseError<'s>> {
     let _expression_parser = (
         opt_note(token(Token::Soft)),
@@ -140,8 +140,8 @@ pub fn constraint_expression_parser<'s>(
     .parse_next(input)
 }
 
-pub fn uniqueness_constraint_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn uniqueness_constraint_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UniquenessConstraint<'s>, VerboseError<'s>> {
     (
         token(Token::Unique),
@@ -153,8 +153,8 @@ pub fn uniqueness_constraint_parser<'s>(
         .parse_next(input)
 }
 
-pub fn constraint_set_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constraint_set_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstraintSet<'s>, VerboseError<'s>> {
     let _single_parser = constraint_expression_parser
         .map(|a| ConstraintSet::Single(Box::new(a)));
@@ -167,8 +167,8 @@ pub fn constraint_set_parser<'s>(
     alt((_single_parser, _multi_parser)).parse_next(input)
 }
 
-pub fn expression_or_dist_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn expression_or_dist_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ExpressionOrDist<'s>, VerboseError<'s>> {
     (
         expression_parser,
@@ -183,8 +183,8 @@ pub fn expression_or_dist_parser<'s>(
         .parse_next(input)
 }
 
-pub fn dist_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dist_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DistList<'s>, VerboseError<'s>> {
     (
         dist_item_parser,
@@ -194,8 +194,8 @@ pub fn dist_list_parser<'s>(
         .parse_next(input)
 }
 
-pub fn dist_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dist_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DistItem<'s>, VerboseError<'s>> {
     let _value_parser = (value_range_parser, opt_note(dist_weight_parser))
         .map(|(a, b)| DistItem::Value(Box::new((a, b))));
@@ -208,8 +208,8 @@ pub fn dist_item_parser<'s>(
     alt((_value_parser, _default_parser)).parse_next(input)
 }
 
-pub fn dist_weight_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dist_weight_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DistWeight<'s>, VerboseError<'s>> {
     let _indv_weight_parser = (token(Token::ColonEq), expression_parser)
         .map(|(a, b)| DistWeight::IndvWeight(a, b));
@@ -218,8 +218,8 @@ pub fn dist_weight_parser<'s>(
     alt((_indv_weight_parser, _range_weight_parser)).parse_next(input)
 }
 
-pub fn constraint_prototype_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constraint_prototype_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstraintPrototype<'s>, VerboseError<'s>> {
     (
         opt_note(constraint_prototype_qualifier_parser),
@@ -233,8 +233,8 @@ pub fn constraint_prototype_parser<'s>(
         .parse_next(input)
 }
 
-pub fn constraint_prototype_qualifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constraint_prototype_qualifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstraintPrototypeQualifier<'s>, VerboseError<'s>> {
     alt((
         token(Token::Extern).map(|a| ConstraintPrototypeQualifier::Extern(a)),
@@ -243,8 +243,8 @@ pub fn constraint_prototype_qualifier_parser<'s>(
     .parse_next(input)
 }
 
-pub fn extern_constraint_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn extern_constraint_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ExternConstraintDeclaration<'s>, VerboseError<'s>> {
     (
         opt_note(token(Token::Static)),

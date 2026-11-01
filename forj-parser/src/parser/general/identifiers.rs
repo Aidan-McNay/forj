@@ -11,32 +11,32 @@ use winnow::combinator::{alt, peek, terminated};
 use winnow::token::any;
 
 #[allow(dead_code)] // Never used
-pub fn array_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn array_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ArrayIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| ArrayIdentifier(a))
         .parse_next(input)
 }
 
-pub fn block_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn block_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<BlockIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| BlockIdentifier(a))
         .parse_next(input)
 }
 
-pub fn bin_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn bin_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<BinIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| BinIdentifier(a))
         .parse_next(input)
 }
 
-pub fn c_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn c_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CIdentifier<'s>, VerboseError<'s>> {
     (
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
@@ -98,72 +98,72 @@ mod c_identifier {
     }
 }
 
-pub fn cell_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn cell_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CellIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| CellIdentifier(a))
         .parse_next(input)
 }
 
-pub fn checker_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn checker_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CheckerIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| CheckerIdentifier(a))
         .parse_next(input)
 }
 
-pub fn class_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| ClassIdentifier(a))
         .parse_next(input)
 }
 
-pub fn class_variable_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_variable_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassVariableIdentifier<'s>, VerboseError<'s>> {
     variable_identifier_parser
         .map(|a| ClassVariableIdentifier(a))
         .parse_next(input)
 }
 
-pub fn clocking_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn clocking_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClockingIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| ClockingIdentifier(a))
         .parse_next(input)
 }
 
-pub fn config_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn config_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConfigIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| ConfigIdentifier(a))
         .parse_next(input)
 }
 
-pub fn const_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn const_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| ConstIdentifier(a))
         .parse_next(input)
 }
 
-pub fn constraint_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constraint_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstraintIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| ConstraintIdentifier(a))
         .parse_next(input)
 }
 
-pub fn covergroup_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn covergroup_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CovergroupIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| CovergroupIdentifier(a))
@@ -171,40 +171,40 @@ pub fn covergroup_identifier_parser<'s>(
 }
 
 #[allow(dead_code)] // Never used
-pub fn covergroup_variable_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn covergroup_variable_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CovergroupVariableIdentifier<'s>, VerboseError<'s>> {
     variable_identifier_parser
         .map(|a| CovergroupVariableIdentifier(a))
         .parse_next(input)
 }
 
-pub fn cover_point_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn cover_point_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CoverPointIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| CoverPointIdentifier(a))
         .parse_next(input)
 }
 
-pub fn cross_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn cross_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CrossIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| CrossIdentifier(a))
         .parse_next(input)
 }
 
-pub fn dynamic_array_variable_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dynamic_array_variable_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DynamicArrayVariableIdentifier<'s>, VerboseError<'s>> {
     variable_identifier_parser
         .map(|a| DynamicArrayVariableIdentifier(a))
         .parse_next(input)
 }
 
-pub fn enum_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn enum_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EnumIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| EnumIdentifier(a))
@@ -212,72 +212,72 @@ pub fn enum_identifier_parser<'s>(
 }
 
 #[allow(dead_code)] // Never used
-pub fn formal_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn formal_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FormalIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| FormalIdentifier(a))
         .parse_next(input)
 }
 
-pub fn formal_port_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn formal_port_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FormalPortIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| FormalPortIdentifier(a))
         .parse_next(input)
 }
 
-pub fn function_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn function_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FunctionIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| FunctionIdentifier(a))
         .parse_next(input)
 }
 
-pub fn generate_block_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn generate_block_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<GenerateBlockIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| GenerateBlockIdentifier(a))
         .parse_next(input)
 }
 
-pub fn genvar_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn genvar_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<GenvarIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| GenvarIdentifier(a))
         .parse_next(input)
 }
 
-pub fn hierarchical_array_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn hierarchical_array_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<HierarchicalArrayIdentifier<'s>, VerboseError<'s>> {
     hierarchical_identifier_parser
         .map(|a| HierarchicalArrayIdentifier(a))
         .parse_next(input)
 }
 
-pub fn hierarchical_block_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn hierarchical_block_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<HierarchicalBlockIdentifier<'s>, VerboseError<'s>> {
     hierarchical_identifier_parser
         .map(|a| HierarchicalBlockIdentifier(a))
         .parse_next(input)
 }
 
-pub fn hierarchical_event_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn hierarchical_event_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<HierarchicalEventIdentifier<'s>, VerboseError<'s>> {
     hierarchical_identifier_parser
         .map(|a| HierarchicalEventIdentifier(a))
         .parse_next(input)
 }
 
-pub fn hierarchical_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn hierarchical_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<HierarchicalIdentifier<'s>, VerboseError<'s>> {
     let identifiers_parser = repeat_note(terminated(
         (
@@ -457,64 +457,64 @@ mod hierarchical_identifier {
     }
 }
 
-pub fn hierarchical_net_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn hierarchical_net_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<HierarchicalNetIdentifier<'s>, VerboseError<'s>> {
     hierarchical_identifier_parser
         .map(|a| HierarchicalNetIdentifier(a))
         .parse_next(input)
 }
 
-pub fn hierarchical_parameter_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn hierarchical_parameter_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<HierarchicalParameterIdentifier<'s>, VerboseError<'s>> {
     hierarchical_identifier_parser
         .map(|a| HierarchicalParameterIdentifier(a))
         .parse_next(input)
 }
 
-pub fn hierarchical_property_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn hierarchical_property_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<HierarchicalPropertyIdentifier<'s>, VerboseError<'s>> {
     hierarchical_identifier_parser
         .map(|a| HierarchicalPropertyIdentifier(a))
         .parse_next(input)
 }
 
-pub fn hierarchical_sequence_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn hierarchical_sequence_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<HierarchicalSequenceIdentifier<'s>, VerboseError<'s>> {
     hierarchical_identifier_parser
         .map(|a| HierarchicalSequenceIdentifier(a))
         .parse_next(input)
 }
 
-pub fn hierarchical_task_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn hierarchical_task_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<HierarchicalTaskIdentifier<'s>, VerboseError<'s>> {
     hierarchical_identifier_parser
         .map(|a| HierarchicalTaskIdentifier(a))
         .parse_next(input)
 }
 
-pub fn hierarchical_tf_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn hierarchical_tf_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<HierarchicalTfIdentifier<'s>, VerboseError<'s>> {
     hierarchical_identifier_parser
         .map(|a| HierarchicalTfIdentifier(a))
         .parse_next(input)
 }
 
-pub fn hierarchical_variable_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn hierarchical_variable_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<HierarchicalVariableIdentifier<'s>, VerboseError<'s>> {
     hierarchical_identifier_parser
         .map(|a| HierarchicalVariableIdentifier(a))
         .parse_next(input)
 }
 
-pub fn identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Identifier<'s>, VerboseError<'s>> {
     (
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
@@ -597,128 +597,128 @@ mod identifier {
     }
 }
 
-pub fn index_variable_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn index_variable_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<IndexVariableIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| IndexVariableIdentifier(a))
         .parse_next(input)
 }
 
-pub fn interface_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| InterfaceIdentifier(a))
         .parse_next(input)
 }
 
-pub fn interface_port_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_port_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfacePortIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| InterfacePortIdentifier(a))
         .parse_next(input)
 }
 
-pub fn inout_port_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn inout_port_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InoutPortIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| InoutPortIdentifier(a))
         .parse_next(input)
 }
 
-pub fn input_port_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn input_port_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InputPortIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| InputPortIdentifier(a))
         .parse_next(input)
 }
 
-pub fn instance_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn instance_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InstanceIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| InstanceIdentifier(a))
         .parse_next(input)
 }
 
-pub fn library_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn library_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LibraryIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| LibraryIdentifier(a))
         .parse_next(input)
 }
 
-pub fn member_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn member_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<MemberIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| MemberIdentifier(a))
         .parse_next(input)
 }
 
-pub fn method_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn method_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<MethodIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| MethodIdentifier(a))
         .parse_next(input)
 }
 
-pub fn modport_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn modport_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModportIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| ModportIdentifier(a))
         .parse_next(input)
 }
 
-pub fn module_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModuleIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| ModuleIdentifier(a))
         .parse_next(input)
 }
 
-pub fn net_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn net_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NetIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| NetIdentifier(a))
         .parse_next(input)
 }
 
-pub fn nettype_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn nettype_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NettypeIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| NettypeIdentifier(a))
         .parse_next(input)
 }
 
-pub fn output_port_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn output_port_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<OutputPortIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| OutputPortIdentifier(a))
         .parse_next(input)
 }
 
-pub fn package_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn package_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PackageIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| PackageIdentifier(a))
         .parse_next(input)
 }
 
-pub fn package_scope_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn package_scope_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PackageScope<'s>, VerboseError<'s>> {
     let _identifier_parser =
         (package_identifier_parser, token(Token::ColonColon))
@@ -759,72 +759,72 @@ mod package_scope {
     }
 }
 
-pub fn parameter_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn parameter_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ParameterIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| ParameterIdentifier(a))
         .parse_next(input)
 }
 
-pub fn port_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn port_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PortIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| PortIdentifier(a))
         .parse_next(input)
 }
 
-pub fn program_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn program_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ProgramIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| ProgramIdentifier(a))
         .parse_next(input)
 }
 
-pub fn property_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn property_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PropertyIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| PropertyIdentifier(a))
         .parse_next(input)
 }
 
-pub fn ps_class_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ps_class_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PsClassIdentifier<'s>, VerboseError<'s>> {
     (opt_note(package_scope_parser), class_identifier_parser)
         .map(|(a, b)| PsClassIdentifier(a, b))
         .parse_next(input)
 }
 
-pub fn ps_covergroup_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ps_covergroup_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PsCovergroupIdentifier<'s>, VerboseError<'s>> {
     (opt_note(package_scope_parser), covergroup_identifier_parser)
         .map(|(a, b)| PsCovergroupIdentifier(a, b))
         .parse_next(input)
 }
 
-pub fn ps_checker_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ps_checker_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PsCheckerIdentifier<'s>, VerboseError<'s>> {
     (opt_note(package_scope_parser), checker_identifier_parser)
         .map(|(a, b)| PsCheckerIdentifier(a, b))
         .parse_next(input)
 }
 
-pub fn ps_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ps_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PsIdentifier<'s>, VerboseError<'s>> {
     (opt_note(package_scope_parser), identifier_parser)
         .map(|(a, b)| PsIdentifier(a, b))
         .parse_next(input)
 }
 
-pub fn ps_or_hierarchical_array_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ps_or_hierarchical_array_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PsOrHierarchicalArrayIdentifier<'s>, VerboseError<'s>> {
     (
         opt_note(implicit_class_handle_or_class_scope_or_package_scope_parser),
@@ -834,8 +834,8 @@ pub fn ps_or_hierarchical_array_identifier_parser<'s>(
         .parse_next(input)
 }
 
-pub fn ps_or_hierarchical_net_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ps_or_hierarchical_net_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PsOrHierarchicalNetIdentifier<'s>, VerboseError<'s>> {
     let opt_scope = opt_note(package_scope_parser).parse_next(input)?;
     match opt_scope {
@@ -852,8 +852,8 @@ pub fn ps_or_hierarchical_net_identifier_parser<'s>(
     }
 }
 
-pub fn ps_or_hierarchical_property_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ps_or_hierarchical_property_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PsOrHierarchicalPropertyIdentifier<'s>, VerboseError<'s>> {
     let opt_scope = opt_note(package_scope_parser).parse_next(input)?;
     match opt_scope {
@@ -870,8 +870,8 @@ pub fn ps_or_hierarchical_property_identifier_parser<'s>(
     }
 }
 
-pub fn ps_or_hierarchical_sequence_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ps_or_hierarchical_sequence_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PsOrHierarchicalSequenceIdentifier<'s>, VerboseError<'s>> {
     let opt_scope = opt_note(package_scope_parser).parse_next(input)?;
     match opt_scope {
@@ -888,8 +888,8 @@ pub fn ps_or_hierarchical_sequence_identifier_parser<'s>(
     }
 }
 
-pub fn ps_or_hierarchical_tf_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ps_or_hierarchical_tf_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PsOrHierarchicalTfIdentifier<'s>, VerboseError<'s>> {
     let opt_scope =
         opt_note(implicit_class_handle_or_class_scope_or_package_scope_parser)
@@ -908,8 +908,8 @@ pub fn ps_or_hierarchical_tf_identifier_parser<'s>(
     }
 }
 
-pub fn package_or_class_scope_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn package_or_class_scope_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PackageOrClassScope<'s>, VerboseError<'s>> {
     alt((
         class_scope_parser.map(|a| PackageOrClassScope::ClassScope(a)),
@@ -918,8 +918,8 @@ pub fn package_or_class_scope_parser<'s>(
     .parse_next(input)
 }
 
-pub fn ps_parameter_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ps_parameter_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PsParameterIdentifier<'s>, VerboseError<'s>> {
     let opt_scope =
         opt_note(package_or_class_scope_parser).parse_next(input)?;
@@ -948,8 +948,8 @@ pub fn ps_parameter_identifier_parser<'s>(
     }
 }
 
-pub fn ps_type_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ps_type_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PsTypeIdentifier<'s>, VerboseError<'s>> {
     let _scope_parser = alt((
         (token(Token::Local), token(Token::ColonColon))
@@ -962,32 +962,32 @@ pub fn ps_type_identifier_parser<'s>(
         .parse_next(input)
 }
 
-pub fn rs_production_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn rs_production_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RsProductionIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| RsProductionIdentifier(a))
         .parse_next(input)
 }
 
-pub fn sequence_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn sequence_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequenceIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| SequenceIdentifier(a))
         .parse_next(input)
 }
 
-pub fn signal_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn signal_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SignalIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| SignalIdentifier(a))
         .parse_next(input)
 }
 
-pub fn specparam_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn specparam_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SpecparamIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| SpecparamIdentifier(a))
@@ -1000,8 +1000,8 @@ const SYSTEM_TF_ERROR: &str = "$error";
 const SYSTEM_TF_WARNING: &str = "$warning";
 const SYSTEM_TF_INFO: &str = "$info";
 
-pub fn system_tf_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn system_tf_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SystemTfIdentifier<'s>, VerboseError<'s>> {
     let general_system_tf_identifier_parser = (
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
@@ -1033,54 +1033,54 @@ pub fn system_tf_identifier_parser<'s>(
     .parse_next(input)
 }
 
-pub fn task_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn task_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TaskIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| TaskIdentifier(a))
         .parse_next(input)
 }
 
-pub fn tf_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn tf_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TfIdentifier<'s>, VerboseError<'s>> {
     identifier_parser.map(|a| TfIdentifier(a)).parse_next(input)
 }
 
-pub fn terminal_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn terminal_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TerminalIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| TerminalIdentifier(a))
         .parse_next(input)
 }
 
-pub fn topmodule_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn topmodule_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TopmoduleIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| TopmoduleIdentifier(a))
         .parse_next(input)
 }
 
-pub fn type_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn type_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TypeIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| TypeIdentifier(a))
         .parse_next(input)
 }
 
-pub fn udp_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn udp_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UdpIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| UdpIdentifier(a))
         .parse_next(input)
 }
 
-pub fn variable_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn variable_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<VariableIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| VariableIdentifier(a))

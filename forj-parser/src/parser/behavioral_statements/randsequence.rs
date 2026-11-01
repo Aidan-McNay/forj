@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::{alt, peek, terminated};
 
-pub fn randsequence_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn randsequence_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RandsequenceStatement<'s>, VerboseError<'s>> {
     (
         token(Token::Randsequence),
@@ -25,8 +25,8 @@ pub fn randsequence_statement_parser<'s>(
         .parse_next(input)
 }
 
-pub fn rs_production_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn rs_production_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RsProduction<'s>, VerboseError<'s>> {
     (
         opt_note(terminated(
@@ -48,8 +48,8 @@ pub fn rs_production_parser<'s>(
         .parse_next(input)
 }
 
-pub fn rs_rule_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn rs_rule_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RsRule<'s>, VerboseError<'s>> {
     (
         rs_production_list_parser,
@@ -63,8 +63,8 @@ pub fn rs_rule_parser<'s>(
         .parse_next(input)
 }
 
-pub fn rs_production_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn rs_production_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RsProductionList<'s>, VerboseError<'s>> {
     let _producers_parser = (rs_prod_parser, repeat_note(rs_prod_parser))
         .map(|(a, b)| RsProductionList::Producers(Box::new((a, b))));
@@ -86,8 +86,8 @@ pub fn rs_production_list_parser<'s>(
     alt((_producers_parser, _join_parser)).parse_next(input)
 }
 
-pub fn rs_weight_specification_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn rs_weight_specification_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RsWeightSpecification<'s>, VerboseError<'s>> {
     alt((
         integral_number_parser
@@ -100,8 +100,8 @@ pub fn rs_weight_specification_parser<'s>(
     .parse_next(input)
 }
 
-pub fn rs_code_block_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn rs_code_block_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RsCodeBlock<'s>, VerboseError<'s>> {
     (
         token(Token::Brace),
@@ -113,8 +113,8 @@ pub fn rs_code_block_parser<'s>(
         .parse_next(input)
 }
 
-pub fn rs_prod_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn rs_prod_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RsProd<'s>, VerboseError<'s>> {
     alt((
         rs_production_item_parser.map(|a| RsProd::Item(Box::new(a))),
@@ -126,8 +126,8 @@ pub fn rs_prod_parser<'s>(
     .parse_next(input)
 }
 
-pub fn rs_production_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn rs_production_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RsProductionItem<'s>, VerboseError<'s>> {
     (
         rs_production_identifier_parser,
@@ -141,8 +141,8 @@ pub fn rs_production_item_parser<'s>(
         .parse_next(input)
 }
 
-pub fn rs_if_else_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn rs_if_else_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RsIfElse<'s>, VerboseError<'s>> {
     (
         token(Token::If),
@@ -156,8 +156,8 @@ pub fn rs_if_else_parser<'s>(
         .parse_next(input)
 }
 
-pub fn rs_repeat_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn rs_repeat_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RsRepeat<'s>, VerboseError<'s>> {
     (
         token(Token::Repeat),
@@ -170,8 +170,8 @@ pub fn rs_repeat_parser<'s>(
         .parse_next(input)
 }
 
-pub fn rs_case_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn rs_case_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RsCase<'s>, VerboseError<'s>> {
     (
         token(Token::Case),
@@ -186,8 +186,8 @@ pub fn rs_case_parser<'s>(
         .parse_next(input)
 }
 
-pub fn rs_case_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn rs_case_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RsCaseItem<'s>, VerboseError<'s>> {
     let _expression_parser = (
         case_item_expression_parser,

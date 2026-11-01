@@ -10,8 +10,8 @@ use winnow::Parser;
 use winnow::combinator::{alt, not, peek, terminated};
 use winnow::stream::Stream;
 
-pub fn concurrent_assertion_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn concurrent_assertion_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConcurrentAssertionItem<'s>, VerboseError<'s>> {
     let _assertion_parser = (
         opt_note((block_identifier_parser, token(Token::Colon))),
@@ -23,8 +23,8 @@ pub fn concurrent_assertion_item_parser<'s>(
     alt((_assertion_parser, _checker_parser)).parse_next(input)
 }
 
-pub fn concurrent_assertion_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn concurrent_assertion_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConcurrentAssertionStatement<'s>, VerboseError<'s>> {
     alt((
         assert_property_statement_parser
@@ -41,8 +41,8 @@ pub fn concurrent_assertion_statement_parser<'s>(
     .parse_next(input)
 }
 
-pub fn assert_property_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn assert_property_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AssertPropertyStatement<'s>, VerboseError<'s>> {
     (
         token(Token::Assert),
@@ -56,8 +56,8 @@ pub fn assert_property_statement_parser<'s>(
         .parse_next(input)
 }
 
-pub fn assume_property_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn assume_property_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AssumePropertyStatement<'s>, VerboseError<'s>> {
     (
         token(Token::Assume),
@@ -71,8 +71,8 @@ pub fn assume_property_statement_parser<'s>(
         .parse_next(input)
 }
 
-pub fn cover_property_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn cover_property_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CoverPropertyStatement<'s>, VerboseError<'s>> {
     (
         token(Token::Cover),
@@ -86,8 +86,8 @@ pub fn cover_property_statement_parser<'s>(
         .parse_next(input)
 }
 
-pub fn expect_property_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn expect_property_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ExpectPropertyStatement<'s>, VerboseError<'s>> {
     (
         token(Token::Expect),
@@ -100,8 +100,8 @@ pub fn expect_property_statement_parser<'s>(
         .parse_next(input)
 }
 
-pub fn cover_sequence_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn cover_sequence_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CoverSequenceStatement<'s>, VerboseError<'s>> {
     (
         token(Token::Cover),
@@ -125,8 +125,8 @@ pub fn cover_sequence_statement_parser<'s>(
         .parse_next(input)
 }
 
-pub fn restrict_property_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn restrict_property_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RestrictPropertyStatement<'s>, VerboseError<'s>> {
     (
         token(Token::Restrict),
@@ -140,8 +140,8 @@ pub fn restrict_property_statement_parser<'s>(
         .parse_next(input)
 }
 
-pub fn property_instance_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn property_instance_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PropertyInstance<'s>, VerboseError<'s>> {
     (
         ps_or_hierarchical_property_identifier_parser,
@@ -155,8 +155,8 @@ pub fn property_instance_parser<'s>(
         .parse_next(input)
 }
 
-pub fn property_list_of_arguments_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn property_list_of_arguments_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PropertyListOfArguments<'s>, VerboseError<'s>> {
     let _partial_identifier_parser = (
         opt_note(property_actual_arg_parser),
@@ -197,8 +197,8 @@ pub fn property_list_of_arguments_parser<'s>(
     alt((_partial_identifier_parser, _identifier_parser)).parse_next(input)
 }
 
-pub fn property_actual_arg_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn property_actual_arg_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PropertyActualArg<'s>, VerboseError<'s>> {
     alt((
         property_expr_parser.map(|a| PropertyActualArg::Property(Box::new(a))),
@@ -208,8 +208,8 @@ pub fn property_actual_arg_parser<'s>(
     .parse_next(input)
 }
 
-pub fn assertion_item_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn assertion_item_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AssertionItemDeclaration<'s>, VerboseError<'s>> {
     alt((
         property_declaration_parser
@@ -222,8 +222,8 @@ pub fn assertion_item_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn property_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn property_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PropertyDeclaration<'s>, VerboseError<'s>> {
     let result = (
         token(Token::Property),
@@ -251,8 +251,8 @@ pub fn property_declaration_parser<'s>(
     Ok(result)
 }
 
-pub fn property_port_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn property_port_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PropertyPortList<'s>, VerboseError<'s>> {
     (
         property_port_item_parser,
@@ -262,8 +262,8 @@ pub fn property_port_list_parser<'s>(
         .parse_next(input)
 }
 
-pub fn property_port_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn property_port_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PropertyPortItem<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -280,16 +280,16 @@ pub fn property_port_item_parser<'s>(
         .parse_next(input)
 }
 
-pub fn property_lvar_port_direction_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn property_lvar_port_direction_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PropertyLvarPortDirection<'s>, VerboseError<'s>> {
     token(Token::Input)
         .map(|a| PropertyLvarPortDirection(a))
         .parse_next(input)
 }
 
-pub fn property_formal_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn property_formal_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PropertyFormalType<'s>, VerboseError<'s>> {
     alt((
         token(Token::Property)
@@ -300,8 +300,8 @@ pub fn property_formal_type_parser<'s>(
     .parse_next(input)
 }
 
-pub fn property_spec_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn property_spec_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PropertySpec<'s>, VerboseError<'s>> {
     (
         opt_note(clocking_event_parser),
@@ -360,8 +360,8 @@ enum PropertyExprSeqOp<'a> {
     NonoverlapFollowedBy(Metadata<'a>),
 }
 
-fn basic_property_expr_parser<'s>(
-    input: &mut Tokens<'s>,
+fn basic_property_expr_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
     min_bp: u8,
 ) -> ModalResult<PropertyExpr<'s>, VerboseError<'s>> {
     let mut _sequence_parser = (
@@ -612,8 +612,8 @@ enum PropertyPrattOp<'a> {
     Iff(Metadata<'a>),
 }
 
-fn property_expr_bp_parser<'s>(
-    input: &mut Tokens<'s>,
+fn property_expr_bp_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
     min_bp: u8,
 ) -> ModalResult<PropertyExpr<'s>, VerboseError<'s>> {
     let mut lhs = basic_property_expr_parser(input, min_bp)?;
@@ -716,21 +716,21 @@ fn property_expr_bp_parser<'s>(
     }
 }
 
-fn gen_property_expr_parser<'s>(
+fn gen_property_expr_parser<'s: 'b, 'b>(
     min_bp: u8,
-) -> impl FnMut(&mut Tokens<'s>) -> ModalResult<PropertyExpr<'s>, VerboseError<'s>>
+) -> impl FnMut(&mut Tokens<'s, 'b>) -> ModalResult<PropertyExpr<'s>, VerboseError<'s>>
 {
     move |input| property_expr_bp_parser(input, min_bp)
 }
 
-pub fn property_expr_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn property_expr_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PropertyExpr<'s>, VerboseError<'s>> {
     property_expr_bp_parser(input, 0)
 }
 
-pub fn property_case_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn property_case_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PropertyCaseItem<'s>, VerboseError<'s>> {
     let _expr_parser = (
         expression_or_dist_parser,
@@ -752,8 +752,8 @@ pub fn property_case_item_parser<'s>(
     alt((_default_parser, _expr_parser)).parse_next(input)
 }
 
-pub fn sequence_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn sequence_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequenceDeclaration<'s>, VerboseError<'s>> {
     let result = (
         token(Token::Sequence),
@@ -781,8 +781,8 @@ pub fn sequence_declaration_parser<'s>(
     Ok(result)
 }
 
-pub fn sequence_port_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn sequence_port_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequencePortList<'s>, VerboseError<'s>> {
     (
         sequence_port_item_parser,
@@ -792,8 +792,8 @@ pub fn sequence_port_list_parser<'s>(
         .parse_next(input)
 }
 
-pub fn sequence_port_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn sequence_port_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequencePortItem<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -810,8 +810,8 @@ pub fn sequence_port_item_parser<'s>(
         .parse_next(input)
 }
 
-pub fn sequence_lvar_port_direction_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn sequence_lvar_port_direction_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequenceLvarPortDirection<'s>, VerboseError<'s>> {
     alt((
         token(Token::Input).map(|a| SequenceLvarPortDirection::Input(a)),
@@ -821,8 +821,8 @@ pub fn sequence_lvar_port_direction_parser<'s>(
     .parse_next(input)
 }
 
-pub fn sequence_formal_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn sequence_formal_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequenceFormalType<'s>, VerboseError<'s>> {
     alt((
         data_type_or_implicit_parser_sequence_formal_type
@@ -834,8 +834,8 @@ pub fn sequence_formal_type_parser<'s>(
     .parse_next(input)
 }
 
-fn data_type_or_implicit_parser_sequence_formal_type<'s>(
-    input: &mut Tokens<'s>,
+fn data_type_or_implicit_parser_sequence_formal_type<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataTypeOrImplicit<'s>, VerboseError<'s>> {
     alt((
         terminated(data_type_parser, peek(formal_port_identifier_parser))
@@ -864,8 +864,8 @@ fn intersect_binding_power<'s>() -> (u8, u8) {
     left_assoc(8)
 }
 
-fn basic_sequence_expr_parser<'s>(
-    input: &mut Tokens<'s>,
+fn basic_sequence_expr_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequenceExpr<'s>, VerboseError<'s>> {
     let _start_delay_parser = (
         cycle_delay_range_parser,
@@ -914,8 +914,8 @@ enum SequencePrattOp<'a> {
     Or(Metadata<'a>),
 }
 
-fn sequence_expr_bp_parser<'s>(
-    input: &mut Tokens<'s>,
+fn sequence_expr_bp_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
     min_bp: u8,
     must_consume_and_or: bool,
 ) -> ModalResult<SequenceExpr<'s>, VerboseError<'s>> {
@@ -923,7 +923,7 @@ fn sequence_expr_bp_parser<'s>(
         (
             expression_or_dist_parser,
             token(Token::Throughout),
-            |input: &mut Tokens<'s>| {
+            |input: &mut Tokens<'s, 'b>| {
                 sequence_expr_bp_parser(
                     input,
                     throughout_binding_power(),
@@ -1031,22 +1031,22 @@ fn sequence_expr_bp_parser<'s>(
     }
 }
 
-fn gen_sequence_expr_parser<'s>(
+fn gen_sequence_expr_parser<'s: 'b, 'b>(
     min_bp: u8,
     must_consume_and_or: bool,
-) -> impl FnMut(&mut Tokens<'s>) -> ModalResult<SequenceExpr<'s>, VerboseError<'s>>
+) -> impl FnMut(&mut Tokens<'s, 'b>) -> ModalResult<SequenceExpr<'s>, VerboseError<'s>>
 {
     move |input| sequence_expr_bp_parser(input, min_bp, must_consume_and_or)
 }
 
-pub fn sequence_expr_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn sequence_expr_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequenceExpr<'s>, VerboseError<'s>> {
     sequence_expr_bp_parser(input, 0, true)
 }
 
-pub fn cycle_delay_range_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn cycle_delay_range_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CycleDelayRange<'s>, VerboseError<'s>> {
     let _primary_parser = (token(Token::PoundPound), constant_primary_parser)
         .map(|(a, b)| CycleDelayRange::Primary(Box::new((a, b))));
@@ -1075,8 +1075,8 @@ pub fn cycle_delay_range_parser<'s>(
         .parse_next(input)
 }
 
-pub fn sequence_method_call_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn sequence_method_call_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequenceMethodCall<'s>, VerboseError<'s>> {
     (
         sequence_instance_parser,
@@ -1087,8 +1087,8 @@ pub fn sequence_method_call_parser<'s>(
         .parse_next(input)
 }
 
-pub fn sequence_match_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn sequence_match_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequenceMatchItem<'s>, VerboseError<'s>> {
     alt((
         operator_assignment_parser
@@ -1101,8 +1101,8 @@ pub fn sequence_match_item_parser<'s>(
     .parse_next(input)
 }
 
-pub fn sequence_instance_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn sequence_instance_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequenceInstance<'s>, VerboseError<'s>> {
     (
         ps_or_hierarchical_sequence_identifier_parser,
@@ -1116,8 +1116,8 @@ pub fn sequence_instance_parser<'s>(
         .parse_next(input)
 }
 
-pub fn sequence_list_of_arguments_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn sequence_list_of_arguments_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequenceListOfArguments<'s>, VerboseError<'s>> {
     let _partial_identifier_parser = (
         opt_note(sequence_actual_arg_parser),
@@ -1158,8 +1158,8 @@ pub fn sequence_list_of_arguments_parser<'s>(
     alt((_partial_identifier_parser, _identifier_parser)).parse_next(input)
 }
 
-pub fn sequence_actual_arg_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn sequence_actual_arg_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequenceActualArg<'s>, VerboseError<'s>> {
     alt((
         event_expression_parser.map(|a| SequenceActualArg::Event(Box::new(a))),
@@ -1169,8 +1169,8 @@ pub fn sequence_actual_arg_parser<'s>(
     .parse_next(input)
 }
 
-pub fn boolean_abbrev_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn boolean_abbrev_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<BooleanAbbrev<'s>, VerboseError<'s>> {
     alt((
         consecutive_repetition_parser
@@ -1182,16 +1182,16 @@ pub fn boolean_abbrev_parser<'s>(
     .parse_next(input)
 }
 
-pub fn sequence_abbrev_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn sequence_abbrev_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SequenceAbbrev<'s>, VerboseError<'s>> {
     consecutive_repetition_parser
         .map(|a| SequenceAbbrev(a))
         .parse_next(input)
 }
 
-pub fn consecutive_repetition_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn consecutive_repetition_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConsecutiveRepetition<'s>, VerboseError<'s>> {
     let _expr_parser = (
         token(Token::Bracket),
@@ -1217,8 +1217,8 @@ pub fn consecutive_repetition_parser<'s>(
     alt((_expr_parser, _star_parser, _plus_parser)).parse_next(input)
 }
 
-pub fn nonconsecutive_repetition_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn nonconsecutive_repetition_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NonconsecutiveRepetition<'s>, VerboseError<'s>> {
     (
         token(Token::Bracket),
@@ -1230,8 +1230,8 @@ pub fn nonconsecutive_repetition_parser<'s>(
         .parse_next(input)
 }
 
-pub fn goto_repetition_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn goto_repetition_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<GotoRepetition<'s>, VerboseError<'s>> {
     (
         token(Token::Bracket),
@@ -1243,8 +1243,8 @@ pub fn goto_repetition_parser<'s>(
         .parse_next(input)
 }
 
-pub fn const_or_range_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn const_or_range_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstOrRangeExpression<'s>, VerboseError<'s>> {
     alt((
         cycle_delay_const_range_expression_parser
@@ -1256,8 +1256,8 @@ pub fn const_or_range_expression_parser<'s>(
 }
 
 // TODO: Avoid parsing twice
-pub fn cycle_delay_const_range_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn cycle_delay_const_range_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CycleDelayConstRangeExpression<'s>, VerboseError<'s>> {
     let _bounded_parser = (
         constant_expression_parser,
@@ -1278,8 +1278,8 @@ pub fn cycle_delay_const_range_expression_parser<'s>(
     alt((_bounded_parser, _unbounded_parser)).parse_next(input)
 }
 
-pub fn assertion_variable_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn assertion_variable_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AssertionVariableDeclaration<'s>, VerboseError<'s>> {
     (
         var_data_type_parser,

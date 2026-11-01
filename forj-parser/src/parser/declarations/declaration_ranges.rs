@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn unpacked_dimension_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn unpacked_dimension_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UnpackedDimension<'s>, VerboseError<'s>> {
     let unpacked_range_parser = (
         token(Token::Bracket),
@@ -29,8 +29,8 @@ pub fn unpacked_dimension_parser<'s>(
     alt((unpacked_range_parser, unpacked_expression_parser)).parse_next(input)
 }
 
-pub fn packed_dimension_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn packed_dimension_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PackedDimension<'s>, VerboseError<'s>> {
     let packed_range_parser = (
         token(Token::Bracket),
@@ -46,8 +46,8 @@ pub fn packed_dimension_parser<'s>(
     .parse_next(input)
 }
 
-pub fn associative_dimension_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn associative_dimension_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AssociativeDimension<'s>, VerboseError<'s>> {
     let data_parser = (
         token(Token::Bracket),
@@ -64,8 +64,8 @@ pub fn associative_dimension_parser<'s>(
     alt((data_parser, star_parser)).parse_next(input)
 }
 
-pub fn variable_dimension_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn variable_dimension_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<VariableDimension<'s>, VerboseError<'s>> {
     alt((
         unsized_dimension_parser
@@ -80,8 +80,8 @@ pub fn variable_dimension_parser<'s>(
     .parse_next(input)
 }
 
-pub fn queue_dimension_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn queue_dimension_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<QueueDimension<'s>, VerboseError<'s>> {
     (
         token(Token::Bracket),
@@ -93,8 +93,8 @@ pub fn queue_dimension_parser<'s>(
         .parse_next(input)
 }
 
-pub fn unsized_dimension_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn unsized_dimension_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UnsizedDimension<'s>, VerboseError<'s>> {
     (token(Token::Bracket), token(Token::EBracket))
         .map(|(a, b)| UnsizedDimension(a, b))

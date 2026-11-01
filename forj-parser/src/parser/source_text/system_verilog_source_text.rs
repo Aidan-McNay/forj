@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn source_text_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn source_text_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SourceText<'s>, VerboseError<'s>> {
     let non_trivia = non_trivia_parser(input)?;
     let timeunits_declaration =
@@ -26,8 +26,8 @@ pub fn source_text_parser<'s>(
     Ok(SourceText(non_trivia, timeunits_declaration, descriptions))
 }
 
-pub fn description_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn description_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Description<'s>, VerboseError<'s>> {
     let description_package_item_parser =
         (attribute_instance_vec_parser, package_item_parser)
@@ -56,8 +56,8 @@ pub fn description_parser<'s>(
     .parse_next(input)
 }
 
-pub fn module_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModuleDeclaration<'s>, VerboseError<'s>> {
     alt((
         module_declaration_ansi_parser
@@ -74,8 +74,8 @@ pub fn module_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn module_declaration_nonansi_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_declaration_nonansi_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModuleDeclarationNonansi<'s>, VerboseError<'s>> {
     let result = (
         module_nonansi_header_parser,
@@ -93,8 +93,8 @@ pub fn module_declaration_nonansi_parser<'s>(
     Ok(result)
 }
 
-pub fn module_declaration_ansi_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_declaration_ansi_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModuleDeclarationAnsi<'s>, VerboseError<'s>> {
     let result = (
         module_ansi_header_parser,
@@ -112,8 +112,8 @@ pub fn module_declaration_ansi_parser<'s>(
     Ok(result)
 }
 
-pub fn module_nonansi_header_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_nonansi_header_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModuleNonansiHeader<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -131,8 +131,8 @@ pub fn module_nonansi_header_parser<'s>(
         .parse_next(input)
 }
 
-pub fn module_ansi_header_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_ansi_header_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModuleAnsiHeader<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -154,8 +154,8 @@ pub fn module_ansi_header_parser<'s>(
         .parse_next(input)
 }
 
-pub fn module_declaration_wildcard_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_declaration_wildcard_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModuleDeclarationWildcard<'s>, VerboseError<'s>> {
     let result = (
         attribute_instance_vec_parser,
@@ -183,24 +183,24 @@ pub fn module_declaration_wildcard_parser<'s>(
     Ok(result)
 }
 
-pub fn module_declaration_extern_nonansi_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_declaration_extern_nonansi_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModuleDeclarationExternNonansi<'s>, VerboseError<'s>> {
     (token(Token::Extern), module_nonansi_header_parser)
         .map(|(a, b)| ModuleDeclarationExternNonansi(a, b))
         .parse_next(input)
 }
 
-pub fn module_declaration_extern_ansi_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_declaration_extern_ansi_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModuleDeclarationExternAnsi<'s>, VerboseError<'s>> {
     (token(Token::Extern), module_ansi_header_parser)
         .map(|(a, b)| ModuleDeclarationExternAnsi(a, b))
         .parse_next(input)
 }
 
-pub fn module_keyword_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_keyword_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModuleKeyword<'s>, VerboseError<'s>> {
     alt((
         token(Token::Module).map(|a| ModuleKeyword::Module(a)),
@@ -209,8 +209,8 @@ pub fn module_keyword_parser<'s>(
     .parse_next(input)
 }
 
-pub fn interface_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceDeclaration<'s>, VerboseError<'s>> {
     alt((
         interface_declaration_ansi_parser
@@ -227,8 +227,8 @@ pub fn interface_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn interface_declaration_nonansi_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_declaration_nonansi_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceDeclarationNonansi<'s>, VerboseError<'s>> {
     let result = (
         interface_nonansi_header_parser,
@@ -246,8 +246,8 @@ pub fn interface_declaration_nonansi_parser<'s>(
     Ok(result)
 }
 
-pub fn interface_declaration_ansi_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_declaration_ansi_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceDeclarationAnsi<'s>, VerboseError<'s>> {
     let result = (
         interface_ansi_header_parser,
@@ -265,8 +265,8 @@ pub fn interface_declaration_ansi_parser<'s>(
     Ok(result)
 }
 
-pub fn interface_declaration_wildcard_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_declaration_wildcard_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceDeclarationWildcard<'s>, VerboseError<'s>> {
     let result = (
         attribute_instance_vec_parser,
@@ -293,24 +293,24 @@ pub fn interface_declaration_wildcard_parser<'s>(
     Ok(result)
 }
 
-pub fn interface_declaration_extern_nonansi_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_declaration_extern_nonansi_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceDeclarationExternNonansi<'s>, VerboseError<'s>> {
     (token(Token::Extern), interface_nonansi_header_parser)
         .map(|(a, b)| InterfaceDeclarationExternNonansi(a, b))
         .parse_next(input)
 }
 
-pub fn interface_declaration_extern_ansi_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_declaration_extern_ansi_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceDeclarationExternAnsi<'s>, VerboseError<'s>> {
     (token(Token::Extern), interface_ansi_header_parser)
         .map(|(a, b)| InterfaceDeclarationExternAnsi(a, b))
         .parse_next(input)
 }
 
-pub fn interface_nonansi_header_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_nonansi_header_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceNonansiHeader<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -328,8 +328,8 @@ pub fn interface_nonansi_header_parser<'s>(
         .parse_next(input)
 }
 
-pub fn interface_ansi_header_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_ansi_header_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceAnsiHeader<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -351,8 +351,8 @@ pub fn interface_ansi_header_parser<'s>(
         .parse_next(input)
 }
 
-pub fn program_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn program_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ProgramDeclaration<'s>, VerboseError<'s>> {
     alt((
         program_declaration_ansi_parser
@@ -369,8 +369,8 @@ pub fn program_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn program_declaration_nonansi_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn program_declaration_nonansi_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ProgramDeclarationNonansi<'s>, VerboseError<'s>> {
     let result = (
         program_nonansi_header_parser,
@@ -388,8 +388,8 @@ pub fn program_declaration_nonansi_parser<'s>(
     Ok(result)
 }
 
-pub fn program_declaration_ansi_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn program_declaration_ansi_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ProgramDeclarationAnsi<'s>, VerboseError<'s>> {
     let result = (
         program_ansi_header_parser,
@@ -407,8 +407,8 @@ pub fn program_declaration_ansi_parser<'s>(
     Ok(result)
 }
 
-pub fn program_declaration_wildcard_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn program_declaration_wildcard_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ProgramDeclarationWildcard<'s>, VerboseError<'s>> {
     let result = (
         attribute_instance_vec_parser,
@@ -435,24 +435,24 @@ pub fn program_declaration_wildcard_parser<'s>(
     Ok(result)
 }
 
-pub fn program_declaration_extern_nonansi_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn program_declaration_extern_nonansi_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ProgramDeclarationExternNonansi<'s>, VerboseError<'s>> {
     (token(Token::Extern), program_nonansi_header_parser)
         .map(|(a, b)| ProgramDeclarationExternNonansi(a, b))
         .parse_next(input)
 }
 
-pub fn program_declaration_extern_ansi_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn program_declaration_extern_ansi_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ProgramDeclarationExternAnsi<'s>, VerboseError<'s>> {
     (token(Token::Extern), program_ansi_header_parser)
         .map(|(a, b)| ProgramDeclarationExternAnsi(a, b))
         .parse_next(input)
 }
 
-pub fn program_nonansi_header_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn program_nonansi_header_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ProgramNonansiHeader<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -470,8 +470,8 @@ pub fn program_nonansi_header_parser<'s>(
         .parse_next(input)
 }
 
-pub fn program_ansi_header_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn program_ansi_header_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ProgramAnsiHeader<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -493,8 +493,8 @@ pub fn program_ansi_header_parser<'s>(
         .parse_next(input)
 }
 
-pub fn checker_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn checker_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CheckerDeclaration<'s>, VerboseError<'s>> {
     let checker_declaration_port_list_parser = (
         token(Token::Paren),
@@ -523,8 +523,8 @@ pub fn checker_declaration_parser<'s>(
     Ok(result)
 }
 
-pub fn class_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassDeclaration<'s>, VerboseError<'s>> {
     let class_declaration_extension_parser = (
         token(Token::Extends),
@@ -573,8 +573,8 @@ pub fn class_declaration_parser<'s>(
     Ok(result)
 }
 
-pub fn interface_class_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_class_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceClassDeclaration<'s>, VerboseError<'s>> {
     let interface_class_declaration_extension_parser = (
         token(Token::Extends),
@@ -603,8 +603,8 @@ pub fn interface_class_declaration_parser<'s>(
     Ok(result)
 }
 
-pub fn package_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn package_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PackageDeclaration<'s>, VerboseError<'s>> {
     let attribute_package_items_parser =
         repeat_note((attribute_instance_vec_parser, package_item_parser));
@@ -630,8 +630,8 @@ pub fn package_declaration_parser<'s>(
     Ok(result)
 }
 
-pub fn timeunits_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn timeunits_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TimeunitsDeclaration<'s>, VerboseError<'s>> {
     let timeunit_parser = (
         token(Token::Timeunit),

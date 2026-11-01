@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::{alt, peek, terminated};
 
-pub fn let_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn let_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LetDeclaration<'s>, VerboseError<'s>> {
     (
         token(Token::Let),
@@ -28,16 +28,16 @@ pub fn let_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn let_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn let_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LetIdentifier<'s>, VerboseError<'s>> {
     identifier_parser
         .map(|a| LetIdentifier(a))
         .parse_next(input)
 }
 
-pub fn let_port_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn let_port_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LetPortList<'s>, VerboseError<'s>> {
     (
         let_port_item_parser,
@@ -47,8 +47,8 @@ pub fn let_port_list_parser<'s>(
         .parse_next(input)
 }
 
-pub fn let_port_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn let_port_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LetPortItem<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -61,8 +61,8 @@ pub fn let_port_item_parser<'s>(
         .parse_next(input)
 }
 
-pub fn let_formal_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn let_formal_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LetFormalType<'s>, VerboseError<'s>> {
     alt((
         data_type_or_implicit_parser_let_formal_type
@@ -72,8 +72,8 @@ pub fn let_formal_type_parser<'s>(
     .parse_next(input)
 }
 
-fn data_type_or_implicit_parser_let_formal_type<'s>(
-    input: &mut Tokens<'s>,
+fn data_type_or_implicit_parser_let_formal_type<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataTypeOrImplicit<'s>, VerboseError<'s>> {
     alt((
         terminated(data_type_parser, peek(formal_port_identifier_parser))
@@ -87,8 +87,8 @@ fn data_type_or_implicit_parser_let_formal_type<'s>(
     .parse_next(input)
 }
 
-pub fn let_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn let_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LetExpression<'s>, VerboseError<'s>> {
     (
         opt_note(package_scope_parser),
@@ -103,8 +103,8 @@ pub fn let_expression_parser<'s>(
         .parse_next(input)
 }
 
-pub fn let_list_of_arguments_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn let_list_of_arguments_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LetListOfArguments<'s>, VerboseError<'s>> {
     let _partial_identifier_parser = (
         opt_note(let_actual_arg_parser),
@@ -145,8 +145,8 @@ pub fn let_list_of_arguments_parser<'s>(
     .parse_next(input)
 }
 
-pub fn let_actual_arg_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn let_actual_arg_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LetActualArg<'s>, VerboseError<'s>> {
     expression_parser.map(|a| LetActualArg(a)).parse_next(input)
 }

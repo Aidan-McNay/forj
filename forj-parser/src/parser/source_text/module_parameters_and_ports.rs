@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn parameter_port_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn parameter_port_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ParameterPortList<'s>, VerboseError<'s>> {
     let defaults_parser = (
         token(Token::Pound),
@@ -37,8 +37,8 @@ pub fn parameter_port_list_parser<'s>(
     alt((defaults_parser, no_defaults_parser, empty_parser)).parse_next(input)
 }
 
-pub fn parameter_port_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn parameter_port_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ParameterPortDeclaration<'s>, VerboseError<'s>> {
     alt((
         parameter_declaration_parser.map(|a| {
@@ -57,8 +57,8 @@ pub fn parameter_port_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn list_of_ports_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_ports_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfPorts<'s>, VerboseError<'s>> {
     (
         token(Token::Paren),
@@ -70,8 +70,8 @@ pub fn list_of_ports_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_port_declarations_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_port_declarations_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfPortDeclarations<'s>, VerboseError<'s>> {
     (
         token(Token::Paren),
@@ -90,8 +90,8 @@ pub fn list_of_port_declarations_parser<'s>(
         .parse_next(input)
 }
 
-pub fn port_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn port_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PortDeclaration<'s>, VerboseError<'s>> {
     let _inout_declaration_parser =
         (attribute_instance_vec_parser, inout_declaration_parser)
@@ -122,8 +122,8 @@ pub fn port_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn port_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn port_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Port<'s>, VerboseError<'s>> {
     let _port_expression_parser = opt_note(port_expression_parser)
         .map(|a| Port::PortExpression(Box::new(a)));
@@ -138,8 +138,8 @@ pub fn port_parser<'s>(
     alt((_port_identifier_parser, _port_expression_parser)).parse_next(input)
 }
 
-pub fn port_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn port_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PortExpression<'s>, VerboseError<'s>> {
     let single_port_reference_parser = port_reference_parser
         .map(|a| PortExpression::SinglePortReference(Box::new(a)));
@@ -156,16 +156,16 @@ pub fn port_expression_parser<'s>(
         .parse_next(input)
 }
 
-pub fn port_reference_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn port_reference_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PortReference<'s>, VerboseError<'s>> {
     (port_identifier_parser, constant_select_parser)
         .map(|(a, b)| PortReference(a, b))
         .parse_next(input)
 }
 
-pub fn port_direction_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn port_direction_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PortDirection<'s>, VerboseError<'s>> {
     alt((
         token(Token::Input).map(|a| PortDirection::Input(a)),
@@ -176,24 +176,24 @@ pub fn port_direction_parser<'s>(
     .parse_next(input)
 }
 
-pub fn net_port_header_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn net_port_header_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NetPortHeader<'s>, VerboseError<'s>> {
     (opt_note(port_direction_parser), net_port_type_parser)
         .map(|(a, b)| NetPortHeader(a, b))
         .parse_next(input)
 }
 
-pub fn variable_port_header_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn variable_port_header_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<VariablePortHeader<'s>, VerboseError<'s>> {
     (opt_note(port_direction_parser), variable_port_type_parser)
         .map(|(a, b)| VariablePortHeader(a, b))
         .parse_next(input)
 }
 
-pub fn interface_port_header_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_port_header_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfacePortHeader<'s>, VerboseError<'s>> {
     let _interface_identifier_parser = (
         interface_identifier_parser,
@@ -208,8 +208,8 @@ pub fn interface_port_header_parser<'s>(
     alt((_interface_identifier_parser, _interface_parser)).parse_next(input)
 }
 
-pub fn ansi_port_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ansi_port_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AnsiPortDeclaration<'s>, VerboseError<'s>> {
     alt((
         ansi_net_port_declaration_parser
@@ -222,8 +222,8 @@ pub fn ansi_port_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn ansi_net_port_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ansi_net_port_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AnsiNetPortDeclaration<'s>, VerboseError<'s>> {
     let net_or_interface_port_header_parser = alt((
         interface_port_header_parser.map(|a| {
@@ -242,8 +242,8 @@ pub fn ansi_net_port_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn ansi_variable_port_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ansi_variable_port_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AnsiVariablePortDeclaration<'s>, VerboseError<'s>> {
     (
         opt_note(variable_port_header_parser),
@@ -255,8 +255,8 @@ pub fn ansi_variable_port_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn ansi_constant_port_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ansi_constant_port_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AnsiConstantPortDeclaration<'s>, VerboseError<'s>> {
     (
         opt_note(port_direction_parser),

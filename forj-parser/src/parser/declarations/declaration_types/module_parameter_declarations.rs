@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::{alt, peek, terminated};
 
-pub fn local_parameter_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn local_parameter_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LocalParameterDeclaration<'s>, VerboseError<'s>> {
     let data_parameter_parser = (
         token(Token::Localparam),
@@ -24,8 +24,8 @@ pub fn local_parameter_declaration_parser<'s>(
     alt((data_parameter_parser, type_parameter_parser)).parse_next(input)
 }
 
-fn data_type_or_implicit_parser_local_parameter_declaration<'s>(
-    input: &mut Tokens<'s>,
+fn data_type_or_implicit_parser_local_parameter_declaration<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataTypeOrImplicit<'s>, VerboseError<'s>> {
     alt((
         terminated(data_type_parser, peek(param_assignment_parser))
@@ -36,8 +36,8 @@ fn data_type_or_implicit_parser_local_parameter_declaration<'s>(
     .parse_next(input)
 }
 
-pub fn parameter_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn parameter_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ParameterDeclaration<'s>, VerboseError<'s>> {
     let data_parameter_parser = (
         token(Token::Parameter),
@@ -51,8 +51,8 @@ pub fn parameter_declaration_parser<'s>(
     alt((data_parameter_parser, type_parameter_parser)).parse_next(input)
 }
 
-fn data_type_or_implicit_parser_parameter_declaration<'s>(
-    input: &mut Tokens<'s>,
+fn data_type_or_implicit_parser_parameter_declaration<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataTypeOrImplicit<'s>, VerboseError<'s>> {
     alt((
         terminated(data_type_parser, peek(param_assignment_parser))
@@ -63,8 +63,8 @@ fn data_type_or_implicit_parser_parameter_declaration<'s>(
     .parse_next(input)
 }
 
-pub fn type_parameter_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn type_parameter_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TypeParameterDeclaration<'s>, VerboseError<'s>> {
     (
         token(Token::Type),
@@ -75,8 +75,8 @@ pub fn type_parameter_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn specparam_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn specparam_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SpecparamDeclaration<'s>, VerboseError<'s>> {
     (
         token(Token::Specparam),

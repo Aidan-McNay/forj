@@ -8,8 +8,8 @@ use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::combinator::alt;
 
-pub fn package_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn package_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PackageItem<'s>, VerboseError<'s>> {
     alt((
         package_or_generate_item_declaration_parser
@@ -24,8 +24,8 @@ pub fn package_item_parser<'s>(
     .parse_next(input)
 }
 
-pub fn package_or_generate_item_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn package_or_generate_item_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PackageOrGenerateItemDeclaration<'s>, VerboseError<'s>> {
     alt((
         net_declaration_parser
@@ -73,8 +73,8 @@ pub fn package_or_generate_item_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn anonymous_program_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn anonymous_program_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AnonymousProgram<'s>, VerboseError<'s>> {
     (
         token(Token::Program),
@@ -86,8 +86,8 @@ pub fn anonymous_program_parser<'s>(
         .parse_next(input)
 }
 
-pub fn anonymous_program_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn anonymous_program_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AnonymousProgramItem<'s>, VerboseError<'s>> {
     alt((
         task_declaration_parser

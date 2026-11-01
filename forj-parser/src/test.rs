@@ -53,8 +53,11 @@ macro_rules! apply_parser {
     ($input:literal, $parser:ident, $storage:expr) => {{
         *$storage = lex($input, "<test>").tokens().collect::<Vec<_>>();
         let input = TokenSlice::new(&$storage[..]);
-        let state = (None, MemoizedState::new(&input));
-        let mut tokens = Tokens { input, state };
+        let mut state = ParserState::new(&input);
+        let mut tokens = Tokens {
+            input,
+            state: &mut state,
+        };
         $parser(&mut tokens).unwrap()
     }};
 }
@@ -64,8 +67,11 @@ macro_rules! check_parser {
     ($input:literal, $parser:ident, $expected:expr) => {{
         let lexed_input = lex($input, "<test>").tokens().collect::<Vec<_>>();
         let input = TokenSlice::new(&lexed_input[..]);
-        let state = (None, MemoizedState::new(&input));
-        let mut tokens = Tokens { input, state };
+        let mut state = ParserState::new(&input);
+        let mut tokens = Tokens {
+            input,
+            state: &mut state,
+        };
         assert_eq!($parser(&mut tokens).unwrap(), $expected)
     }};
 }

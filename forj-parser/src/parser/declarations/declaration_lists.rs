@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::{alt, peek, terminated};
 
-pub fn list_of_defparam_assignments_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_defparam_assignments_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfDefparamAssignments<'s>, VerboseError<'s>> {
     (
         defparam_assignment_parser,
@@ -20,8 +20,8 @@ pub fn list_of_defparam_assignments_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_genvar_identifiers_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_genvar_identifiers_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfGenvarIdentifiers<'s>, VerboseError<'s>> {
     (
         genvar_identifier_parser,
@@ -31,8 +31,8 @@ pub fn list_of_genvar_identifiers_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_interface_identifiers_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_interface_identifiers_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfInterfaceIdentifiers<'s>, VerboseError<'s>> {
     (
         interface_identifier_parser,
@@ -47,8 +47,8 @@ pub fn list_of_interface_identifiers_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_net_decl_assignments_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_net_decl_assignments_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfNetDeclAssignments<'s>, VerboseError<'s>> {
     (
         net_decl_assignment_parser,
@@ -58,8 +58,8 @@ pub fn list_of_net_decl_assignments_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_param_assignments_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_param_assignments_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfParamAssignments<'s>, VerboseError<'s>> {
     (
         param_assignment_parser,
@@ -69,8 +69,8 @@ pub fn list_of_param_assignments_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_port_identifiers_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_port_identifiers_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfPortIdentifiers<'s>, VerboseError<'s>> {
     (
         port_identifier_parser,
@@ -85,8 +85,8 @@ pub fn list_of_port_identifiers_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_udp_port_identifiers_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_udp_port_identifiers_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfUdpPortIdentifiers<'s>, VerboseError<'s>> {
     (
         port_identifier_parser,
@@ -96,8 +96,8 @@ pub fn list_of_udp_port_identifiers_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_specparam_assignments_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_specparam_assignments_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfSpecparamAssignments<'s>, VerboseError<'s>> {
     (
         specparam_assignment_parser,
@@ -107,8 +107,8 @@ pub fn list_of_specparam_assignments_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_tf_variable_identifiers_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_tf_variable_identifiers_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfTfVariableIdentifiers<'s>, VerboseError<'s>> {
     (
         port_identifier_parser,
@@ -125,8 +125,8 @@ pub fn list_of_tf_variable_identifiers_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_type_assignments_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_type_assignments_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfTypeAssignments<'s>, VerboseError<'s>> {
     (
         terminated(
@@ -153,8 +153,8 @@ pub fn list_of_type_assignments_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_variable_decl_assignments_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_variable_decl_assignments_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfVariableDeclAssignments<'s>, VerboseError<'s>> {
     (
         variable_decl_assignment_parser,
@@ -164,8 +164,8 @@ pub fn list_of_variable_decl_assignments_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_variable_identifiers_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_variable_identifiers_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfVariableIdentifiers<'s>, VerboseError<'s>> {
     (
         variable_identifier_parser,
@@ -180,8 +180,8 @@ pub fn list_of_variable_identifiers_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_variable_port_identifiers_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_variable_port_identifiers_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfVariablePortIdentifiers<'s>, VerboseError<'s>> {
     (
         port_identifier_parser,

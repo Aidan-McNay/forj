@@ -8,8 +8,8 @@ use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::combinator::alt;
 
-pub fn udp_port_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn udp_port_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UdpPortList<'s>, VerboseError<'s>> {
     (
         output_port_identifier_parser,
@@ -21,8 +21,8 @@ pub fn udp_port_list_parser<'s>(
         .parse_next(input)
 }
 
-pub fn udp_declaration_port_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn udp_declaration_port_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UdpDeclarationPortList<'s>, VerboseError<'s>> {
     (
         udp_output_declaration_parser,
@@ -34,8 +34,8 @@ pub fn udp_declaration_port_list_parser<'s>(
         .parse_next(input)
 }
 
-pub fn udp_port_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn udp_port_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UdpPortDeclaration<'s>, VerboseError<'s>> {
     alt((
         (udp_output_declaration_parser, token(Token::SColon))
@@ -48,8 +48,8 @@ pub fn udp_port_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn udp_output_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn udp_output_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UdpOutputDeclaration<'s>, VerboseError<'s>> {
     let _combinational_parser = (
         attribute_instance_vec_parser,
@@ -72,8 +72,8 @@ pub fn udp_output_declaration_parser<'s>(
     alt((_combinational_parser, _sequential_parser)).parse_next(input)
 }
 
-pub fn udp_input_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn udp_input_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UdpInputDeclaration<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -84,8 +84,8 @@ pub fn udp_input_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn udp_reg_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn udp_reg_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UdpRegDeclaration<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,

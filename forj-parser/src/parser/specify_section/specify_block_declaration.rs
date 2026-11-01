@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn specify_block_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn specify_block_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SpecifyBlock<'s>, VerboseError<'s>> {
     (
         token(Token::Specify),
@@ -21,8 +21,8 @@ pub fn specify_block_parser<'s>(
         .parse_next(input)
 }
 
-pub fn specify_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn specify_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SpecifyItem<'s>, VerboseError<'s>> {
     alt((
         specparam_declaration_parser
@@ -38,8 +38,8 @@ pub fn specify_item_parser<'s>(
     .parse_next(input)
 }
 
-pub fn pulsestyle_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn pulsestyle_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PulsestyleDeclaration<'s>, VerboseError<'s>> {
     alt((
         (
@@ -62,8 +62,8 @@ pub fn pulsestyle_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn showcancelled_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn showcancelled_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ShowcancelledDeclaration<'s>, VerboseError<'s>> {
     alt((
         (

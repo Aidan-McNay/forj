@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn net_lvalue_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn net_lvalue_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NetLvalue<'s>, VerboseError<'s>> {
     let _selection_net_lvalue_parser = (
         ps_or_hierarchical_net_identifier_parser,
@@ -41,8 +41,8 @@ pub fn net_lvalue_parser<'s>(
     .parse_next(input)
 }
 
-fn implicit_class_handle_or_package_scope_parser<'s>(
-    input: &mut Tokens<'s>,
+fn implicit_class_handle_or_package_scope_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ImplicitClassHandleOrPackageScope<'s>, VerboseError<'s>> {
     alt((
         (implicit_class_handle_parser, token(Token::Period)).map(|(a, b)| {
@@ -57,8 +57,8 @@ fn implicit_class_handle_or_package_scope_parser<'s>(
     .parse_next(input)
 }
 
-pub fn variable_lvalue_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn variable_lvalue_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<VariableLvalue<'s>, VerboseError<'s>> {
     let _selection_variable_lvalue_parser = (
         opt_note(implicit_class_handle_or_package_scope_parser),
@@ -97,8 +97,8 @@ pub fn variable_lvalue_parser<'s>(
     .parse_next(input)
 }
 
-pub fn nonrange_variable_lvalue_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn nonrange_variable_lvalue_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NonrangeVariableLvalue<'s>, VerboseError<'s>> {
     (
         opt_note(implicit_class_handle_or_package_scope_parser),

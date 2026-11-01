@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn loop_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn loop_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LoopStatement<'s>, VerboseError<'s>> {
     let _forever_parser = (token(Token::Forever), statement_or_null_parser)
         .map(|(a, b)| LoopStatement::Forever(Box::new((a, b))));
@@ -82,8 +82,8 @@ pub fn loop_statement_parser<'s>(
     .parse_next(input)
 }
 
-pub fn for_initialization_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn for_initialization_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ForInitialization<'s>, VerboseError<'s>> {
     alt((
         list_of_variable_assignments_parser
@@ -99,8 +99,8 @@ pub fn for_initialization_parser<'s>(
     .parse_next(input)
 }
 
-pub fn for_variable_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn for_variable_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ForVariableDeclaration<'s>, VerboseError<'s>> {
     (
         opt_note(token(Token::Var)),
@@ -119,8 +119,8 @@ pub fn for_variable_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn for_step_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn for_step_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ForStep<'s>, VerboseError<'s>> {
     (
         for_step_assignment_parser,
@@ -130,8 +130,8 @@ pub fn for_step_parser<'s>(
         .parse_next(input)
 }
 
-pub fn for_step_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn for_step_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ForStepAssignment<'s>, VerboseError<'s>> {
     alt((
         operator_assignment_parser
@@ -144,8 +144,8 @@ pub fn for_step_assignment_parser<'s>(
     .parse_next(input)
 }
 
-pub fn loop_variables_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn loop_variables_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LoopVariables<'s>, VerboseError<'s>> {
     (
         opt_note(index_variable_identifier_parser),

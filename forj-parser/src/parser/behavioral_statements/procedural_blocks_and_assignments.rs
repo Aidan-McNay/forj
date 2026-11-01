@@ -9,24 +9,24 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn initial_construct_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn initial_construct_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InitialConstruct<'s>, VerboseError<'s>> {
     (token(Token::Initial), statement_or_null_parser)
         .map(|(a, b)| InitialConstruct(a, b))
         .parse_next(input)
 }
 
-pub fn always_construct_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn always_construct_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AlwaysConstruct<'s>, VerboseError<'s>> {
     (always_keyword_parser, statement_parser)
         .map(|(a, b)| AlwaysConstruct(a, b))
         .parse_next(input)
 }
 
-pub fn always_keyword_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn always_keyword_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AlwaysKeyword<'s>, VerboseError<'s>> {
     alt((
         token(Token::Always).map(|a| AlwaysKeyword::Always(a)),
@@ -37,16 +37,16 @@ pub fn always_keyword_parser<'s>(
     .parse_next(input)
 }
 
-pub fn final_construct_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn final_construct_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FinalConstruct<'s>, VerboseError<'s>> {
     (token(Token::Final), function_statement_parser)
         .map(|(a, b)| FinalConstruct(a, b))
         .parse_next(input)
 }
 
-pub fn implicit_class_handle_or_class_scope_or_package_scope_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn implicit_class_handle_or_class_scope_or_package_scope_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<
     ImplicitClassHandleOrClassScopeOrPackageScope<'s>,
     VerboseError<'s>,
@@ -67,8 +67,8 @@ pub fn implicit_class_handle_or_class_scope_or_package_scope_parser<'s>(
     .parse_next(input)
 }
 
-pub fn blocking_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn blocking_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<BlockingAssignment<'s>, VerboseError<'s>> {
     let _variable_parser = (
         variable_lvalue_parser,
@@ -109,8 +109,8 @@ pub fn blocking_assignment_parser<'s>(
     .parse_next(input)
 }
 
-pub fn operator_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn operator_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<OperatorAssignment<'s>, VerboseError<'s>> {
     (
         variable_lvalue_parser,
@@ -121,8 +121,8 @@ pub fn operator_assignment_parser<'s>(
         .parse_next(input)
 }
 
-pub fn assignment_operator_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn assignment_operator_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AssignmentOperator<'s>, VerboseError<'s>> {
     alt((
         token(Token::Eq).map(|a| AssignmentOperator::Eq(a)),
@@ -142,8 +142,8 @@ pub fn assignment_operator_parser<'s>(
     .parse_next(input)
 }
 
-pub fn nonblocking_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn nonblocking_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NonblockingAssignment<'s>, VerboseError<'s>> {
     (
         variable_lvalue_parser,
@@ -155,8 +155,8 @@ pub fn nonblocking_assignment_parser<'s>(
         .parse_next(input)
 }
 
-pub fn procedural_continuous_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn procedural_continuous_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ProceduralContinuousAssignment<'s>, VerboseError<'s>> {
     alt((
         (token(Token::Assign), variable_assignment_parser).map(|(a, b)| {
@@ -181,8 +181,8 @@ pub fn procedural_continuous_assignment_parser<'s>(
     .parse_next(input)
 }
 
-pub fn variable_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn variable_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<VariableAssignment<'s>, VerboseError<'s>> {
     (variable_lvalue_parser, token(Token::Eq), expression_parser)
         .map(|(a, b, c)| VariableAssignment(a, b, c))

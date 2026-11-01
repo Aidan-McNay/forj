@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn module_instantiation_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_instantiation_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModuleInstantiation<'s>, VerboseError<'s>> {
     (
         module_identifier_parser,
@@ -23,8 +23,8 @@ pub fn module_instantiation_parser<'s>(
         .parse_next(input)
 }
 
-pub fn parameter_value_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn parameter_value_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ParameterValueAssignment<'s>, VerboseError<'s>> {
     (
         token(Token::Pound),
@@ -36,8 +36,8 @@ pub fn parameter_value_assignment_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_parameter_value_assignments_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_parameter_value_assignments_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfParameterValueAssignments<'s>, VerboseError<'s>> {
     let _ordered_ports_parser = (
         ordered_parameter_assignment_parser,
@@ -54,16 +54,16 @@ pub fn list_of_parameter_value_assignments_parser<'s>(
     alt((_ordered_ports_parser, _named_ports_parser)).parse_next(input)
 }
 
-pub fn ordered_parameter_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ordered_parameter_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<OrderedParameterAssignment<'s>, VerboseError<'s>> {
     param_expression_parser
         .map(|a| OrderedParameterAssignment(a))
         .parse_next(input)
 }
 
-pub fn named_parameter_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn named_parameter_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NamedParameterAssignment<'s>, VerboseError<'s>> {
     (
         token(Token::Period),
@@ -76,8 +76,8 @@ pub fn named_parameter_assignment_parser<'s>(
         .parse_next(input)
 }
 
-pub fn hierarchical_instance_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn hierarchical_instance_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<HierarchicalInstance<'s>, VerboseError<'s>> {
     (
         name_of_instance_parser,
@@ -89,8 +89,8 @@ pub fn hierarchical_instance_parser<'s>(
         .parse_next(input)
 }
 
-pub fn name_of_instance_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn name_of_instance_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NameOfInstance<'s>, VerboseError<'s>> {
     (
         instance_identifier_parser,
@@ -100,8 +100,8 @@ pub fn name_of_instance_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_port_connections_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_port_connections_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfPortConnections<'s>, VerboseError<'s>> {
     let _ordered_ports_parser = (
         ordered_port_connection_parser,
@@ -116,16 +116,16 @@ pub fn list_of_port_connections_parser<'s>(
     alt((_named_ports_parser, _ordered_ports_parser)).parse_next(input)
 }
 
-pub fn ordered_port_connection_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ordered_port_connection_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<OrderedPortConnection<'s>, VerboseError<'s>> {
     (attribute_instance_vec_parser, opt_note(expression_parser))
         .map(|(a, b)| OrderedPortConnection(a, b))
         .parse_next(input)
 }
 
-pub fn named_port_connection_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn named_port_connection_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NamedPortConnection<'s>, VerboseError<'s>> {
     let _named_parser = (
         attribute_instance_vec_parser,

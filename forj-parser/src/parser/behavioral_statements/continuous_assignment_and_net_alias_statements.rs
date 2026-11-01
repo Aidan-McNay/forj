@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn continuous_assign_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn continuous_assign_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ContinuousAssign<'s>, VerboseError<'s>> {
     let _net_assignments_parser = (
         token(Token::Assign),
@@ -35,8 +35,8 @@ pub fn continuous_assign_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_net_assignments_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_net_assignments_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfNetAssignments<'s>, VerboseError<'s>> {
     (
         net_assignment_parser,
@@ -46,8 +46,8 @@ pub fn list_of_net_assignments_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_variable_assignments_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_variable_assignments_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfVariableAssignments<'s>, VerboseError<'s>> {
     (
         variable_assignment_parser,
@@ -57,8 +57,8 @@ pub fn list_of_variable_assignments_parser<'s>(
         .parse_next(input)
 }
 
-pub fn net_alias_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn net_alias_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NetAlias<'s>, VerboseError<'s>> {
     (
         token(Token::Alias),
@@ -72,8 +72,8 @@ pub fn net_alias_parser<'s>(
         .parse_next(input)
 }
 
-pub fn net_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn net_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NetAssignment<'s>, VerboseError<'s>> {
     (net_lvalue_parser, token(Token::Eq), expression_parser)
         .map(|(a, b, c)| NetAssignment(a, b, c))

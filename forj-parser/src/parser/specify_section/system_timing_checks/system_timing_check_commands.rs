@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn system_timing_check_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn system_timing_check_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SystemTimingCheck<'s>, VerboseError<'s>> {
     alt((
         dollar_setup_timing_check_parser
@@ -41,8 +41,8 @@ pub fn system_timing_check_parser<'s>(
     .parse_next(input)
 }
 
-pub fn dollar_setup_timing_check_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dollar_setup_timing_check_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DollarSetupTimingCheck<'s>, VerboseError<'s>> {
     (
         token(Token::DollarSetup),
@@ -62,8 +62,8 @@ pub fn dollar_setup_timing_check_parser<'s>(
         .parse_next(input)
 }
 
-pub fn dollar_hold_timing_check_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dollar_hold_timing_check_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DollarHoldTimingCheck<'s>, VerboseError<'s>> {
     (
         token(Token::DollarHold),
@@ -83,8 +83,8 @@ pub fn dollar_hold_timing_check_parser<'s>(
         .parse_next(input)
 }
 
-pub fn dollar_setuphold_timing_check_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dollar_setuphold_timing_check_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DollarSetupholdTimingCheck<'s>, VerboseError<'s>> {
     (
         token(Token::DollarSetuphold),
@@ -125,8 +125,8 @@ pub fn dollar_setuphold_timing_check_parser<'s>(
         .parse_next(input)
 }
 
-pub fn dollar_recovery_timing_check_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dollar_recovery_timing_check_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DollarRecoveryTimingCheck<'s>, VerboseError<'s>> {
     (
         token(Token::DollarRecovery),
@@ -146,8 +146,8 @@ pub fn dollar_recovery_timing_check_parser<'s>(
         .parse_next(input)
 }
 
-pub fn dollar_removal_timing_check_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dollar_removal_timing_check_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DollarRemovalTimingCheck<'s>, VerboseError<'s>> {
     (
         token(Token::DollarRemoval),
@@ -167,8 +167,8 @@ pub fn dollar_removal_timing_check_parser<'s>(
         .parse_next(input)
 }
 
-pub fn dollar_recrem_timing_check_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dollar_recrem_timing_check_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DollarRecremTimingCheck<'s>, VerboseError<'s>> {
     (
         token(Token::DollarRecrem),
@@ -209,8 +209,8 @@ pub fn dollar_recrem_timing_check_parser<'s>(
         .parse_next(input)
 }
 
-pub fn dollar_skew_timing_check_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dollar_skew_timing_check_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DollarSkewTimingCheck<'s>, VerboseError<'s>> {
     (
         token(Token::DollarSkew),
@@ -230,8 +230,8 @@ pub fn dollar_skew_timing_check_parser<'s>(
         .parse_next(input)
 }
 
-pub fn dollar_timeskew_timing_check_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dollar_timeskew_timing_check_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DollarTimeskewTimingCheck<'s>, VerboseError<'s>> {
     (
         token(Token::DollarTimeskew),
@@ -262,8 +262,8 @@ pub fn dollar_timeskew_timing_check_parser<'s>(
         .parse_next(input)
 }
 
-pub fn dollar_fullskew_timing_check_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dollar_fullskew_timing_check_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DollarFullskewTimingCheck<'s>, VerboseError<'s>> {
     (
         token(Token::DollarFullskew),
@@ -294,8 +294,8 @@ pub fn dollar_fullskew_timing_check_parser<'s>(
         .parse_next(input)
 }
 
-pub fn dollar_period_timing_check_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dollar_period_timing_check_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DollarPeriodTimingCheck<'s>, VerboseError<'s>> {
     (
         token(Token::DollarPeriod),
@@ -313,8 +313,8 @@ pub fn dollar_period_timing_check_parser<'s>(
         .parse_next(input)
 }
 
-pub fn dollar_width_timing_check_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dollar_width_timing_check_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DollarWidthTimingCheck<'s>, VerboseError<'s>> {
     (
         token(Token::DollarWidth),
@@ -334,8 +334,8 @@ pub fn dollar_width_timing_check_parser<'s>(
         .parse_next(input)
 }
 
-pub fn dollar_nochange_timing_check_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dollar_nochange_timing_check_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DollarNochangeTimingCheck<'s>, VerboseError<'s>> {
     (
         token(Token::DollarNochange),

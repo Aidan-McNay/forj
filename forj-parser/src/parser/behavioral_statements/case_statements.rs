@@ -27,8 +27,8 @@ enum CaseStatementBody<'a> {
     ),
 }
 
-pub fn case_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn case_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CaseStatement<'s>, VerboseError<'s>> {
     let _case_statement_header_parser = (
         opt_note(unique_priority_parser),
@@ -81,16 +81,16 @@ pub fn case_statement_parser<'s>(
         .parse_next(input)
 }
 
-pub fn case_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn case_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CaseExpression<'s>, VerboseError<'s>> {
     expression_parser
         .map(|a| CaseExpression(a))
         .parse_next(input)
 }
 
-pub fn case_keyword_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn case_keyword_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CaseKeyword<'s>, VerboseError<'s>> {
     alt((
         token(Token::Case).map(|a| CaseKeyword::Case(a)),
@@ -100,8 +100,8 @@ pub fn case_keyword_parser<'s>(
     .parse_next(input)
 }
 
-pub fn case_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn case_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CaseItem<'s>, VerboseError<'s>> {
     let _expression_parser = (
         case_item_expression_parser,
@@ -119,8 +119,8 @@ pub fn case_item_parser<'s>(
     alt((_default_parser, _expression_parser)).parse_next(input)
 }
 
-pub fn case_pattern_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn case_pattern_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CasePatternItem<'s>, VerboseError<'s>> {
     let _expression_parser = (
         pattern_parser,
@@ -140,8 +140,8 @@ pub fn case_pattern_item_parser<'s>(
     alt((_default_parser, _expression_parser)).parse_next(input)
 }
 
-pub fn case_inside_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn case_inside_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CaseInsideItem<'s>, VerboseError<'s>> {
     let _expression_parser = (
         range_list_parser,
@@ -158,16 +158,16 @@ pub fn case_inside_item_parser<'s>(
     alt((_default_parser, _expression_parser)).parse_next(input)
 }
 
-pub fn case_item_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn case_item_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CaseItemExpression<'s>, VerboseError<'s>> {
     expression_parser
         .map(|a| CaseItemExpression(a))
         .parse_next(input)
 }
 
-pub fn randcase_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn randcase_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RandcaseStatement<'s>, VerboseError<'s>> {
     (
         token(Token::Randcase),
@@ -179,8 +179,8 @@ pub fn randcase_statement_parser<'s>(
         .parse_next(input)
 }
 
-pub fn randcase_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn randcase_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RandcaseItem<'s>, VerboseError<'s>> {
     (
         expression_parser,
@@ -191,8 +191,8 @@ pub fn randcase_item_parser<'s>(
         .parse_next(input)
 }
 
-pub fn range_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn range_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RangeList<'s>, VerboseError<'s>> {
     let _value_range_vec_parser =
         repeat_note((token(Token::Comma), value_range_parser));
@@ -201,8 +201,8 @@ pub fn range_list_parser<'s>(
         .parse_next(input)
 }
 
-pub fn value_range_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn value_range_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ValueRange<'s>, VerboseError<'s>> {
     let _expression_parser =
         expression_parser.map(|a| ValueRange::Expression(Box::new(a)));
@@ -265,8 +265,8 @@ pub fn value_range_parser<'s>(
     .parse_next(input)
 }
 
-pub fn constant_range_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_range_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantRangeList<'s>, VerboseError<'s>> {
     let _value_range_vec_parser =
         repeat_note((token(Token::Comma), constant_value_range_parser));
@@ -275,8 +275,8 @@ pub fn constant_range_list_parser<'s>(
         .parse_next(input)
 }
 
-pub fn constant_value_range_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_value_range_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantValueRange<'s>, VerboseError<'s>> {
     let _expression_parser = constant_expression_parser
         .map(|a| ConstantValueRange::Expression(Box::new(a)));

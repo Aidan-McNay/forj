@@ -10,8 +10,8 @@ use winnow::Parser;
 use winnow::combinator::alt;
 use winnow::token::any;
 
-pub fn system_severity_task_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn system_severity_task_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SeveritySystemTask<'s>, VerboseError<'s>> {
     alt((
         fatal_system_severity_task_parser
@@ -26,8 +26,8 @@ pub fn system_severity_task_parser<'s>(
     .parse_next(input)
 }
 
-pub fn fatal_system_severity_task_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn fatal_system_severity_task_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FatalSeveritySystemTask<'s>, VerboseError<'s>> {
     (
         token(Token::DollarFatal),
@@ -43,8 +43,8 @@ pub fn fatal_system_severity_task_parser<'s>(
         .parse_next(input)
 }
 
-pub fn error_system_severity_task_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn error_system_severity_task_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ErrorSeveritySystemTask<'s>, VerboseError<'s>> {
     (
         token(Token::DollarError),
@@ -59,8 +59,8 @@ pub fn error_system_severity_task_parser<'s>(
         .parse_next(input)
 }
 
-pub fn warning_system_severity_task_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn warning_system_severity_task_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<WarningSeveritySystemTask<'s>, VerboseError<'s>> {
     (
         token(Token::DollarWarning),
@@ -75,8 +75,8 @@ pub fn warning_system_severity_task_parser<'s>(
         .parse_next(input)
 }
 
-pub fn info_system_severity_task_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn info_system_severity_task_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InfoSeveritySystemTask<'s>, VerboseError<'s>> {
     (
         token(Token::DollarInfo),
@@ -91,8 +91,8 @@ pub fn info_system_severity_task_parser<'s>(
         .parse_next(input)
 }
 
-pub fn finish_number_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn finish_number_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FinishNumber<'s>, VerboseError<'s>> {
     (
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
@@ -131,16 +131,16 @@ pub fn finish_number_parser<'s>(
         .parse_next(input)
 }
 
-pub fn elaboration_system_severity_task_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn elaboration_system_severity_task_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ElaborationSeveritySystemTask<'s>, VerboseError<'s>> {
     system_severity_task_parser
         .map(|a| ElaborationSeveritySystemTask(a))
         .parse_next(input)
 }
 
-pub fn module_common_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_common_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModuleCommonItem<'s>, VerboseError<'s>> {
     alt((
         continuous_assign_parser.map(|a| ModuleCommonItem::Assign(Box::new(a))),
@@ -169,8 +169,8 @@ pub fn module_common_item_parser<'s>(
     .parse_next(input)
 }
 
-pub fn module_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModuleItem<'s>, VerboseError<'s>> {
     alt((
         (port_declaration_parser, token(Token::SColon))
@@ -188,8 +188,8 @@ enum ModuleOrGenerateItemBody<'a> {
     ModuleCommon(ModuleCommonItem<'a>),
 }
 
-pub fn module_or_generate_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_or_generate_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModuleOrGenerateItem<'s>, VerboseError<'s>> {
     let _body_parser = alt((
         parameter_override_parser
@@ -222,8 +222,8 @@ pub fn module_or_generate_item_parser<'s>(
         .parse_next(input)
 }
 
-pub fn module_or_generate_item_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_or_generate_item_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModuleOrGenerateItemDeclaration<'s>, VerboseError<'s>> {
     alt((
         package_or_generate_item_declaration_parser.map(|a| {
@@ -260,8 +260,8 @@ pub fn module_or_generate_item_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn non_port_module_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn non_port_module_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NonPortModuleItem<'s>, VerboseError<'s>> {
     alt((
         generate_region_parser.map(|a| NonPortModuleItem::Region(Box::new(a))),
@@ -282,8 +282,8 @@ pub fn non_port_module_item_parser<'s>(
     .parse_next(input)
 }
 
-pub fn parameter_override_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn parameter_override_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ParameterOverride<'s>, VerboseError<'s>> {
     (
         token(Token::Defparam),
@@ -294,8 +294,8 @@ pub fn parameter_override_parser<'s>(
         .parse_next(input)
 }
 
-pub fn bind_directive_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn bind_directive_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<BindDirective<'s>, VerboseError<'s>> {
     let _instance_parser = (
         token(Token::Bind),
@@ -329,8 +329,8 @@ pub fn bind_directive_parser<'s>(
     alt((_instance_parser, _scope_parser)).parse_next(input)
 }
 
-pub fn bind_target_scope_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn bind_target_scope_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<BindTargetScope<'s>, VerboseError<'s>> {
     alt((
         module_identifier_parser.map(|a| BindTargetScope::Module(a)),
@@ -339,16 +339,16 @@ pub fn bind_target_scope_parser<'s>(
     .parse_next(input)
 }
 
-pub fn bind_target_instance_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn bind_target_instance_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<BindTargetInstance<'s>, VerboseError<'s>> {
     (hierarchical_identifier_parser, constant_bit_select_parser)
         .map(|(a, b)| BindTargetInstance(a, b))
         .parse_next(input)
 }
 
-pub fn bind_target_instance_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn bind_target_instance_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<BindTargetInstanceList<'s>, VerboseError<'s>> {
     (
         bind_target_instance_parser,
@@ -358,8 +358,8 @@ pub fn bind_target_instance_list_parser<'s>(
         .parse_next(input)
 }
 
-pub fn bind_instantiation_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn bind_instantiation_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<BindInstantiation<'s>, VerboseError<'s>> {
     alt((
         program_instantiation_parser

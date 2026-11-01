@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::{alt, not, peek, terminated};
 
-pub fn defparam_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn defparam_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DefparamAssignment<'s>, VerboseError<'s>> {
     (
         hierarchical_parameter_identifier_parser,
@@ -21,8 +21,8 @@ pub fn defparam_assignment_parser<'s>(
         .parse_next(input)
 }
 
-pub fn net_decl_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn net_decl_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NetDeclAssignment<'s>, VerboseError<'s>> {
     (
         net_identifier_parser,
@@ -33,8 +33,8 @@ pub fn net_decl_assignment_parser<'s>(
         .parse_next(input)
 }
 
-pub fn param_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn param_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ParamAssignment<'s>, VerboseError<'s>> {
     (
         parameter_identifier_parser,
@@ -45,8 +45,8 @@ pub fn param_assignment_parser<'s>(
         .parse_next(input)
 }
 
-pub fn specparam_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn specparam_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SpecparamAssignment<'s>, VerboseError<'s>> {
     let _base_parser = (
         specparam_identifier_parser,
@@ -59,8 +59,8 @@ pub fn specparam_assignment_parser<'s>(
     alt((_base_parser, _pulse_parser)).parse_next(input)
 }
 
-fn pathpulse_pathspecific_path_parser<'s>(
-    input: &mut Tokens<'s>,
+fn pathpulse_pathspecific_path_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Identifier<'s>, VerboseError<'s>> {
     identifier_parser
         .verify_map(|a| match a {
@@ -81,8 +81,8 @@ fn pathpulse_pathspecific_path_parser<'s>(
         .parse_next(input)
 }
 
-pub fn pulse_control_specparam_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn pulse_control_specparam_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PulseControlSpecparam<'s>, VerboseError<'s>> {
     let _nonpath_specific_parser = (
         token(Token::PathpulseDollar),
@@ -109,32 +109,32 @@ pub fn pulse_control_specparam_parser<'s>(
     alt((_nonpath_specific_parser, _path_specific_parser)).parse_next(input)
 }
 
-pub fn error_limit_value_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn error_limit_value_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ErrorLimitValue<'s>, VerboseError<'s>> {
     limit_value_parser
         .map(|a| ErrorLimitValue(a))
         .parse_next(input)
 }
 
-pub fn reject_limit_value_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn reject_limit_value_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RejectLimitValue<'s>, VerboseError<'s>> {
     limit_value_parser
         .map(|a| RejectLimitValue(a))
         .parse_next(input)
 }
 
-pub fn limit_value_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn limit_value_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LimitValue<'s>, VerboseError<'s>> {
     constant_mintypmax_expression_parser
         .map(|a| LimitValue(a))
         .parse_next(input)
 }
 
-pub fn type_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn type_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TypeAssignment<'s>, VerboseError<'s>> {
     (
         type_identifier_parser,
@@ -147,8 +147,8 @@ pub fn type_assignment_parser<'s>(
         .parse_next(input)
 }
 
-pub fn variable_decl_assignment_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn variable_decl_assignment_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<VariableDeclAssignment<'s>, VerboseError<'s>> {
     let _variable_parser = (
         variable_identifier_parser,
@@ -186,8 +186,8 @@ pub fn variable_decl_assignment_parser<'s>(
     .parse_next(input)
 }
 
-pub fn class_new_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_new_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassNew<'s>, VerboseError<'s>> {
     let _args_parser = (
         opt_note(class_scope_parser),
@@ -208,8 +208,8 @@ pub fn class_new_parser<'s>(
     alt((_expression_parser, _args_parser)).parse_next(input)
 }
 
-pub fn dynamic_array_new_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn dynamic_array_new_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DynamicArrayNew<'s>, VerboseError<'s>> {
     (
         token(Token::New),

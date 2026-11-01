@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn conditional_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn conditional_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConditionalStatement<'s>, VerboseError<'s>> {
     (
         opt_note(unique_priority_parser),
@@ -35,8 +35,8 @@ pub fn conditional_statement_parser<'s>(
         .parse_next(input)
 }
 
-pub fn unique_priority_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn unique_priority_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UniquePriority<'s>, VerboseError<'s>> {
     alt((
         token(Token::Unique).map(|a| UniquePriority::Unique(a)),
@@ -46,8 +46,8 @@ pub fn unique_priority_parser<'s>(
     .parse_next(input)
 }
 
-pub fn cond_predicate_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn cond_predicate_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CondPredicate<'s>, VerboseError<'s>> {
     (
         expression_or_cond_pattern_parser,
@@ -60,8 +60,8 @@ pub fn cond_predicate_parser<'s>(
         .parse_next(input)
 }
 
-pub fn expression_or_cond_pattern_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn expression_or_cond_pattern_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ExpressionOrCondPattern<'s>, VerboseError<'s>> {
     (
         cond_predicate_expression_parser,
@@ -80,8 +80,8 @@ pub fn expression_or_cond_pattern_parser<'s>(
 }
 
 #[allow(dead_code)] // Integrated in expression_or_cond_pattern_parser
-pub fn cond_pattern_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn cond_pattern_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CondPattern<'s>, VerboseError<'s>> {
     (
         cond_predicate_expression_parser,

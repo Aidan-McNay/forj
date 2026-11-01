@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn generate_region_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn generate_region_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<GenerateRegion<'s>, VerboseError<'s>> {
     (
         token(Token::Generate),
@@ -21,8 +21,8 @@ pub fn generate_region_parser<'s>(
         .parse_next(input)
 }
 
-pub fn loop_generate_construct_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn loop_generate_construct_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<LoopGenerateConstruct<'s>, VerboseError<'s>> {
     (
         token(Token::For),
@@ -41,8 +41,8 @@ pub fn loop_generate_construct_parser<'s>(
         .parse_next(input)
 }
 
-pub fn genvar_initialization_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn genvar_initialization_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<GenvarInitialization<'s>, VerboseError<'s>> {
     (
         opt_note(token(Token::Genvar)),
@@ -54,8 +54,8 @@ pub fn genvar_initialization_parser<'s>(
         .parse_next(input)
 }
 
-pub fn genvar_iteration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn genvar_iteration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<GenvarIteration<'s>, VerboseError<'s>> {
     let _assignment_parser = (
         genvar_identifier_parser,
@@ -71,8 +71,8 @@ pub fn genvar_iteration_parser<'s>(
     alt((_assignment_parser, _prefix_parser, _postfix_parser)).parse_next(input)
 }
 
-pub fn conditional_generate_construct_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn conditional_generate_construct_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConditionalGenerateConstruct<'s>, VerboseError<'s>> {
     alt((
         if_generate_construct_parser
@@ -83,8 +83,8 @@ pub fn conditional_generate_construct_parser<'s>(
     .parse_next(input)
 }
 
-pub fn if_generate_construct_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn if_generate_construct_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<IfGenerateConstruct<'s>, VerboseError<'s>> {
     (
         token(Token::If),
@@ -98,8 +98,8 @@ pub fn if_generate_construct_parser<'s>(
         .parse_next(input)
 }
 
-pub fn case_generate_construct_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn case_generate_construct_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CaseGenerateConstruct<'s>, VerboseError<'s>> {
     (
         token(Token::Case),
@@ -114,8 +114,8 @@ pub fn case_generate_construct_parser<'s>(
         .parse_next(input)
 }
 
-pub fn case_generate_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn case_generate_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CaseGenerateItem<'s>, VerboseError<'s>> {
     let _expression_parser = (
         constant_expression_parser,
@@ -135,8 +135,8 @@ pub fn case_generate_item_parser<'s>(
     alt((_default_parser, _expression_parser)).parse_next(input)
 }
 
-pub fn generate_block_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn generate_block_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<GenerateBlock<'s>, VerboseError<'s>> {
     let _block_parser = (
         opt_note((generate_block_identifier_parser, token(Token::Colon))),
@@ -177,8 +177,8 @@ pub fn generate_block_parser<'s>(
     Ok(result)
 }
 
-pub fn generate_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn generate_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<GenerateItem<'s>, VerboseError<'s>> {
     alt((
         module_or_generate_item_parser

@@ -9,8 +9,8 @@ use winnow::Parser;
 use winnow::combinator::{alt, not, peek, terminated};
 use winnow::error::ModalResult;
 
-pub fn delay2_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn delay2_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Delay2<'s>, VerboseError<'s>> {
     let _value_parser = (token(Token::Pound), delay_value_parser)
         .map(|(a, b)| Delay2::Value(Box::new((a, b))));
@@ -25,8 +25,8 @@ pub fn delay2_parser<'s>(
     alt((_value_parser, _mintypmax_parser)).parse_next(input)
 }
 
-pub fn delay3_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn delay3_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Delay3<'s>, VerboseError<'s>> {
     let _value_parser = (token(Token::Pound), delay_value_parser)
         .map(|(a, b)| Delay3::Value(Box::new((a, b))));
@@ -45,8 +45,8 @@ pub fn delay3_parser<'s>(
     alt((_value_parser, _mintypmax_parser)).parse_next(input)
 }
 
-pub fn delay_value_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn delay_value_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DelayValue<'s>, VerboseError<'s>> {
     alt((
         token(Token::OneStep).map(|a| DelayValue::OneStep(a)),

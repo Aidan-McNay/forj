@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn statement_or_null_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn statement_or_null_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<StatementOrNull<'s>, VerboseError<'s>> {
     alt((
         statement_parser.map(|a| StatementOrNull::Statement(Box::new(a))),
@@ -20,8 +20,8 @@ pub fn statement_or_null_parser<'s>(
     .parse_next(input)
 }
 
-pub fn statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Statement<'s>, VerboseError<'s>> {
     let result = (
         opt_note((block_identifier_parser, token(Token::Colon))),
@@ -56,8 +56,8 @@ pub fn statement_parser<'s>(
     Ok(result)
 }
 
-pub fn statement_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn statement_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<StatementItem<'s>, VerboseError<'s>> {
     alt((
         (blocking_assignment_parser, token(Token::SColon))
@@ -98,16 +98,16 @@ pub fn statement_item_parser<'s>(
     .parse_next(input)
 }
 
-pub fn function_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn function_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FunctionStatement<'s>, VerboseError<'s>> {
     statement_parser
         .map(|a| FunctionStatement(a))
         .parse_next(input)
 }
 
-pub fn function_statement_or_null_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn function_statement_or_null_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FunctionStatementOrNull<'s>, VerboseError<'s>> {
     alt((
         function_statement_parser

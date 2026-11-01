@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn checker_instantiation_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn checker_instantiation_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CheckerInstantiation<'s>, VerboseError<'s>> {
     (
         ps_checker_identifier_parser,
@@ -24,8 +24,8 @@ pub fn checker_instantiation_parser<'s>(
         .parse_next(input)
 }
 
-pub fn list_of_checker_port_connections_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_checker_port_connections_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfCheckerPortConnections<'s>, VerboseError<'s>> {
     let _ordered_parser = (
         ordered_checker_port_connection_parser,
@@ -46,8 +46,8 @@ pub fn list_of_checker_port_connections_parser<'s>(
     alt((_named_parser, _ordered_parser)).parse_next(input)
 }
 
-pub fn ordered_checker_port_connection_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn ordered_checker_port_connection_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<OrderedCheckerPortConnection<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -57,8 +57,8 @@ pub fn ordered_checker_port_connection_parser<'s>(
         .parse_next(input)
 }
 
-pub fn named_checker_port_connection_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn named_checker_port_connection_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NamedCheckerPortConnection<'s>, VerboseError<'s>> {
     let _identifier_parser = (
         attribute_instance_vec_parser,

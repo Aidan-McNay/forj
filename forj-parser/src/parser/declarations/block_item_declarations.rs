@@ -16,8 +16,8 @@ enum BlockItemDeclarationBody<'a> {
     Let(LetDeclaration<'a>),
 }
 
-pub fn block_item_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn block_item_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<BlockItemDeclaration<'s>, VerboseError<'s>> {
     let _body_parser = alt((
         data_declaration_parser.map(|a| BlockItemDeclarationBody::Data(a)),

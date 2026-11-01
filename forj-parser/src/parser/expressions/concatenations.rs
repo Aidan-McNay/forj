@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::{alt, peek, terminated};
 
-pub fn concatenation_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn concatenation_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Concatenation<'s>, VerboseError<'s>> {
     (
         token(Token::Brace),
@@ -22,8 +22,8 @@ pub fn concatenation_parser<'s>(
         .parse_next(input)
 }
 
-pub fn constant_concatenation_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_concatenation_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantConcatenation<'s>, VerboseError<'s>> {
     (
         token(Token::Brace),
@@ -35,8 +35,8 @@ pub fn constant_concatenation_parser<'s>(
         .parse_next(input)
 }
 
-pub fn constant_multiple_concatenation_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_multiple_concatenation_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantMultipleConcatenation<'s>, VerboseError<'s>> {
     (
         token(Token::Brace),
@@ -48,8 +48,8 @@ pub fn constant_multiple_concatenation_parser<'s>(
         .parse_next(input)
 }
 
-pub fn module_path_concatenation_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_path_concatenation_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModulePathConcatenation<'s>, VerboseError<'s>> {
     (
         token(Token::Brace),
@@ -61,8 +61,8 @@ pub fn module_path_concatenation_parser<'s>(
         .parse_next(input)
 }
 
-pub fn module_path_multiple_concatenation_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_path_multiple_concatenation_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModulePathMultipleConcatenation<'s>, VerboseError<'s>> {
     (
         token(Token::Brace),
@@ -74,8 +74,8 @@ pub fn module_path_multiple_concatenation_parser<'s>(
         .parse_next(input)
 }
 
-pub fn multiple_concatenation_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn multiple_concatenation_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<MultipleConcatenation<'s>, VerboseError<'s>> {
     (
         token(Token::Brace),
@@ -87,8 +87,8 @@ pub fn multiple_concatenation_parser<'s>(
         .parse_next(input)
 }
 
-pub fn streaming_concatenation_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn streaming_concatenation_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<StreamingConcatenation<'s>, VerboseError<'s>> {
     (
         token(Token::Brace),
@@ -101,8 +101,8 @@ pub fn streaming_concatenation_parser<'s>(
         .parse_next(input)
 }
 
-pub fn stream_operator_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn stream_operator_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<StreamOperator<'s>, VerboseError<'s>> {
     alt((
         token(Token::GtGt).map(|a| StreamOperator::Right(a)),
@@ -111,8 +111,8 @@ pub fn stream_operator_parser<'s>(
     .parse_next(input)
 }
 
-pub fn slice_size_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn slice_size_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SliceSize<'s>, VerboseError<'s>> {
     alt((
         simple_type_parser.map(|a| SliceSize::Simple(Box::new(a))),
@@ -121,8 +121,8 @@ pub fn slice_size_parser<'s>(
     .parse_next(input)
 }
 
-pub fn stream_concatenation_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn stream_concatenation_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<StreamConcatenation<'s>, VerboseError<'s>> {
     (
         token(Token::Brace),
@@ -134,8 +134,8 @@ pub fn stream_concatenation_parser<'s>(
         .parse_next(input)
 }
 
-pub fn stream_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn stream_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<StreamExpression<'s>, VerboseError<'s>> {
     (
         expression_parser,
@@ -156,8 +156,8 @@ enum ArrayExtraRange<'s> {
     MinusRange((Metadata<'s>, Expression<'s>)),
 }
 
-pub fn array_range_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn array_range_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ArrayRangeExpression<'s>, VerboseError<'s>> {
     let _extra_range_parser = alt((
         (token(Token::Colon), expression_parser)
@@ -195,8 +195,8 @@ pub fn array_range_expression_parser<'s>(
         .parse_next(input)
 }
 
-pub fn empty_unpacked_array_concatenation_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn empty_unpacked_array_concatenation_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EmptyUnpackedArrayConcatenation<'s>, VerboseError<'s>> {
     (token(Token::Brace), token(Token::EBrace))
         .map(|(a, b)| EmptyUnpackedArrayConcatenation(a, b))

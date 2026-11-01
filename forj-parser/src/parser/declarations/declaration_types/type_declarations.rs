@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::{alt, peek, terminated};
 
-pub fn data_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn data_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataDeclaration<'s>, VerboseError<'s>> {
     let _variable_data_declaration_parser = (
         opt_note(token(Token::Const)),
@@ -40,8 +40,8 @@ pub fn data_declaration_parser<'s>(
     .parse_next(input)
 }
 
-fn data_type_or_implicit_parser_data_declaration<'s>(
-    input: &mut Tokens<'s>,
+fn data_type_or_implicit_parser_data_declaration<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataTypeOrImplicit<'s>, VerboseError<'s>> {
     alt((
         terminated(data_type_parser, peek(variable_decl_assignment_parser))
@@ -55,8 +55,8 @@ fn data_type_or_implicit_parser_data_declaration<'s>(
     .parse_next(input)
 }
 
-pub fn package_import_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn package_import_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PackageImportDeclaration<'s>, VerboseError<'s>> {
     (
         token(Token::Import),
@@ -68,8 +68,8 @@ pub fn package_import_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn package_export_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn package_export_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PackageExportDeclaration<'s>, VerboseError<'s>> {
     let _item_parser = (
         token(Token::Export),
@@ -96,8 +96,8 @@ pub fn package_export_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn package_import_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn package_import_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PackageImportItem<'s>, VerboseError<'s>> {
     alt((
         (
@@ -118,8 +118,8 @@ pub fn package_import_item_parser<'s>(
     .parse_next(input)
 }
 
-pub fn genvar_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn genvar_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<GenvarDeclaration<'s>, VerboseError<'s>> {
     (
         token(Token::Genvar),
@@ -130,8 +130,8 @@ pub fn genvar_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn net_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn net_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NetDeclaration<'s>, VerboseError<'s>> {
     let _drive_or_charge_strength_parser = alt((
         drive_strength_parser.map(|a| DriveOrChargeStrength::DriveStrength(a)),
@@ -186,8 +186,8 @@ pub fn net_declaration_parser<'s>(
     .parse_next(input)
 }
 
-fn data_type_or_implicit_parser_net_declaration<'s>(
-    input: &mut Tokens<'s>,
+fn data_type_or_implicit_parser_net_declaration<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataTypeOrImplicit<'s>, VerboseError<'s>> {
     alt((
         terminated(
@@ -204,8 +204,8 @@ fn data_type_or_implicit_parser_net_declaration<'s>(
     .parse_next(input)
 }
 
-pub fn type_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn type_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TypeDeclaration<'s>, VerboseError<'s>> {
     let _data_type_or_incomplete_class_scoped_parser = (
         token(Token::Typedef),
@@ -248,8 +248,8 @@ pub fn type_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn forward_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn forward_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ForwardType<'s>, VerboseError<'s>> {
     alt((
         token(Token::Enum).map(|a| ForwardType::Enum(a)),
@@ -262,8 +262,8 @@ pub fn forward_type_parser<'s>(
     .parse_next(input)
 }
 
-pub fn nettype_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn nettype_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NettypeDeclaration<'s>, VerboseError<'s>> {
     let _with_scope_parser = (
         token(Token::Nettype),
@@ -292,8 +292,8 @@ pub fn nettype_declaration_parser<'s>(
     alt((_with_scope_parser, _scoped_parser)).parse_next(input)
 }
 
-pub fn lifetime_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn lifetime_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Lifetime<'s>, VerboseError<'s>> {
     alt((
         token(Token::Static).map(|a| Lifetime::Static(a)),

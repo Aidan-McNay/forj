@@ -12,8 +12,8 @@ use winnow::Parser;
 use winnow::combinator::{alt, not, peek, terminated};
 use winnow::stream::Stream;
 
-pub fn inc_or_dec_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn inc_or_dec_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<IncOrDecExpression<'s>, VerboseError<'s>> {
     let _preop_parser = (
         inc_or_dec_operator_parser,
@@ -31,8 +31,8 @@ pub fn inc_or_dec_expression_parser<'s>(
 }
 
 #[allow(dead_code)] // Parsed in Pratt parsing
-pub fn conditional_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn conditional_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConditionalExpression<'s>, VerboseError<'s>> {
     (
         cond_predicate_parser,
@@ -107,8 +107,8 @@ fn inside_operator_binding_power<'s>() -> (u8, u8) {
     left_assoc(11)
 }
 
-fn constant_expression_bp_parser<'s>(
-    input: &mut Tokens<'s>,
+fn constant_expression_bp_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
     min_bp: u8,
 ) -> ModalResult<ConstantExpression<'s>, VerboseError<'s>> {
     let mut lhs = alt((
@@ -176,14 +176,14 @@ fn constant_expression_bp_parser<'s>(
     }
 }
 
-pub fn constant_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantExpression<'s>, VerboseError<'s>> {
     constant_expression_bp_parser(input, 0)
 }
 
-pub fn constant_mintypmax_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_mintypmax_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantMintypmaxExpression<'s>, VerboseError<'s>> {
     (
         constant_expression_parser,
@@ -203,8 +203,8 @@ pub fn constant_mintypmax_expression_parser<'s>(
         .parse_next(input)
 }
 
-pub fn constant_param_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_param_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantParamExpression<'s>, VerboseError<'s>> {
     let _mintypmax_parser = constant_mintypmax_expression_parser
         .map(|a| ConstantParamExpression::Mintypmax(Box::new(a)));
@@ -215,8 +215,8 @@ pub fn constant_param_expression_parser<'s>(
     alt((_mintypmax_parser, _data_parser, _dollar_parser)).parse_next(input)
 }
 
-pub fn param_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn param_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ParamExpression<'s>, VerboseError<'s>> {
     let _mintypmax_parser =
         terminated(mintypmax_expression_parser, peek(not(token(Token::Pound))))
@@ -228,8 +228,8 @@ pub fn param_expression_parser<'s>(
     alt((_mintypmax_parser, _data_parser, _dollar_parser)).parse_next(input)
 }
 
-pub fn constant_range_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_range_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantRangeExpression<'s>, VerboseError<'s>> {
     alt((
         constant_part_select_range_parser
@@ -240,8 +240,8 @@ pub fn constant_range_expression_parser<'s>(
     .parse_next(input)
 }
 
-pub fn constant_part_select_range_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_part_select_range_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantPartSelectRange<'s>, VerboseError<'s>> {
     alt((
         constant_range_parser
@@ -252,8 +252,8 @@ pub fn constant_part_select_range_parser<'s>(
     .parse_next(input)
 }
 
-pub fn constant_indexed_range_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_indexed_range_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantIndexedRange<'s>, VerboseError<'s>> {
     let _plus_parser = (
         constant_expression_parser,
@@ -270,8 +270,8 @@ pub fn constant_indexed_range_parser<'s>(
     alt((_plus_parser, _minus_parser)).parse_next(input)
 }
 
-pub fn constant_range_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_range_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantRange<'s>, VerboseError<'s>> {
     (
         constant_expression_parser,
@@ -282,16 +282,16 @@ pub fn constant_range_parser<'s>(
         .parse_next(input)
 }
 
-fn gen_constant_expression_parser<'s>(
+fn gen_constant_expression_parser<'s: 'b, 'b>(
     min_bp: u8,
 ) -> impl FnMut(
-    &mut Tokens<'s>,
+    &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantExpression<'s>, VerboseError<'s>> {
     move |input| constant_expression_bp_parser(input, min_bp)
 }
 
-fn pattern_bp_parser<'s>(
-    input: &mut Tokens<'s>,
+fn pattern_bp_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
     min_bp: u8,
 ) -> ModalResult<Pattern<'s>, VerboseError<'s>> {
     let _parentheses_parser =
@@ -349,14 +349,15 @@ fn pattern_bp_parser<'s>(
     .parse_next(input)
 }
 
-pub(crate) fn gen_pattern_parser<'s>(
+pub(crate) fn gen_pattern_parser<'s: 'b, 'b>(
     min_bp: u8,
-) -> impl FnMut(&mut Tokens<'s>) -> ModalResult<Pattern<'s>, VerboseError<'s>> {
+) -> impl FnMut(&mut Tokens<'s, 'b>) -> ModalResult<Pattern<'s>, VerboseError<'s>>
+{
     move |input| pattern_bp_parser(input, min_bp)
 }
 
-fn basic_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+fn basic_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Expression<'s>, VerboseError<'s>> {
     let _primary_parser = terminated(
         primary_parser,
@@ -405,8 +406,8 @@ enum ExpressionPrattOp<'a> {
     Inside(Metadata<'a>),
 }
 
-fn expression_bp_parser<'s>(
-    input: &mut Tokens<'s>,
+fn expression_bp_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
     min_bp: u8,
     // Should consume ?, but don't have to consume matches/&&& if not in ternary expr
     in_cond_predicate: bool,
@@ -642,20 +643,20 @@ fn expression_bp_parser<'s>(
     }
 }
 
-pub(crate) fn cond_predicate_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub(crate) fn cond_predicate_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Expression<'s>, VerboseError<'s>> {
     expression_bp_parser(input, 0, true)
 }
 
-pub fn expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Expression<'s>, VerboseError<'s>> {
     expression_bp_parser(input, 0, false)
 }
 
-pub fn tagged_union_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn tagged_union_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TaggedUnionExpression<'s>, VerboseError<'s>> {
     (
         token(Token::Tagged),
@@ -667,8 +668,8 @@ pub fn tagged_union_expression_parser<'s>(
 }
 
 #[allow(dead_code)] // Parsed in Pratt parsing
-pub fn inside_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn inside_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InsideExpression<'s>, VerboseError<'s>> {
     (
         expression_parser,
@@ -681,8 +682,8 @@ pub fn inside_expression_parser<'s>(
         .parse_next(input)
 }
 
-pub fn mintypmax_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn mintypmax_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<MintypmaxExpression<'s>, VerboseError<'s>> {
     (
         expression_parser,
@@ -703,8 +704,8 @@ pub fn mintypmax_expression_parser<'s>(
 }
 
 #[allow(dead_code)] // Parsed in Pratt parsing
-pub fn module_path_conditional_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_path_conditional_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModulePathConditionalExpression<'s>, VerboseError<'s>> {
     (
         module_path_expression_parser,
@@ -742,8 +743,8 @@ enum BinaryModulePathOrTernaryOp<'a> {
     Ternary(Metadata<'a>),
 }
 
-fn module_path_expression_bp_parser<'s>(
-    input: &mut Tokens<'s>,
+fn module_path_expression_bp_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
     min_bp: u8,
 ) -> ModalResult<ModulePathExpression<'s>, VerboseError<'s>> {
     let mut lhs = alt((
@@ -799,14 +800,14 @@ fn module_path_expression_bp_parser<'s>(
     }
 }
 
-pub fn module_path_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_path_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModulePathExpression<'s>, VerboseError<'s>> {
     module_path_expression_bp_parser(input, 0)
 }
 
-pub fn module_path_mintypmax_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_path_mintypmax_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModulePathMintypmaxExpression<'s>, VerboseError<'s>> {
     alt((
         (
@@ -827,8 +828,8 @@ pub fn module_path_mintypmax_expression_parser<'s>(
     .parse_next(input)
 }
 
-pub fn part_select_range_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn part_select_range_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PartSelectRange<'s>, VerboseError<'s>> {
     alt((
         constant_range_parser
@@ -839,8 +840,8 @@ pub fn part_select_range_parser<'s>(
     .parse_next(input)
 }
 
-pub fn indexed_range_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn indexed_range_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<IndexedRange<'s>, VerboseError<'s>> {
     alt((
         (
@@ -859,8 +860,8 @@ pub fn indexed_range_parser<'s>(
     .parse_next(input)
 }
 
-pub fn genvar_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn genvar_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<GenvarExpression<'s>, VerboseError<'s>> {
     constant_expression_parser
         .map(|a| GenvarExpression(a))

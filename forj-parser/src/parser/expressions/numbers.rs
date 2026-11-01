@@ -10,8 +10,8 @@ use winnow::Parser;
 use winnow::combinator::alt;
 use winnow::token::any;
 
-pub fn number_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn number_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Number<'s>, VerboseError<'s>> {
     alt((
         integral_number_parser.map(|a| Number::Integral(Box::new(a))),
@@ -21,8 +21,8 @@ pub fn number_parser<'s>(
     .parse_next(input)
 }
 
-pub fn integral_number_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn integral_number_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<IntegralNumber<'s>, VerboseError<'s>> {
     alt((
         decimal_number_parser.map(|a| IntegralNumber::Decimal(Box::new(a))),
@@ -34,8 +34,8 @@ pub fn integral_number_parser<'s>(
     .parse_next(input)
 }
 
-pub fn decimal_number_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn decimal_number_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DecimalNumber<'s>, VerboseError<'s>> {
     let _sized_parser = (
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
@@ -60,8 +60,8 @@ pub fn decimal_number_parser<'s>(
     .parse_next(input)
 }
 
-pub fn binary_number_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn binary_number_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<BinaryNumber<'s>, VerboseError<'s>> {
     (
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
@@ -82,8 +82,8 @@ pub fn binary_number_parser<'s>(
         .parse_next(input)
 }
 
-pub fn octal_number_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn octal_number_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<OctalNumber<'s>, VerboseError<'s>> {
     (
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
@@ -104,8 +104,8 @@ pub fn octal_number_parser<'s>(
         .parse_next(input)
 }
 
-pub fn hex_number_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn hex_number_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<HexNumber<'s>, VerboseError<'s>> {
     (
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
@@ -126,8 +126,8 @@ pub fn hex_number_parser<'s>(
         .parse_next(input)
 }
 
-pub fn real_number_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn real_number_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RealNumber<'s>, VerboseError<'s>> {
     alt((
         fixed_point_number_parser.map(|a| RealNumber::FixedPoint(Box::new(a))),
@@ -137,8 +137,8 @@ pub fn real_number_parser<'s>(
     .parse_next(input)
 }
 
-pub fn fixed_point_number_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn fixed_point_number_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FixedPointNumber<'s>, VerboseError<'s>> {
     (
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
@@ -159,8 +159,8 @@ pub fn fixed_point_number_parser<'s>(
         .parse_next(input)
 }
 
-pub fn scientific_number_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn scientific_number_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ScientificNumber<'s>, VerboseError<'s>> {
     (
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
@@ -181,8 +181,8 @@ pub fn scientific_number_parser<'s>(
         .parse_next(input)
 }
 
-pub fn unsigned_number_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn unsigned_number_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UnsignedNumber<'s>, VerboseError<'s>> {
     (
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
@@ -203,8 +203,8 @@ pub fn unsigned_number_parser<'s>(
         .parse_next(input)
 }
 
-pub fn unbased_unsized_literal_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn unbased_unsized_literal_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<UnbasedUnsizedLiteral<'s>, VerboseError<'s>> {
     (
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {

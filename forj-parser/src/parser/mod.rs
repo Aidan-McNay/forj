@@ -49,15 +49,16 @@ pub fn parse<'s>(
     input: &'s [SpannedToken<'s>],
 ) -> Result<SourceText<'s>, VerboseError<'s>> {
     let stream = TokenSlice::new(input);
-    let state = (None, MemoizedState::new(&stream));
+    let mut state = ParserState::new(&stream);
     let mut stateful_input = Tokens {
         input: stream,
-        state,
+        state: &mut state,
     };
-    match source_text_parser.parse_next(&mut stateful_input) {
+    let result = source_text_parser.parse_next(&mut stateful_input);
+    match result {
         Ok(source_text) => Ok(source_text),
         Err(ErrMode::Backtrack(err)) | Err(ErrMode::Cut(err)) => {
-            Err(match stateful_input.state.0 {
+            Err(match state.last_err {
                 None => err,
                 Some(prev_err) => err.or(prev_err),
             })

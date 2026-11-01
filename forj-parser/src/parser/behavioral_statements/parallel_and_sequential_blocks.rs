@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn action_block_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn action_block_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ActionBlock<'s>, VerboseError<'s>> {
     alt((
         (
@@ -24,8 +24,8 @@ pub fn action_block_parser<'s>(
     .parse_next(input)
 }
 
-pub fn seq_block_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn seq_block_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SeqBlock<'s>, VerboseError<'s>> {
     (
         token(Token::Begin),
@@ -39,8 +39,8 @@ pub fn seq_block_parser<'s>(
         .parse_next(input)
 }
 
-pub fn par_block_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn par_block_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ParBlock<'s>, VerboseError<'s>> {
     (
         token(Token::Fork),
@@ -54,8 +54,8 @@ pub fn par_block_parser<'s>(
         .parse_next(input)
 }
 
-pub fn join_keyword_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn join_keyword_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<JoinKeyword<'s>, VerboseError<'s>> {
     alt((
         token(Token::Join).map(|a| JoinKeyword::Join(a)),

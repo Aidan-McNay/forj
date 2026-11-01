@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn path_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn path_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PathDeclaration<'s>, VerboseError<'s>> {
     alt((
         (simple_path_declaration_parser, token(Token::SColon))
@@ -26,8 +26,8 @@ pub fn path_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn simple_path_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn simple_path_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SimplePathDeclaration<'s>, VerboseError<'s>> {
     alt((
         (
@@ -48,8 +48,8 @@ pub fn simple_path_declaration_parser<'s>(
     .parse_next(input)
 }
 
-fn plus_parallel_connection_parser<'s>(
-    input: &mut Tokens<'s>,
+fn plus_parallel_connection_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<(Option<PolarityOperator<'s>>, Metadata<'s>), VerboseError<'s>>
 {
     let plus_equal = token(Token::PlusEq).parse_next(input)?;
@@ -66,8 +66,8 @@ fn plus_parallel_connection_parser<'s>(
     ))
 }
 
-fn minus_parallel_connection_parser<'s>(
-    input: &mut Tokens<'s>,
+fn minus_parallel_connection_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<(Option<PolarityOperator<'s>>, Metadata<'s>), VerboseError<'s>>
 {
     let minus_equal = token(Token::MinusEq).parse_next(input)?;
@@ -84,8 +84,8 @@ fn minus_parallel_connection_parser<'s>(
     ))
 }
 
-pub fn parallel_path_description_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn parallel_path_description_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ParallelPathDescription<'s>, VerboseError<'s>> {
     (
         token(Token::Paren),
@@ -102,8 +102,8 @@ pub fn parallel_path_description_parser<'s>(
         .parse_next(input)
 }
 
-pub fn full_path_description_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn full_path_description_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FullPathDescription<'s>, VerboseError<'s>> {
     (
         token(Token::Paren),
@@ -117,8 +117,8 @@ pub fn full_path_description_parser<'s>(
         .parse_next(input)
 }
 
-pub fn edge_sensitive_path_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn edge_sensitive_path_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EdgeSensitivePathDeclaration<'s>, VerboseError<'s>> {
     alt((
         (
@@ -141,8 +141,8 @@ pub fn edge_sensitive_path_declaration_parser<'s>(
     .parse_next(input)
 }
 
-fn edge_sensitive_plus_polarity_operator<'s>(
-    input: &mut Tokens<'s>,
+fn edge_sensitive_plus_polarity_operator<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<(Option<PolarityOperator<'s>>, Metadata<'s>), VerboseError<'s>>
 {
     // Split apart metadata for `+:` into `+` and `:`
@@ -154,8 +154,8 @@ fn edge_sensitive_plus_polarity_operator<'s>(
     Ok((Some(PolarityOperator::Plus(plus_metadata)), colon_metadata))
 }
 
-fn edge_sensitive_minus_polarity_operator<'s>(
-    input: &mut Tokens<'s>,
+fn edge_sensitive_minus_polarity_operator<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<(Option<PolarityOperator<'s>>, Metadata<'s>), VerboseError<'s>>
 {
     // Split apart metadata for `-:` into `-` and `:`
@@ -170,8 +170,8 @@ fn edge_sensitive_minus_polarity_operator<'s>(
     ))
 }
 
-pub fn parallel_edge_sensitive_path_description_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn parallel_edge_sensitive_path_description_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ParallelEdgeSensitivePathDescription<'s>, VerboseError<'s>> {
     let _data_source_parser = (
         token(Token::Paren),
@@ -218,8 +218,8 @@ pub fn parallel_edge_sensitive_path_description_parser<'s>(
     alt((_data_source_parser, _no_data_source_parser)).parse_next(input)
 }
 
-pub fn full_edge_sensitive_path_description_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn full_edge_sensitive_path_description_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FullEdgeSensitivePathDescription<'s>, VerboseError<'s>> {
     let _data_source_parser = (
         token(Token::Paren),
@@ -260,8 +260,8 @@ pub fn full_edge_sensitive_path_description_parser<'s>(
     alt((_data_source_parser, _no_data_source_parser)).parse_next(input)
 }
 
-pub fn state_dependent_path_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn state_dependent_path_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<StateDependentPathDeclaration<'s>, VerboseError<'s>> {
     alt((
         (
@@ -293,16 +293,16 @@ pub fn state_dependent_path_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn data_source_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn data_source_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataSourceExpression<'s>, VerboseError<'s>> {
     expression_parser
         .map(|a| DataSourceExpression(a))
         .parse_next(input)
 }
 
-pub fn edge_identifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn edge_identifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EdgeIdentifier<'s>, VerboseError<'s>> {
     alt((
         token(Token::Posedge).map(|a| EdgeIdentifier::Posedge(a)),
@@ -312,8 +312,8 @@ pub fn edge_identifier_parser<'s>(
     .parse_next(input)
 }
 
-pub fn polarity_operator_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn polarity_operator_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PolarityOperator<'s>, VerboseError<'s>> {
     alt((
         token(Token::Plus).map(|a| PolarityOperator::Plus(a)),

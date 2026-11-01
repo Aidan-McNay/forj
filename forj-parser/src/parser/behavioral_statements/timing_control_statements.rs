@@ -9,16 +9,16 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn procedural_timing_control_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn procedural_timing_control_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ProceduralTimingControlStatement<'s>, VerboseError<'s>> {
     (procedural_timing_control_parser, statement_or_null_parser)
         .map(|(a, b)| ProceduralTimingControlStatement(a, b))
         .parse_next(input)
 }
 
-pub fn delay_or_event_control_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn delay_or_event_control_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DelayOrEventControl<'s>, VerboseError<'s>> {
     let _repeat_parser = (
         token(Token::Repeat),
@@ -38,8 +38,8 @@ pub fn delay_or_event_control_parser<'s>(
     .parse_next(input)
 }
 
-pub fn delay_control_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn delay_control_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DelayControl<'s>, VerboseError<'s>> {
     let _value_parser = (token(Token::Pound), delay_value_parser)
         .map(|(a, b)| DelayControl::Value(Box::new((a, b))));
@@ -53,8 +53,8 @@ pub fn delay_control_parser<'s>(
     alt((_value_parser, _mintypmax_parser)).parse_next(input)
 }
 
-pub fn event_control_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn event_control_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EventControl<'s>, VerboseError<'s>> {
     let _clocking_parser =
         clocking_event_parser.map(|a| EventControl::Clocking(Box::new(a)));
@@ -73,10 +73,10 @@ pub fn event_control_parser<'s>(
         .parse_next(input)
 }
 
-pub fn clocking_event_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn clocking_event_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClockingEvent<'s>, VerboseError<'s>> {
-    let _identifier_parser = |input: &mut Tokens<'s>| {
+    let _identifier_parser = |input: &mut Tokens<'s, 'b>| {
         let at_sign = token(Token::At).parse_next(input)?;
         let opt_scope = opt_note(package_scope_parser).parse_next(input)?;
         match opt_scope {
@@ -104,8 +104,8 @@ pub fn clocking_event_parser<'s>(
     alt((_expression_parser, _identifier_parser)).parse_next(input)
 }
 
-fn basic_event_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+fn basic_event_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EventExpression<'s>, VerboseError<'s>> {
     let _trigger_event_parser = (
         opt_note(edge_identifier_parser),
@@ -132,8 +132,8 @@ fn basic_event_expression_parser<'s>(
     .parse_next(input)
 }
 
-pub fn event_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn event_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EventExpression<'s>, VerboseError<'s>> {
     let _or_expression_parser = (
         basic_event_expression_parser,
@@ -155,8 +155,8 @@ pub fn event_expression_parser<'s>(
     .parse_next(input)
 }
 
-pub fn procedural_timing_control_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn procedural_timing_control_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ProceduralTimingControl<'s>, VerboseError<'s>> {
     alt((
         delay_control_parser
@@ -168,8 +168,8 @@ pub fn procedural_timing_control_parser<'s>(
     .parse_next(input)
 }
 
-pub fn jump_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn jump_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<JumpStatement<'s>, VerboseError<'s>> {
     let _return_parser = (
         token(Token::Return),
@@ -184,8 +184,8 @@ pub fn jump_statement_parser<'s>(
     alt((_return_parser, _break_parser, _continue_parser)).parse_next(input)
 }
 
-pub fn wait_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn wait_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<WaitStatement<'s>, VerboseError<'s>> {
     let _expression_parser = (
         token(Token::Wait),
@@ -214,8 +214,8 @@ pub fn wait_statement_parser<'s>(
     alt((_fork_parser, _expression_parser, _order_parser)).parse_next(input)
 }
 
-pub fn event_trigger_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn event_trigger_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EventTrigger<'s>, VerboseError<'s>> {
     let _blocking_parser = (
         token(Token::MinusGt),
@@ -237,8 +237,8 @@ pub fn event_trigger_parser<'s>(
     alt((_blocking_parser, _nonblocking_parser)).parse_next(input)
 }
 
-pub fn disable_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn disable_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DisableStatement<'s>, VerboseError<'s>> {
     let _task_parser = (
         token(Token::Disable),

@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn assertion_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn assertion_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<AssertionItem<'s>, VerboseError<'s>> {
     alt((
         concurrent_assertion_item_parser
@@ -21,8 +21,8 @@ pub fn assertion_item_parser<'s>(
     .parse_next(input)
 }
 
-pub fn deferred_immediate_assertion_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn deferred_immediate_assertion_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DeferredImmediateAssertionItem<'s>, VerboseError<'s>> {
     (
         opt_note((block_identifier_parser, token(Token::Colon))),
@@ -32,8 +32,8 @@ pub fn deferred_immediate_assertion_item_parser<'s>(
         .parse_next(input)
 }
 
-pub fn procedural_assertion_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn procedural_assertion_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ProceduralAssertionStatement<'s>, VerboseError<'s>> {
     alt((
         concurrent_assertion_statement_parser
@@ -46,8 +46,8 @@ pub fn procedural_assertion_statement_parser<'s>(
     .parse_next(input)
 }
 
-pub fn immediate_assertion_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn immediate_assertion_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ImmediateAssertionStatement<'s>, VerboseError<'s>> {
     alt((
         simple_immediate_assertion_statement_parser
@@ -58,8 +58,8 @@ pub fn immediate_assertion_statement_parser<'s>(
     .parse_next(input)
 }
 
-pub fn simple_immediate_assertion_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn simple_immediate_assertion_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SimpleImmediateAssertionStatement<'s>, VerboseError<'s>> {
     alt((
         simple_immediate_assert_statement_parser
@@ -72,8 +72,8 @@ pub fn simple_immediate_assertion_statement_parser<'s>(
     .parse_next(input)
 }
 
-pub fn deferred_immediate_assertion_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn deferred_immediate_assertion_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DeferredImmediateAssertionStatement<'s>, VerboseError<'s>> {
     alt((
         deferred_immediate_assert_statement_parser
@@ -86,8 +86,8 @@ pub fn deferred_immediate_assertion_statement_parser<'s>(
     .parse_next(input)
 }
 
-pub fn simple_immediate_assert_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn simple_immediate_assert_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SimpleImmediateAssertStatement<'s>, VerboseError<'s>> {
     (
         token(Token::Assert),
@@ -100,8 +100,8 @@ pub fn simple_immediate_assert_statement_parser<'s>(
         .parse_next(input)
 }
 
-pub fn simple_immediate_assume_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn simple_immediate_assume_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SimpleImmediateAssumeStatement<'s>, VerboseError<'s>> {
     (
         token(Token::Assume),
@@ -114,8 +114,8 @@ pub fn simple_immediate_assume_statement_parser<'s>(
         .parse_next(input)
 }
 
-pub fn simple_immediate_cover_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn simple_immediate_cover_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SimpleImmediateCoverStatement<'s>, VerboseError<'s>> {
     (
         token(Token::Cover),
@@ -128,8 +128,8 @@ pub fn simple_immediate_cover_statement_parser<'s>(
         .parse_next(input)
 }
 
-pub fn deferred_immediate_assert_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn deferred_immediate_assert_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DeferredImmediateAssertStatement<'s>, VerboseError<'s>> {
     let _now_parser = (
         token(Token::Assert),
@@ -167,8 +167,8 @@ pub fn deferred_immediate_assert_statement_parser<'s>(
     alt((_now_parser, _final_parser)).parse_next(input)
 }
 
-pub fn deferred_immediate_assume_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn deferred_immediate_assume_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DeferredImmediateAssumeStatement<'s>, VerboseError<'s>> {
     let _now_parser = (
         token(Token::Assume),
@@ -206,8 +206,8 @@ pub fn deferred_immediate_assume_statement_parser<'s>(
     alt((_now_parser, _final_parser)).parse_next(input)
 }
 
-pub fn deferred_immediate_cover_statement_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn deferred_immediate_cover_statement_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DeferredImmediateCoverStatement<'s>, VerboseError<'s>> {
     let _now_parser = (
         token(Token::Cover),

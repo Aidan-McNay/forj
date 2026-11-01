@@ -8,8 +8,8 @@ use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::combinator::alt;
 
-pub fn checker_port_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn checker_port_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CheckerPortList<'s>, VerboseError<'s>> {
     (
         checker_port_item_parser,
@@ -19,8 +19,8 @@ pub fn checker_port_list_parser<'s>(
         .parse_next(input)
 }
 
-pub fn checker_port_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn checker_port_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CheckerPortItem<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -34,8 +34,8 @@ pub fn checker_port_item_parser<'s>(
         .parse_next(input)
 }
 
-pub fn checker_port_direction_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn checker_port_direction_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CheckerPortDirection<'s>, VerboseError<'s>> {
     alt((
         token(Token::Input).map(|a| CheckerPortDirection::Input(a)),
@@ -44,8 +44,8 @@ pub fn checker_port_direction_parser<'s>(
     .parse_next(input)
 }
 
-pub fn checker_or_generate_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn checker_or_generate_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CheckerOrGenerateItem<'s>, VerboseError<'s>> {
     alt((
         initial_construct_parser
@@ -66,8 +66,8 @@ pub fn checker_or_generate_item_parser<'s>(
     .parse_next(input)
 }
 
-pub fn checker_or_generate_item_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn checker_or_generate_item_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CheckerOrGenerateItemDeclaration<'s>, VerboseError<'s>> {
     alt((
         (opt_note(token(Token::Rand)), data_declaration_parser).map(
@@ -115,8 +115,8 @@ pub fn checker_or_generate_item_declaration_parser<'s>(
     .parse_next(input)
 }
 
-pub fn checker_generate_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn checker_generate_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CheckerGenerateItem<'s>, VerboseError<'s>> {
     alt((
         loop_generate_construct_parser

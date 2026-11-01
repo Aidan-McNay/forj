@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::{alt, not, peek, terminated};
 
-pub fn casting_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn casting_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CastingType<'s>, VerboseError<'s>> {
     alt((
         terminated(simple_type_parser, peek(token(Token::Apost)))
@@ -24,8 +24,8 @@ pub fn casting_type_parser<'s>(
     .parse_next(input)
 }
 
-pub(crate) fn casting_type_parser_no_primary<'s>(
-    input: &mut Tokens<'s>,
+pub(crate) fn casting_type_parser_no_primary<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<CastingType<'s>, VerboseError<'s>> {
     alt((
         simple_type_parser.map(|a| CastingType::SimpleType(Box::new(a))),
@@ -36,8 +36,8 @@ pub(crate) fn casting_type_parser_no_primary<'s>(
     .parse_next(input)
 }
 
-fn constant_primary_parser_without_cast<'s>(
-    input: &mut Tokens<'s>,
+fn constant_primary_parser_without_cast<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantPrimary<'s>, VerboseError<'s>> {
     let _primary_literal_parser = primary_literal_parser
         .map(|a| ConstantPrimary::PrimaryLiteral(Box::new(a)));
@@ -130,8 +130,8 @@ fn constant_primary_parser_without_cast<'s>(
     .parse_next(input)
 }
 
-pub fn class_or_package_scope_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_or_package_scope_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassOrPackageScope<'s>, VerboseError<'s>> {
     alt((
         class_scope_parser.map(|a| ClassOrPackageScope::Class(Box::new(a))),
@@ -140,8 +140,8 @@ pub fn class_or_package_scope_parser<'s>(
     .parse_next(input)
 }
 
-pub fn data_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn data_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataType<'s>, VerboseError<'s>> {
     let _vector_parser = (
         integer_vector_type_parser,
@@ -224,8 +224,8 @@ pub fn data_type_parser<'s>(
 
 // Use versions specific for each use case, to avoid incorrect consumption
 #[allow(dead_code)]
-pub fn _data_type_or_implicit_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn _data_type_or_implicit_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataTypeOrImplicit<'s>, VerboseError<'s>> {
     alt((
         data_type_parser.map(|a| DataTypeOrImplicit::DataType(a)),
@@ -235,8 +235,8 @@ pub fn _data_type_or_implicit_parser<'s>(
     .parse_next(input)
 }
 
-pub fn implicit_data_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn implicit_data_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ImplicitDataType<'s>, VerboseError<'s>> {
     (
         opt_note(signing_parser),
@@ -246,8 +246,8 @@ pub fn implicit_data_type_parser<'s>(
         .parse_next(input)
 }
 
-pub fn enum_base_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn enum_base_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EnumBaseType<'s>, VerboseError<'s>> {
     let _atom_parser = (integer_atom_type_parser, opt_note(signing_parser))
         .map(|(a, b)| EnumBaseType::Atom(Box::new((a, b))));
@@ -263,8 +263,8 @@ pub fn enum_base_type_parser<'s>(
     alt((_atom_parser, _vector_parser, _type_parser)).parse_next(input)
 }
 
-pub fn enum_name_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn enum_name_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<EnumNameDeclaration<'s>, VerboseError<'s>> {
     (
         enum_identifier_parser,
@@ -280,16 +280,16 @@ pub fn enum_name_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn class_scope_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_scope_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassScope<'s>, VerboseError<'s>> {
     (class_type_parser_peek_class_scope, token(Token::ColonColon))
         .map(|(a, b)| ClassScope(a, b))
         .parse_next(input)
 }
 
-fn class_type_parser_peek_class_scope<'s>(
-    input: &mut Tokens<'s>,
+fn class_type_parser_peek_class_scope<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassType<'s>, VerboseError<'s>> {
     (
         ps_class_identifier_parser_peek_class_scope,
@@ -307,8 +307,8 @@ fn class_type_parser_peek_class_scope<'s>(
         .parse_next(input)
 }
 
-fn ps_class_identifier_parser_peek_class_scope<'s>(
-    input: &mut Tokens<'s>,
+fn ps_class_identifier_parser_peek_class_scope<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PsClassIdentifier<'s>, VerboseError<'s>> {
     (
         opt_note(terminated(
@@ -321,8 +321,8 @@ fn ps_class_identifier_parser_peek_class_scope<'s>(
         .parse_next(input)
 }
 
-pub fn class_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassType<'s>, VerboseError<'s>> {
     (
         ps_class_identifier_parser,
@@ -337,8 +337,8 @@ pub fn class_type_parser<'s>(
         .parse_next(input)
 }
 
-pub fn interface_class_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn interface_class_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<InterfaceClassType<'s>, VerboseError<'s>> {
     (
         ps_class_identifier_parser,
@@ -348,8 +348,8 @@ pub fn interface_class_type_parser<'s>(
         .parse_next(input)
 }
 
-pub fn integer_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn integer_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<IntegerType<'s>, VerboseError<'s>> {
     alt((
         integer_atom_type_parser.map(|a| IntegerType::Atom(Box::new(a))),
@@ -358,8 +358,8 @@ pub fn integer_type_parser<'s>(
     .parse_next(input)
 }
 
-pub fn integer_atom_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn integer_atom_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<IntegerAtomType<'s>, VerboseError<'s>> {
     alt((
         token(Token::Byte).map(|a| IntegerAtomType::Byte(a)),
@@ -372,8 +372,8 @@ pub fn integer_atom_type_parser<'s>(
     .parse_next(input)
 }
 
-pub fn integer_vector_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn integer_vector_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<IntegerVectorType<'s>, VerboseError<'s>> {
     alt((
         token(Token::Bit).map(|a| IntegerVectorType::Bit(a)),
@@ -383,8 +383,8 @@ pub fn integer_vector_type_parser<'s>(
     .parse_next(input)
 }
 
-pub fn non_integer_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn non_integer_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NonIntegerType<'s>, VerboseError<'s>> {
     alt((
         token(Token::Shortreal).map(|a| NonIntegerType::Shortreal(a)),
@@ -394,8 +394,8 @@ pub fn non_integer_type_parser<'s>(
     .parse_next(input)
 }
 
-pub fn net_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn net_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NetType<'s>, VerboseError<'s>> {
     alt((
         token(Token::Supply0).map(|a| NetType::Supply0(a)),
@@ -414,8 +414,8 @@ pub fn net_type_parser<'s>(
     .parse_next(input)
 }
 
-pub fn net_port_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn net_port_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NetPortType<'s>, VerboseError<'s>> {
     let _implicit_parser = (
         opt_note(net_type_parser),
@@ -431,8 +431,8 @@ pub fn net_port_type_parser<'s>(
         .parse_next(input)
 }
 
-fn data_type_or_implicit_parser_net_port_type<'s>(
-    input: &mut Tokens<'s>,
+fn data_type_or_implicit_parser_net_port_type<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataTypeOrImplicit<'s>, VerboseError<'s>> {
     alt((
         terminated(data_type_parser, peek(port_identifier_parser))
@@ -443,16 +443,16 @@ fn data_type_or_implicit_parser_net_port_type<'s>(
     .parse_next(input)
 }
 
-pub fn variable_port_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn variable_port_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<VariablePortType<'s>, VerboseError<'s>> {
     var_data_type_parser
         .map(|a| VariablePortType(a))
         .parse_next(input)
 }
 
-pub fn var_data_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn var_data_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<VarDataType<'s>, VerboseError<'s>> {
     alt((
         terminated(data_type_parser, peek(variable_identifier_parser))
@@ -466,8 +466,8 @@ pub fn var_data_type_parser<'s>(
     .parse_next(input)
 }
 
-fn data_type_or_implicit_parser_var_data_type<'s>(
-    input: &mut Tokens<'s>,
+fn data_type_or_implicit_parser_var_data_type<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataTypeOrImplicit<'s>, VerboseError<'s>> {
     alt((
         terminated(data_type_parser, peek(variable_identifier_parser))
@@ -478,8 +478,8 @@ fn data_type_or_implicit_parser_var_data_type<'s>(
     .parse_next(input)
 }
 
-pub fn signing_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn signing_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Signing<'s>, VerboseError<'s>> {
     alt((
         token(Token::Signed).map(|a| Signing::Signed(a)),
@@ -488,8 +488,8 @@ pub fn signing_parser<'s>(
     .parse_next(input)
 }
 
-pub fn simple_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn simple_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SimpleType<'s>, VerboseError<'s>> {
     alt((
         integer_type_parser.map(|a| SimpleType::Integer(Box::new(a))),
@@ -501,8 +501,8 @@ pub fn simple_type_parser<'s>(
     .parse_next(input)
 }
 
-pub fn struct_union_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn struct_union_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<StructUnion<'s>, VerboseError<'s>> {
     let soft_or_tagged_parser = alt((
         token(Token::Soft).map(|a| SoftOrTagged::Soft(a)),
@@ -516,8 +516,8 @@ pub fn struct_union_parser<'s>(
     .parse_next(input)
 }
 
-pub fn struct_union_member_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn struct_union_member_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<StructUnionMember<'s>, VerboseError<'s>> {
     (
         attribute_instance_vec_parser,
@@ -530,8 +530,8 @@ pub fn struct_union_member_parser<'s>(
         .parse_next(input)
 }
 
-pub fn data_type_or_void_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn data_type_or_void_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataTypeOrVoid<'s>, VerboseError<'s>> {
     alt((
         data_type_parser.map(|a| DataTypeOrVoid::DataType(Box::new(a))),
@@ -540,8 +540,8 @@ pub fn data_type_or_void_parser<'s>(
     .parse_next(input)
 }
 
-pub fn type_reference_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn type_reference_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TypeReference<'s>, VerboseError<'s>> {
     let _expression_parser = (
         token(Token::Type),
@@ -568,8 +568,8 @@ pub fn type_reference_parser<'s>(
     .parse_next(input)
 }
 
-pub fn data_type_or_incomplete_class_scoped_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn data_type_or_incomplete_class_scoped_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<DataTypeOrIncompleteClassScopedType<'s>, VerboseError<'s>> {
     alt((
         data_type_parser
@@ -583,8 +583,8 @@ pub fn data_type_or_incomplete_class_scoped_type_parser<'s>(
     .parse_next(input)
 }
 
-pub fn incomplete_class_scoped_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn incomplete_class_scoped_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<IncompleteClassScopedType<'s>, VerboseError<'s>> {
     let mut base = (
         type_identifier_parser,
@@ -607,8 +607,8 @@ pub fn incomplete_class_scoped_type_parser<'s>(
     }
 }
 
-pub fn type_identifier_or_class_type_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn type_identifier_or_class_type_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TypeIdentifierOrClassType<'s>, VerboseError<'s>> {
     alt((
         type_identifier_parser

@@ -8,16 +8,16 @@ use forj_syntax::*;
 use winnow::ModalResult;
 use winnow::combinator::{alt, not, peek, terminated};
 
-pub fn constant_function_call_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_function_call_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantFunctionCall<'s>, VerboseError<'s>> {
     function_subroutine_call_parser
         .map(|a| ConstantFunctionCall(a))
         .parse_next(input)
 }
 
-pub fn tf_call_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn tf_call_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TfCall<'s>, VerboseError<'s>> {
     (
         ps_or_hierarchical_tf_identifier_parser,
@@ -32,8 +32,8 @@ pub fn tf_call_parser<'s>(
         .parse_next(input)
 }
 
-pub fn system_tf_call_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn system_tf_call_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SystemTfCall<'s>, VerboseError<'s>> {
     let _args_parser = (
         system_tf_identifier_parser,
@@ -69,8 +69,8 @@ pub fn system_tf_call_parser<'s>(
     alt((_expressions_parser, _data_parser, _args_parser)).parse_next(input)
 }
 
-pub fn subroutine_call_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn subroutine_call_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<SubroutineCall<'s>, VerboseError<'s>> {
     alt((
         (
@@ -85,16 +85,16 @@ pub fn subroutine_call_parser<'s>(
     .parse_next(input)
 }
 
-pub fn function_subroutine_call_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn function_subroutine_call_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<FunctionSubroutineCall<'s>, VerboseError<'s>> {
     subroutine_call_parser
         .map(|a| FunctionSubroutineCall(a))
         .parse_next(input)
 }
 
-pub fn list_of_arguments_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn list_of_arguments_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ListOfArguments<'s>, VerboseError<'s>> {
     let _ordered_parser = (
         opt_note(expression_parser),
@@ -133,8 +133,8 @@ pub fn list_of_arguments_parser<'s>(
     alt((_named_parser, _ordered_parser)).parse_next(input)
 }
 
-pub fn method_call_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn method_call_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<MethodCall<'s>, VerboseError<'s>> {
     (
         method_call_root_parser,
@@ -145,8 +145,8 @@ pub fn method_call_parser<'s>(
         .parse_next(input)
 }
 
-pub fn method_call_body_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn method_call_body_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<MethodCallBody<'s>, VerboseError<'s>> {
     let _custom_parser = (
         method_identifier_parser,
@@ -163,8 +163,8 @@ pub fn method_call_body_parser<'s>(
     alt((_build_in_parser, _custom_parser)).parse_next(input)
 }
 
-pub fn built_in_method_call_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn built_in_method_call_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<BuiltInMethodCall<'s>, VerboseError<'s>> {
     alt((
         randomize_call_parser
@@ -175,8 +175,8 @@ pub fn built_in_method_call_parser<'s>(
     .parse_next(input)
 }
 
-pub fn array_manipulation_call_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn array_manipulation_call_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ArrayManipulationCall<'s>, VerboseError<'s>> {
     (
         array_method_name_parser,
@@ -197,8 +197,8 @@ pub fn array_manipulation_call_parser<'s>(
         .parse_next(input)
 }
 
-pub fn randomize_call_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn randomize_call_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RandomizeCall<'s>, VerboseError<'s>> {
     let _variable_identifier_list_or_null_parser = alt((
         variable_identifier_list_parser.map(|a| {
@@ -229,8 +229,8 @@ pub fn randomize_call_parser<'s>(
         .parse_next(input)
 }
 
-pub fn variable_identifier_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn variable_identifier_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<VariableIdentifierList<'s>, VerboseError<'s>> {
     (
         variable_identifier_parser,
@@ -240,8 +240,8 @@ pub fn variable_identifier_list_parser<'s>(
         .parse_next(input)
 }
 
-pub fn identifier_list_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn identifier_list_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<IdentifierList<'s>, VerboseError<'s>> {
     (
         identifier_parser,
@@ -251,8 +251,8 @@ pub fn identifier_list_parser<'s>(
         .parse_next(input)
 }
 
-fn primary_parser_method_root<'s>(
-    input: &mut Tokens<'s>,
+fn primary_parser_method_root<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Primary<'s>, VerboseError<'s>> {
     let _primary_literal_parser =
         primary_literal_parser.map(|a| Primary::PrimaryLiteral(Box::new(a)));
@@ -326,8 +326,8 @@ fn primary_parser_method_root<'s>(
     .parse_next(input)
 }
 
-pub fn hierarchical_identifier_parser_method_root<'s>(
-    input: &mut Tokens<'s>,
+pub fn hierarchical_identifier_parser_method_root<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<HierarchicalIdentifier<'s>, VerboseError<'s>> {
     let identifiers_parser = repeat_note(terminated(
         (
@@ -346,8 +346,8 @@ pub fn hierarchical_identifier_parser_method_root<'s>(
         .parse_next(input)
 }
 
-pub fn select_parser_method_root<'s>(
-    input: &mut Tokens<'s>,
+pub fn select_parser_method_root<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Select<'s>, VerboseError<'s>> {
     let _member_select_parser = (
         repeat_note(terminated(
@@ -381,8 +381,8 @@ pub fn select_parser_method_root<'s>(
         .parse_next(input)
 }
 
-pub fn method_call_root_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn method_call_root_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<MethodCallRoot<'s>, VerboseError<'s>> {
     alt((
         primary_parser_method_root
@@ -393,8 +393,8 @@ pub fn method_call_root_parser<'s>(
     .parse_next(input)
 }
 
-pub fn array_method_name_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn array_method_name_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ArrayMethodName<'s>, VerboseError<'s>> {
     alt((
         method_identifier_parser.map(|a| ArrayMethodName::Method(Box::new(a))),

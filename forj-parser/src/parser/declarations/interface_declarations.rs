@@ -9,8 +9,8 @@ use winnow::ModalResult;
 use winnow::Parser;
 use winnow::combinator::alt;
 
-pub fn modport_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn modport_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModportDeclaration<'s>, VerboseError<'s>> {
     (
         token(Token::Modport),
@@ -22,8 +22,8 @@ pub fn modport_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn modport_item_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn modport_item_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModportItem<'s>, VerboseError<'s>> {
     (
         modport_identifier_parser,
@@ -42,8 +42,8 @@ enum ModportsPortsDeclarationBody<'a> {
     Clocking(ModportClockingDeclaration<'a>),
 }
 
-pub fn modport_ports_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn modport_ports_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModportPortsDeclaration<'s>, VerboseError<'s>> {
     let _body_parser = alt((
         modport_simple_ports_declaration_parser
@@ -68,16 +68,16 @@ pub fn modport_ports_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn modport_clocking_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn modport_clocking_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModportClockingDeclaration<'s>, VerboseError<'s>> {
     (token(Token::Clocking), clocking_identifier_parser)
         .map(|(a, b)| ModportClockingDeclaration(a, b))
         .parse_next(input)
 }
 
-pub fn modport_simple_ports_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn modport_simple_ports_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModportSimplePortsDeclaration<'s>, VerboseError<'s>> {
     (
         port_direction_parser,
@@ -88,8 +88,8 @@ pub fn modport_simple_ports_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn modport_simple_port_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn modport_simple_port_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModportSimplePort<'s>, VerboseError<'s>> {
     alt((
         port_identifier_parser.map(|a| ModportSimplePort::Name(Box::new(a))),
@@ -107,8 +107,8 @@ pub fn modport_simple_port_parser<'s>(
     .parse_next(input)
 }
 
-pub fn modport_tf_ports_declaration_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn modport_tf_ports_declaration_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModportTfPortsDeclaration<'s>, VerboseError<'s>> {
     (
         import_export_parser,
@@ -119,8 +119,8 @@ pub fn modport_tf_ports_declaration_parser<'s>(
         .parse_next(input)
 }
 
-pub fn modport_tf_port_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn modport_tf_port_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModportTfPort<'s>, VerboseError<'s>> {
     alt((
         method_prototype_parser.map(|a| ModportTfPort::Method(Box::new(a))),
@@ -129,8 +129,8 @@ pub fn modport_tf_port_parser<'s>(
     .parse_next(input)
 }
 
-pub fn import_export_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn import_export_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ImportExport<'s>, VerboseError<'s>> {
     alt((
         token(Token::Import).map(|a| ImportExport::Import(a)),

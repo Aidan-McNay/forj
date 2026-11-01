@@ -11,8 +11,8 @@ use winnow::combinator::{alt, not, peek, terminated};
 use winnow::stream::Stream;
 use winnow::token::any;
 
-pub fn constant_primary_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_primary_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantPrimary<'s>, VerboseError<'s>> {
     let _primary_literal_parser = primary_literal_parser
         .map(|a| ConstantPrimary::PrimaryLiteral(Box::new(a)));
@@ -138,8 +138,8 @@ pub fn constant_primary_parser<'s>(
     }
 }
 
-pub fn module_path_primary_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn module_path_primary_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ModulePathPrimary<'s>, VerboseError<'s>> {
     alt((
         number_parser.map(|a| ModulePathPrimary::Number(Box::new(a))),
@@ -162,11 +162,12 @@ pub fn module_path_primary_parser<'s>(
     .parse_next(input)
 }
 
-pub fn primary_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn primary_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Primary<'s>, VerboseError<'s>> {
-    let offset = input.state.1.offset(&input.input);
-    if let Some((result, advance_offset)) = input.state.1.primaries.get(&offset)
+    let offset = input.state.memoized.offset(&input.input);
+    if let Some((result, advance_offset)) =
+        input.state.memoized.primaries.get(&offset)
     {
         let memoized_result = result.clone();
         input.next_slice(*advance_offset);
@@ -259,17 +260,17 @@ pub fn primary_parser<'s>(
         _null_parser,
     ))
     .parse_next(input);
-    let result_offset = input.state.1.offset(&input.input);
+    let result_offset = input.state.memoized.offset(&input.input);
     input
         .state
-        .1
+        .memoized
         .primaries
         .insert(offset, (result.clone(), result_offset - offset));
     result
 }
 
-pub fn class_qualifier_or_package_scope_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_qualifier_or_package_scope_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassQualifierOrPackageScope<'s>, VerboseError<'s>> {
     alt((
         class_qualifier_parser
@@ -280,8 +281,8 @@ pub fn class_qualifier_or_package_scope_parser<'s>(
     .parse_next(input)
 }
 
-pub fn implicit_class_handle_or_class_scope_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn implicit_class_handle_or_class_scope_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ImplicitClassHandleOrClassScope<'s>, VerboseError<'s>> {
     alt((
         (implicit_class_handle_parser, token(Token::Period)).map(|(a, b)| {
@@ -295,8 +296,8 @@ pub fn implicit_class_handle_or_class_scope_parser<'s>(
     .parse_next(input)
 }
 
-pub fn class_qualifier_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn class_qualifier_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ClassQualifier<'s>, VerboseError<'s>> {
     (
         opt_note((token(Token::Local), token(Token::ColonColon))),
@@ -306,8 +307,8 @@ pub fn class_qualifier_parser<'s>(
         .parse_next(input)
 }
 
-pub fn range_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn range_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<RangeExpression<'s>, VerboseError<'s>> {
     alt((
         part_select_range_parser
@@ -317,8 +318,8 @@ pub fn range_expression_parser<'s>(
     .parse_next(input)
 }
 
-pub fn primary_literal_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn primary_literal_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<PrimaryLiteral<'s>, VerboseError<'s>> {
     alt((
         time_literal_parser.map(|a| PrimaryLiteral::TimeLiteral(Box::new(a))),
@@ -331,8 +332,8 @@ pub fn primary_literal_parser<'s>(
     .parse_next(input)
 }
 
-pub fn time_literal_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn time_literal_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TimeLiteral<'s>, VerboseError<'s>> {
     (
         alt((
@@ -386,8 +387,8 @@ pub fn time_literal_parser<'s>(
         .parse_next(input)
 }
 
-fn time_unit_parser<'s>(
-    input: &mut Tokens<'s>,
+fn time_unit_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<TimeUnit<'s>, VerboseError<'s>> {
     (
         any.verify_map(|s: &'s SpannedToken<'s>| match s.0 {
@@ -448,8 +449,8 @@ fn time_unit_parser<'s>(
         .parse_next(input)
 }
 
-pub fn implicit_class_handle_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn implicit_class_handle_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ImplicitClassHandle<'s>, VerboseError<'s>> {
     let _this_parser = (
         token(Token::This),
@@ -464,8 +465,8 @@ pub fn implicit_class_handle_parser<'s>(
     alt((_this_parser, _super_parser)).parse_next(input)
 }
 
-pub fn bit_select_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn bit_select_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<BitSelect<'s>, VerboseError<'s>> {
     repeat_note((
         token(Token::Bracket),
@@ -476,8 +477,8 @@ pub fn bit_select_parser<'s>(
     .parse_next(input)
 }
 
-pub fn select_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn select_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Select<'s>, VerboseError<'s>> {
     let _member_select_parser = (
         repeat_note(terminated(
@@ -504,8 +505,8 @@ pub fn select_parser<'s>(
         .parse_next(input)
 }
 
-pub fn nonrange_select_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn nonrange_select_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<NonrangeSelect<'s>, VerboseError<'s>> {
     let _member_select_parser = (
         repeat_note(terminated(
@@ -524,8 +525,8 @@ pub fn nonrange_select_parser<'s>(
         .parse_next(input)
 }
 
-pub fn constant_bit_select_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_bit_select_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantBitSelect<'s>, VerboseError<'s>> {
     repeat_note((
         token(Token::Bracket),
@@ -536,8 +537,8 @@ pub fn constant_bit_select_parser<'s>(
     .parse_next(input)
 }
 
-pub fn constant_select_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_select_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantSelect<'s>, VerboseError<'s>> {
     let _member_select_parser = (
         repeat_note(terminated(
@@ -564,8 +565,8 @@ pub fn constant_select_parser<'s>(
         .parse_next(input)
 }
 
-pub fn cast_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn cast_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<Cast<'s>, VerboseError<'s>> {
     (
         casting_type_parser,
@@ -578,8 +579,8 @@ pub fn cast_parser<'s>(
         .parse_next(input)
 }
 
-pub fn constant_cast_parser_no_primary<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_cast_parser_no_primary<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantCast<'s>, VerboseError<'s>> {
     (
         casting_type_parser_no_primary,
@@ -592,8 +593,8 @@ pub fn constant_cast_parser_no_primary<'s>(
         .parse_next(input)
 }
 
-pub fn constant_let_expression_parser<'s>(
-    input: &mut Tokens<'s>,
+pub fn constant_let_expression_parser<'s, 'b>(
+    input: &mut Tokens<'s, 'b>,
 ) -> ModalResult<ConstantLetExpression<'s>, VerboseError<'s>> {
     let_expression_parser
         .map(|a| ConstantLetExpression(a))
