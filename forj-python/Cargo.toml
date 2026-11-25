@@ -1,7 +1,7 @@
 [package]
 name = "forj-python"
 description = "Python bindings for the Forj SystemVerilog tools"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Aidan McNay <aidanmcnay@gmail.com>"]
 edition = "2024"
 license = "Apache-2.0"
@@ -15,8 +15,8 @@ name = "forj_python"
 crate-type = ["cdylib"]
 
 [dependencies]
-forj-parser = { version = "0.1.0", path = "../forj-parser" }
-forj-syntax = { version = "0.1.0", path = "../forj-syntax" }
+forj-parser = { version = "0.1.2", path = "../forj-parser" }
+forj-syntax = { version = "0.1.2", path = "../forj-syntax" }
 yansi = "1.0.1"
 
 [dependencies.pyo3]

@@ -172,7 +172,7 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
 name = "forj"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "clap",
  "forj-parser",
@@ -181,7 +181,7 @@ dependencies = [
 
 [[package]]
 name = "forj-parser"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "ariadne",
  "bstr",
@@ -194,7 +194,7 @@ dependencies = [
 
 [[package]]
 name = "forj-python"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "forj-parser",
  "forj-syntax",
@@ -204,7 +204,7 @@ dependencies = [
 
 [[package]]
 name = "forj-syntax"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "proc-macro2",
  "quote",
